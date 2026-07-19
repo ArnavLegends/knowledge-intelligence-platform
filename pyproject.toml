@@ -1,0 +1,126 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "knowledge-intelligence-platform"
+version = "0.1.0"
+description = "A production-grade AI Knowledge Intelligence Platform for RAG, Agentic AI, and Knowledge Graphs."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Arnav Bhatt" }]
+keywords = [
+    "rag",
+    "retrieval-augmented-generation",
+    "knowledge-intelligence",
+    "ai",
+    "llm",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=25.1",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1",
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.9",
+]
+
+[tool.hatch.build.targets.wheel]
+only-include = ["README.md", "LICENSE"]
+
+# ------------------------------------------------------------------------------
+# Ruff — linting
+# ------------------------------------------------------------------------------
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+src = ["tests"]
+
+exclude = [
+    ".git",
+    ".venv",
+    "build",
+    "dist",
+]
+
+[tool.ruff.lint]
+select = [
+    "B",    # flake8-bugbear
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "SIM",  # flake8-simplify
+    "UP",   # pyupgrade
+    "W",    # pycodestyle warnings
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = []
+
+# ------------------------------------------------------------------------------
+# Black — formatting
+# ------------------------------------------------------------------------------
+[tool.black]
+line-length = 88
+target-version = ["py311", "py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+# ------------------------------------------------------------------------------
+# pytest — testing
+# ------------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = [
+    "--strict-config",
+    "--strict-markers",
+    "-ra",
+]
+markers = [
+    "integration: tests requiring external services or infrastructure",
+    "slow: tests that take significant time to run",
+]
+
+# ------------------------------------------------------------------------------
+# Coverage — test reporting
+# ------------------------------------------------------------------------------
+[tool.coverage.run]
+branch = true
+source = []
+omit = [
+    "tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 0
