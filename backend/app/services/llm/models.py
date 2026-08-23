@@ -2,23 +2,39 @@
 
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 LLMRole = Literal["system", "user", "assistant"]
 
 
 class LLMMessage(BaseModel):
-    """A single chat message sent to a language model."""
+    """A single provider-agnostic chat message."""
 
     role: LLMRole
-    content: str
+    content: str = Field(min_length=1)
+
+    @field_validator("content")
+    @classmethod
+    def content_must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("content must not be blank")
+        return value
 
 
 class LLMRequest(BaseModel):
-    """Provider-agnostic generation request."""
+    """Provider-agnostic generation request consumed by the LLM manager."""
 
     messages: list[LLMMessage] = Field(min_length=1)
     model: str | None = None
+    temperature: float | None = Field(default=None, ge=0.0, le=2.0)
+    max_output_tokens: int | None = Field(default=None, ge=1)
+
+    @field_validator("model")
+    @classmethod
+    def model_must_not_be_blank(cls, value: str | None) -> str | None:
+        if value is not None and not value.strip():
+            raise ValueError("model must not be blank")
+        return value
 
 
 class LLMUsage(BaseModel):

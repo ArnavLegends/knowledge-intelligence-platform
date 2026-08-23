@@ -24,17 +24,10 @@ class OpenAIProvider(LLMProvider):
         return "openai"
 
     def generate(self, request: LLMRequest) -> LLMResponse:
-        model = request.model or self._model
-        messages = [
-            {"role": message.role, "content": message.content}
-            for message in request.messages
-        ]
+        payload = self._to_openai_payload(request)
 
         try:
-            completion = self._client.chat.completions.create(
-                model=model,
-                messages=messages,
-            )
+            completion = self._client.chat.completions.create(**payload)
         except LLMProviderError:
             raise
         except Exception:
@@ -57,7 +50,22 @@ class OpenAIProvider(LLMProvider):
 
         return LLMResponse(
             content=content,
-            model=completion.model or model,
+            model=completion.model or payload["model"],
             provider=self.name,
             usage=usage,
         )
+
+    def _to_openai_payload(self, request: LLMRequest) -> dict[str, object]:
+        """Translate the internal request into OpenAI chat-completion arguments."""
+        payload: dict[str, object] = {
+            "model": request.model or self._model,
+            "messages": [
+                {"role": message.role, "content": message.content}
+                for message in request.messages
+            ],
+        }
+        if request.temperature is not None:
+            payload["temperature"] = request.temperature
+        if request.max_output_tokens is not None:
+            payload["max_tokens"] = request.max_output_tokens
+        return payload
