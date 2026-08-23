@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.core.config import settings
+from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.middleware.request_logging import RequestLoggingMiddleware
 
@@ -27,9 +28,16 @@ app = FastAPI(
 )
 
 app.add_middleware(RequestLoggingMiddleware)
+register_exception_handlers(app)
 
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
     """Return a simple health status for operational monitoring."""
     return {"status": "healthy"}
+
+
+@app.get("/ready")
+def readiness_check() -> dict[str, str]:
+    """Return application-level readiness to serve requests."""
+    return {"status": "ready"}
