@@ -9,6 +9,7 @@ def test_settings_default_values() -> None:
     assert settings.app_version == "0.2.0"
     assert settings.environment == "development"
     assert settings.debug is False
+    assert settings.log_level == "INFO"
 
 
 def test_settings_load_from_environment_variables(monkeypatch) -> None:

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     app_version: str = "0.2.0"
     environment: str = "development"
     debug: bool = False
+    log_level: str = "INFO"
 
 
 settings = Settings()
