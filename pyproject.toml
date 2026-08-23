@@ -27,10 +27,15 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+]
 
 [project.optional-dependencies]
 dev = [
     "black>=25.1",
+    "httpx>=0.28",
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.9",
@@ -39,6 +44,7 @@ dev = [
 [dependency-groups]
 dev = [
     "black>=25.1",
+    "httpx>=0.28",
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.9",
@@ -53,7 +59,7 @@ only-include = ["README.md", "LICENSE"]
 [tool.ruff]
 target-version = "py311"
 line-length = 88
-src = ["tests"]
+src = ["backend", "tests"]
 
 exclude = [
     ".git",
@@ -75,7 +81,7 @@ select = [
 ignore = []
 
 [tool.ruff.lint.isort]
-known-first-party = []
+known-first-party = ["app"]
 
 # ------------------------------------------------------------------------------
 # Black — formatting
@@ -99,7 +105,7 @@ extend-exclude = '''
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = ["backend"]
 addopts = [
     "--strict-config",
     "--strict-markers",
@@ -115,7 +121,7 @@ markers = [
 # ------------------------------------------------------------------------------
 [tool.coverage.run]
 branch = true
-source = []
+source = ["backend"]
 omit = [
     "tests/*",
 ]
