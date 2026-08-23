@@ -47,6 +47,16 @@ class NotFoundError(AppException):
         super().__init__(message)
 
 
+class LLMProviderError(AppException):
+    """Raised when a language model provider request fails."""
+
+    code = "llm_provider_error"
+    status_code = 503
+
+    def __init__(self, message: str = "Language model provider request failed.") -> None:
+        super().__init__(message)
+
+
 def error_payload(code: str, message: str) -> dict[str, dict[str, str]]:
     """Return the standard API error body."""
     return {"error": {"code": code, "message": message}}

@@ -10,6 +10,9 @@ def test_settings_default_values() -> None:
     assert settings.environment == "development"
     assert settings.debug is False
     assert settings.log_level == "INFO"
+    assert settings.llm_provider == "openai"
+    assert settings.llm_model == "gpt-4o-mini"
+    assert settings.llm_api_key == ""
 
 
 def test_settings_load_from_environment_variables(monkeypatch) -> None:
