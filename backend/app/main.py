@@ -2,15 +2,15 @@
 
 from fastapi import FastAPI
 
-API_VERSION = "0.2.0"
+from app.core.config import settings
 
 app = FastAPI(
-    title="Knowledge Intelligence Platform",
+    title=settings.app_name,
     description=(
         "A production-grade AI Knowledge Intelligence Platform for RAG, "
         "Agentic AI, and Knowledge Graphs."
     ),
-    version=API_VERSION,
+    version=settings.app_version,
 )
 
 
