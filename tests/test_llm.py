@@ -48,7 +48,11 @@ def test_settings_load_llm_provider_and_model(monkeypatch) -> None:
 
 
 def test_manager_selects_configured_openai_provider() -> None:
-    settings = Settings(llm_provider="openai", llm_model="gpt-4o-mini", llm_api_key="sk-test")
+    settings = Settings(
+        llm_provider="openai",
+        llm_model="gpt-4o-mini",
+        llm_api_key="sk-test",
+    )
     manager = LLMManager(settings=settings)
 
     assert manager.provider_name == "openai"
@@ -153,7 +157,11 @@ def test_request_validates_generation_parameters() -> None:
 
 
 def test_openai_adapter_translates_internal_request() -> None:
-    provider = OpenAIProvider(api_key="sk-test", model="gpt-4o-mini", client=MagicMock())
+    provider = OpenAIProvider(
+        api_key="sk-test",
+        model="gpt-4o-mini",
+        client=MagicMock(),
+    )
     request = LLMRequest(
         messages=[
             LLMMessage(role="system", content="Be brief."),
@@ -183,7 +191,12 @@ def test_openai_adapter_returns_normalized_response() -> None:
     client = MagicMock()
     client.chat.completions.create.return_value = SimpleNamespace(
         model="gpt-4o-mini",
-        choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))],
+        choices=[
+            SimpleNamespace(
+                message=SimpleNamespace(content="ok"),
+                finish_reason="stop",
+            )
+        ],
         usage=SimpleNamespace(prompt_tokens=4, completion_tokens=5, total_tokens=9),
     )
     provider = OpenAIProvider(api_key="sk-test", model="gpt-4o-mini", client=client)
@@ -197,6 +210,7 @@ def test_openai_adapter_returns_normalized_response() -> None:
     assert response.usage == LLMUsage(
         prompt_tokens=4, completion_tokens=5, total_tokens=9
     )
+    assert response.finish_reason == "stop"
     client.chat.completions.create.assert_called_once()
     call_kwargs = client.chat.completions.create.call_args.kwargs
     assert call_kwargs["model"] == "gpt-4o-mini"

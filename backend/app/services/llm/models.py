@@ -52,3 +52,4 @@ class LLMResponse(BaseModel):
     model: str
     provider: str
     usage: LLMUsage | None = None
+    finish_reason: str | None = None

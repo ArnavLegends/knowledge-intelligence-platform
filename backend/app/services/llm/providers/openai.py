@@ -37,8 +37,8 @@ class OpenAIProvider(LLMProvider):
         if not completion.choices:
             raise LLMProviderError("Language model provider returned no choices.")
 
-        message = completion.choices[0].message
-        content = message.content or ""
+        choice = completion.choices[0]
+        content = getattr(choice.message, "content", None) or ""
 
         usage = None
         if completion.usage is not None:
@@ -50,9 +50,10 @@ class OpenAIProvider(LLMProvider):
 
         return LLMResponse(
             content=content,
-            model=completion.model or payload["model"],
+            model=completion.model or str(payload["model"]),
             provider=self.name,
             usage=usage,
+            finish_reason=getattr(choice, "finish_reason", None),
         )
 
     def _to_openai_payload(self, request: LLMRequest) -> dict[str, object]:

@@ -53,7 +53,9 @@ class LLMProviderError(AppException):
     code = "llm_provider_error"
     status_code = 503
 
-    def __init__(self, message: str = "Language model provider request failed.") -> None:
+    def __init__(
+        self, message: str = "Language model provider request failed."
+    ) -> None:
         super().__init__(message)
 
 

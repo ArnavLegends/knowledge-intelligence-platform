@@ -1,19 +1,17 @@
 # Backend
 
-This directory will contain the FastAPI backend and AI service layer for the Knowledge Intelligence Platform.
+This directory contains the FastAPI backend and AI service layer for the Knowledge Intelligence Platform.
 
-## Planned Responsibilities
+## Current Responsibilities
 
 - REST API endpoints and request routing
 - Configuration and dependency injection
-- Retrieval engine and AI orchestration
-- Language model integration
-- Memory and knowledge layer services
 - Structured logging and error handling
+- Provider-agnostic language model service
 
 ## Development Milestone
 
-Backend implementation begins in **v0.2 — Backend Foundation**. No application code exists in this directory during v0.1.
+Backend foundation and the first LLM application service are implemented. Retrieval, ingestion, and orchestration remain planned for later versions.
 
 ## Related Documentation
 

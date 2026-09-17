@@ -77,7 +77,19 @@ Each release should document significant engineering changes while avoiding unne
 
 ---
 
-# Future Releases
+# v0.2.0 — Backend Foundation
+
+**Release Date:** YYYY-MM-DD
+
+## Added
+
+### Language Model Application Service
+
+- Provider-agnostic LLM message, request, and response contract
+- Application-facing LLM Service above the existing LLM Manager
+- Versioned generate endpoint: `POST /api/v1/llm/generate`
+
+---
 
 Future versions should follow the same structure.
 

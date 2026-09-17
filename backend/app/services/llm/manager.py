@@ -1,6 +1,7 @@
 """Language model manager that selects and hides the configured provider."""
 
-from app.core.config import Settings, settings as default_settings
+from app.core.config import Settings
+from app.core.config import settings as default_settings
 from app.core.exceptions import AppException
 from app.services.llm.base import LLMProvider
 from app.services.llm.models import LLMRequest, LLMResponse

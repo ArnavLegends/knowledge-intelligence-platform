@@ -173,6 +173,22 @@ Responsibilities include:
 
 Provides abstraction over supported LLM providers.
 
+The current implementation separates application use from provider details:
+
+```
+FastAPI
+   ↓
+LLM Service
+   ↓
+LLM Manager
+   ↓
+LLM Provider
+   ↓
+Provider Adapter
+```
+
+FastAPI routes and future orchestrators depend on the LLM Service. The LLM Manager selects the configured provider. Provider adapters isolate vendor SDKs and translate to a provider-agnostic request/response contract.
+
 Responsibilities include:
 
 - Model invocation
