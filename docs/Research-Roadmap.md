@@ -214,6 +214,20 @@ This lifecycle ensures that engineering improvements are supported by measurable
 
 ---
 
+## Research Records
+
+### CHUNK-BASELINE-001
+
+**Status:** Baseline / Not Yet Evaluated  
+**Strategy:** Fixed-size character chunking  
+**Initial Configuration:** `chunk_size = 1000`, `chunk_overlap = 200`  
+**Variables:** chunk size, overlap  
+
+**Purpose:** Establish a deterministic baseline for future chunking experiments.
+*(Metrics and results will be recorded here when evaluated).*
+
+---
+
 ## Research Themes by Project Version
 
 The research roadmap evolves alongside the product roadmap. Each product milestone introduces opportunities to investigate specific AI systems engineering challenges.

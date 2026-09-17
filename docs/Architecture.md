@@ -228,6 +228,33 @@ Responsibilities include:
 
 ---
 
+## Document Chunking
+
+Converts a normalized `Document` into deterministic, ordered `Chunk` objects. Chunking is strictly separated from LLMs and databases.
+
+The current implementation is:
+
+```
+Document
+   ↓
+ChunkingService
+   ↓
+DocumentChunker
+   ↓
+FixedSizeChunker
+   ↓
+Chunks
+```
+
+Responsibilities include:
+
+- Segmenting full-text documents
+- Preserving source metadata and ordering
+- Supporting configurable overlap and sizes
+- Preparing text for future embedding storage
+
+---
+
 ## Memory System
 
 Maintains conversational and persistent memory.

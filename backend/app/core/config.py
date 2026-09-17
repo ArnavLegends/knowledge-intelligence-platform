@@ -1,5 +1,8 @@
 """Application configuration loaded from environment variables and .env files."""
 
+from typing import Self
+
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +24,18 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     llm_api_key: str = ""
     max_upload_bytes: int = 2_097_152
+    chunk_size: int = 1000
+    chunk_overlap: int = 200
+
+    @model_validator(mode="after")
+    def validate_chunking(self) -> Self:
+        if self.chunk_size <= 0:
+            raise ValueError("chunk_size must be strictly greater than 0")
+        if self.chunk_overlap < 0:
+            raise ValueError("chunk_overlap must be non-negative")
+        if self.chunk_overlap >= self.chunk_size:
+            raise ValueError("chunk_overlap must be strictly less than chunk_size")
+        return self
 
 
 settings = Settings()

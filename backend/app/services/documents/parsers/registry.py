@@ -20,9 +20,7 @@ class ParserRegistry:
         for media_type in parser.media_types:
             self._by_media_type[media_type.lower()] = parser
 
-    def select(
-        self, filename: str, media_type: str | None = None
-    ) -> DocumentParser:
+    def select(self, filename: str, media_type: str | None = None) -> DocumentParser:
         extension = Path(filename).suffix.lower()
         parser = self._by_extension.get(extension)
         if parser is None and media_type:

@@ -89,6 +89,16 @@ class DocumentParseError(AppException):
         super().__init__(message)
 
 
+class ChunkingError(AppException):
+    """Raised when chunking configuration or execution fails at runtime."""
+
+    code = "chunking_error"
+    status_code = 500
+
+    def __init__(self, message: str = "Chunking failed.") -> None:
+        super().__init__(message)
+
+
 def error_payload(code: str, message: str) -> dict[str, dict[str, str]]:
     """Return the standard API error body."""
     return {"error": {"code": code, "message": message}}

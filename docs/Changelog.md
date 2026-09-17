@@ -96,6 +96,13 @@ Each release should document significant engineering changes while avoiding unne
 - UTF-8 `.txt` parser
 - Versioned upload endpoint: `POST /api/v1/documents`
 
+### Chunking & Segmentation Foundation
+
+- `Chunk` data model for segmented text
+- Configurable `CHUNK_SIZE` and `CHUNK_OVERLAP` settings
+- `FixedSizeChunker` for deterministic character chunking
+- `ChunkingService` to abstract chunking strategies
+
 ---
 
 Future versions should follow the same structure.

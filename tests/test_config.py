@@ -33,10 +33,7 @@ def test_settings_load_from_environment_variables(monkeypatch) -> None:
 def test_settings_load_from_env_file(tmp_path, monkeypatch) -> None:
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "APP_NAME=From Env File\n"
-        "APP_VERSION=1.2.3\n"
-        "ENVIRONMENT=staging\n"
-        "DEBUG=true\n",
+        "APP_NAME=From Env File\nAPP_VERSION=1.2.3\nENVIRONMENT=staging\nDEBUG=true\n",
         encoding="utf-8",
     )
     monkeypatch.chdir(tmp_path)
