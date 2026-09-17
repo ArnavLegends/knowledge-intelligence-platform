@@ -103,6 +103,13 @@ Each release should document significant engineering changes while avoiding unne
 - `FixedSizeChunker` for deterministic character chunking
 - `ChunkingService` to abstract chunking strategies
 
+### Embedding Foundation
+
+- `Embedding` data model for normalized vectors
+- `EmbeddingManager` and `EmbeddingProvider` abstractions
+- `OpenAIEmbeddingProvider` adapter
+- `EmbeddingService` for converting chunks to embeddings
+
 ---
 
 Future versions should follow the same structure.

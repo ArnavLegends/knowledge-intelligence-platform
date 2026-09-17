@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     max_upload_bytes: int = 2_097_152
     chunk_size: int = 1000
     chunk_overlap: int = 200
+    embedding_provider: str = "openai"
+    embedding_model: str = "text-embedding-3-small"
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:

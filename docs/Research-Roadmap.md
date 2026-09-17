@@ -226,6 +226,16 @@ This lifecycle ensures that engineering improvements are supported by measurable
 **Purpose:** Establish a deterministic baseline for future chunking experiments.
 *(Metrics and results will be recorded here when evaluated).*
 
+### EMBED-BASELINE-001
+
+**Status:** Baseline / Not Yet Evaluated  
+**Strategy:** Initial configured embedding provider/model  
+**Configuration:** `provider = openai`, `model = text-embedding-3-small`  
+**Variables:** embedding model, dimensionality, batch/input size  
+
+**Purpose:** Establish a reproducible embedding baseline for later retrieval experiments.
+*(Metrics and results will be recorded here when evaluated).*
+
 ---
 
 ## Research Themes by Project Version

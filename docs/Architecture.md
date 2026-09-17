@@ -255,6 +255,35 @@ Responsibilities include:
 
 ---
 
+## Embedding Pipeline
+
+Transforms an ordered list of `Chunk` objects into normalized `Embedding` objects using an external embedding provider.
+
+The current implementation is:
+
+```
+Chunk
+   ↓
+EmbeddingService
+   ↓
+EmbeddingManager
+   ↓
+EmbeddingProvider
+   ↓
+Provider Adapter
+   ↓
+Normalized Embedding
+```
+
+Responsibilities include:
+
+- Creating internal provider-agnostic embedding requests
+- Delegating text embedding generation
+- Preserving source chunk identities and metadata
+- Translating provider errors into internal exceptions
+
+Note: Vector storage and retrieval are future stages.
+
 ## Memory System
 
 Maintains conversational and persistent memory.

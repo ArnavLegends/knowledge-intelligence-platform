@@ -99,6 +99,16 @@ class ChunkingError(AppException):
         super().__init__(message)
 
 
+class EmbeddingProviderError(AppException):
+    """Raised when an embedding provider request fails."""
+
+    code = "embedding_provider_error"
+    status_code = 503
+
+    def __init__(self, message: str = "Embedding provider request failed.") -> None:
+        super().__init__(message)
+
+
 def error_payload(code: str, message: str) -> dict[str, dict[str, str]]:
     """Return the standard API error body."""
     return {"error": {"code": code, "message": message}}
