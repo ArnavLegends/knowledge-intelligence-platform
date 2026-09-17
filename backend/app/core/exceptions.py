@@ -59,6 +59,36 @@ class LLMProviderError(AppException):
         super().__init__(message)
 
 
+class DocumentValidationError(AppException):
+    """Raised when an uploaded document fails validation."""
+
+    code = "invalid_document"
+    status_code = 400
+
+    def __init__(self, message: str = "Invalid document upload.") -> None:
+        super().__init__(message)
+
+
+class UnsupportedFormatError(AppException):
+    """Raised when no parser is registered for the uploaded format."""
+
+    code = "unsupported_format"
+    status_code = 415
+
+    def __init__(self, message: str = "Unsupported document format.") -> None:
+        super().__init__(message)
+
+
+class DocumentParseError(AppException):
+    """Raised when a supported document cannot be parsed."""
+
+    code = "document_parse_error"
+    status_code = 400
+
+    def __init__(self, message: str = "Document could not be parsed.") -> None:
+        super().__init__(message)
+
+
 def error_payload(code: str, message: str) -> dict[str, dict[str, str]]:
     """Return the standard API error body."""
     return {"error": {"code": code, "message": message}}

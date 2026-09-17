@@ -89,6 +89,13 @@ Each release should document significant engineering changes while avoiding unne
 - Application-facing LLM Service above the existing LLM Manager
 - Versioned generate endpoint: `POST /api/v1/llm/generate`
 
+### Document Ingestion Foundation
+
+- Normalized internal Document model
+- Upload validation and a parser registry
+- UTF-8 `.txt` parser
+- Versioned upload endpoint: `POST /api/v1/documents`
+
 ---
 
 Future versions should follow the same structure.

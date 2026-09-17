@@ -199,6 +199,35 @@ Responsibilities include:
 
 ---
 
+## Document Ingestion
+
+Transforms uploaded files into a normalized internal Document without persisting storage or creating embeddings.
+
+The current implementation is:
+
+```
+Uploaded File
+   ↓
+Validation
+   ↓
+Parser Selection
+   ↓
+Parser
+   ↓
+Normalized Document
+```
+
+FastAPI routes depend on DocumentIngestionService. Parser selection uses a registry so additional formats can be added without changing the ingestion service. This milestone supports `.txt` only.
+
+Responsibilities include:
+
+- Upload validation
+- Parser selection
+- Text extraction
+- Normalized document representation
+
+---
+
 ## Memory System
 
 Maintains conversational and persistent memory.

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     llm_provider: str = "openai"
     llm_model: str = "gpt-4o-mini"
     llm_api_key: str = ""
+    max_upload_bytes: int = 2_097_152
 
 
 settings = Settings()

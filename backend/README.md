@@ -8,10 +8,11 @@ This directory contains the FastAPI backend and AI service layer for the Knowled
 - Configuration and dependency injection
 - Structured logging and error handling
 - Provider-agnostic language model service
+- Document ingestion for plain-text uploads
 
 ## Development Milestone
 
-Backend foundation and the first LLM application service are implemented. Retrieval, ingestion, and orchestration remain planned for later versions.
+Backend foundation, LLM application service, and document ingestion foundation are implemented. Embeddings, retrieval, and orchestration remain planned for later versions.
 
 ## Related Documentation
 
