@@ -1,16 +1,18 @@
 # Benchmarking & Evaluation
 
-**Document Version:** 1.0
-**Project Version:** v0.1
-**Status:** Active
+**Document Version:** 1.1
+**Project Version:** v0.3 (Core Foundation)
+**Status:** Active — Methodology Document (No benchmarks executed yet)
 
 ---
 
 # Purpose
 
-This document defines the benchmarking methodology used to evaluate the Knowledge Intelligence Platform.
+This document defines the benchmarking methodology planned for the Knowledge Intelligence Platform.
 
-Benchmarking provides objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
+> **Current Status:** No benchmark experiments have been executed yet. The backend RAG engine is implemented and tested (116 unit/integration tests). Benchmark infrastructure — including evaluation datasets, metrics harnesses, and experiment runners — is planned for development alongside the v1.0 milestone. This document serves as the forward-looking methodology specification.
+
+Once implemented, benchmarking will provide objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
 
 The evaluation framework ensures that architectural and implementation decisions are supported by measurable data rather than subjective observations.
 
@@ -304,30 +306,32 @@ Recommended follow-up experiments.
 
 Every release should include benchmark comparisons against previous versions.
 
+> **Note:** No benchmark runs have been executed yet. The table below tracks planned benchmark targets. Results will be recorded here as the evaluation harness is implemented during v1.0.
+
 | Version | Retrieval | Latency | Faithfulness | Status |
 |----------|-----------|----------|--------------|--------|
-| v0.1 | Baseline | Baseline | Baseline | Initial Release |
-| v0.2 | TBD | TBD | TBD | Planned |
-| v0.3 | TBD | TBD | TBD | Planned |
+| v0.3 | — | — | — | Baseline / Not Yet Evaluated |
 | v1.0 | TBD | TBD | TBD | Planned |
 | v2.0 | TBD | TBD | TBD | Planned |
 
-Historical benchmark data should never be deleted. Instead, newer benchmark results should be appended to preserve longitudinal comparisons and demonstrate the evolution of the platform.
+Historical benchmark data should never be deleted. Once established, newer results should be appended to preserve longitudinal comparisons.
 
 ---
 
 # Evaluation Tools
 
-The platform may utilize one or more evaluation frameworks depending on project requirements.
+The following tools are planned for evaluation once the benchmark infrastructure is built during v1.0.
 
-Potential tools include:
+No external evaluation frameworks are currently integrated.
 
-- RAGAS
-- DeepEval
-- LangSmith
-- MLflow
-- Weights & Biases
-- Custom evaluation scripts
+Planned tools include:
+
+- RAGAS (planned)
+- DeepEval (planned)
+- LangSmith (planned)
+- MLflow (planned)
+- Weights & Biases (planned)
+- Custom evaluation scripts (planned)
 
 The evaluation framework should remain modular so that tools may be replaced without affecting the overall benchmarking methodology.
 
@@ -355,10 +359,10 @@ Whenever practical, benchmark reports should include tables, charts, and reprodu
 | Item | Value |
 |------|-------|
 | Document Owner | Project Maintainer |
-| Document Version | 1.0 |
-| Project Version | v0.1 |
+| Document Version | 1.1 |
+| Project Version | v0.3 (Core Foundation) |
 | Status | Active |
-| Last Reviewed | YYYY-MM-DD |
+| Last Reviewed | 2026-09-17 |
 
 ## Review Policy
 

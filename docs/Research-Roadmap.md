@@ -1,7 +1,7 @@
 # Research Roadmap
 
-**Document Version:** 1.0  
-**Project Version:** v0.1  
+**Document Version:** 1.1  
+**Project Version:** v0.3 (Core Foundation)  
 **Status:** Active
 
 ---
@@ -27,6 +27,8 @@ Every major architectural decision should be motivated by clearly defined resear
 The platform emphasizes applied AI systems research, where experimental findings directly influence engineering improvements, architectural evolution, and future development priorities.
 
 Research activities should prioritize reproducibility, objectivity, and practical impact over novelty alone.
+
+> **Current Research Infrastructure Status:** The backend engineering foundation (document ingestion, chunking, embedding, vector storage, retrieval, RAG) is implemented and tested. Dedicated research infrastructure (evaluation harness, benchmark datasets, experiment tracking) is planned for development alongside v1.0. No evaluated experimental results exist yet — all research records are currently marked as **Baseline / Not Yet Evaluated**.
 
 ---
 
@@ -269,24 +271,24 @@ This lifecycle ensures that engineering improvements are supported by measurable
 
 The research roadmap evolves alongside the product roadmap. Each product milestone introduces opportunities to investigate specific AI systems engineering challenges.
 
-| Product Version | Primary Research Themes |
-|-----------------|-------------------------|
-| v0.1 | Documentation standards, engineering workflows, reproducibility |
-| v0.2 | Backend architecture, modular software design |
-| v0.3 | Document chunking, embedding strategies, vector indexing |
-| v1.0 | Retrieval-Augmented Generation (RAG), prompt engineering, context management |
-| v1.1 | User experience evaluation, developer productivity |
-| v1.2 | Hybrid retrieval, reranking, metadata filtering, query expansion |
-| v1.3 | Performance optimization, caching, scalability, observability |
-| v2.0 | Conversational memory, long-term memory architectures |
-| v2.1 | Tool calling, API orchestration, workflow reliability |
-| v2.2 | Planning algorithms, autonomous agents, multi-step reasoning |
-| v2.3 | Knowledge synthesis, explainability, intelligent orchestration |
-| v2.4 | Knowledge graphs, entity linking, graph-based retrieval |
-| v3.0 | Multimodal retrieval, multimodal reasoning, unified knowledge representation |
-| v3.1 | Collaboration systems, access control, collaborative AI workflows |
-| v3.2 | Cloud deployment, distributed systems, operational AI |
-| v4.0 | Enterprise AI systems, scalability, governance, security |
+| Product Version | Primary Research Themes | Research Status |
+|-----------------|-------------------------|----------------|
+| v0.1 | Documentation standards, engineering workflows, reproducibility | ✅ Foundation established |
+| v0.2 | Backend architecture, modular software design | ✅ Foundation established |
+| v0.3 | Document chunking, embedding strategies, vector indexing | 📦 Baselines defined, not yet evaluated |
+| v1.0 | RAG pipeline, prompt engineering, context management | 📅 Planned |
+| v1.1 | User experience evaluation, developer productivity | 📅 Planned |
+| v1.2 | Hybrid retrieval, reranking, metadata filtering, query expansion | 📅 Planned |
+| v1.3 | Performance optimization, caching, scalability, observability | 📅 Planned |
+| v2.0 | Conversational memory, long-term memory architectures | 📅 Planned |
+| v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned |
+| v2.2 | Planning algorithms, autonomous agents, multi-step reasoning | 📅 Planned |
+| v2.3 | Knowledge synthesis, explainability, intelligent orchestration | 📅 Planned |
+| v2.4 | Knowledge graphs, entity linking, graph-based retrieval | 📅 Planned |
+| v3.0 | Multimodal retrieval, multimodal reasoning, unified knowledge representation | 📅 Planned |
+| v3.1 | Collaboration systems, access control, collaborative AI workflows | 📅 Planned |
+| v3.2 | Cloud deployment, distributed systems, operational AI | 📅 Planned |
+| v4.0 | Enterprise AI systems, scalability, governance, security | 📅 Planned |
 
 Every major product release should include at least one research question, one benchmark, and documented experimental findings.
 
@@ -350,10 +352,10 @@ Publication is considered an optional outcome rather than the primary objective.
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 1.0 |
-| Project Version | v0.1 |
+| Document Version | 1.1 |
+| Project Version | v0.3 (Core Foundation) |
 | Status | Active |
-| Last Reviewed | YYYY-MM-DD |
+| Last Reviewed | 2026-09-17 |
 
 ### Review Policy
 

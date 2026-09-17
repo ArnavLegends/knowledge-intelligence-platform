@@ -134,55 +134,30 @@ Each release should document significant engineering changes while avoiding unne
 
 ---
 
-Future versions should follow the same structure.
+# [Unreleased] — Repository Professionalization & Documentation Synchronization
 
-Example:
+**Date:** 2026-09-17
 
-## v0.2.0
+## Changed
 
-### Added
+### Repository Hygiene
 
--
+- Added `tests/conftest.py` to enforce in-memory ChromaDB during all test runs, preventing generation of `.chroma_data` runtime data in the project root.
+- Removed pre-existing `.chroma_data` directory from the project root.
 
-### Changed
+### Documentation Synchronization
 
--
-
-### Improved
-
--
-
-### Fixed
-
--
-
-### Security
-
--
+- Rewrote `README.md` as an accurate, professional project landing page. Clearly separated current from planned technologies.
+- Updated `docs/Product-Roadmap.md` (v1.1): Marked v0.1, v0.2, and core v0.3 as Complete. Positioned v1.0 as the next milestone. Clarified that PDF/DOCX/Markdown ingestion remains a v1.0 deliverable.
+- Updated `docs/Research-Roadmap.md` (v1.1): Added a research infrastructure status note. Updated research themes table with a status column. Clarified that all baselines are "Not Yet Evaluated".
+- Updated `docs/Benchmarking.md` (v1.1): Added explicit notice that no benchmarks have been executed. Marked evaluation tools as planned. Updated the version benchmark table to reflect the actual baseline state.
+- Updated `docs/Architecture.md` (v1.1): Fixed the high-level system diagram to accurately show implemented vs. planned layers. Updated Frontend, Memory System, Knowledge Layer, and Evaluation Layer sections as planned. Corrected stale "future stages" notes in the implemented Vector Storage and Retrieval sections.
+- Created `docs/API-Reference.md`: Full documentation of all implemented endpoints (`GET /health`, `GET /ready`, `POST /api/v1/documents`, `POST /api/v1/retrieval/search`, `POST /api/v1/rag/answer`, `POST /api/v1/llm/generate`), verified against actual Pydantic schemas.
+- Updated folder `README.md` files for `frontend/`, `research/`, `benchmarks/`, `evaluation/`, `datasets/`, `examples/`, `paper/` to accurately describe their planned status.
 
 ---
 
-## v0.3.0
-
-### Added
-
--
-
-### Changed
-
--
-
-### Improved
-
--
-
-### Fixed
-
--
-
-### Security
-
--
+Future versions should follow the same structure.
 
 ---
 

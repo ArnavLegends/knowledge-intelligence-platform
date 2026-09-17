@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "knowledge-intelligence-platform"
 version = "0.1.0"
-description = "A production-grade AI Knowledge Intelligence Platform for RAG, Agentic AI, and Knowledge Graphs."
+description = "A modular FastAPI backend for Retrieval-Augmented Generation (RAG), with planned support for Agentic AI and Knowledge Graphs."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

@@ -1,7 +1,7 @@
 # System Architecture
 
-**Document Version:** 1.0  
-**Project Version:** v0.1  
+**Document Version:** 1.1  
+**Project Version:** v0.3 (Core Foundation)  
 **Status:** Active
 
 ---
@@ -78,35 +78,37 @@ Ensure experiments and benchmarks can be reproduced consistently across environm
 
 The Knowledge Intelligence Platform follows a layered architecture in which each layer has a clearly defined responsibility.
 
+**Implemented layers** are shown without annotation. **Planned layers** are marked.
+
 ```
                     User
                      │
                      ▼
-             Frontend Interface
+             [PLANNED] Frontend Interface
                      │
                      ▼
               FastAPI Backend
                      │
      ┌───────────────┼────────────────┐
      ▼               ▼                ▼
- Retrieval      AI Orchestrator    Authentication
- Engine              │
-                     ▼
-              Language Models
-                     │
-         ┌───────────┼───────────┐
-         ▼           ▼           ▼
-   Vector DB     Memory      External Tools
-         │           │           │
-         └───────────┼───────────┘
-                     ▼
-          Knowledge Intelligence Layer
-                     │
-                     ▼
-          Monitoring & Evaluation
+ Documents        RAG / Retrieval   LLM Service
+ Ingestion             │
+     ▼                ▼
+  Chunking         Retrieval
+     ▼             Service
+  Embeddings           │
+     ▼                ▼
+  Vector Store     Context
+   (ChromaDB)      Builder
+
+[PLANNED] Memory System
+[PLANNED] Knowledge Graph
+[PLANNED] Agentic Workflows
+[PLANNED] Evaluation Layer
+[PLANNED] Monitoring & Observability
 ```
 
-Each layer performs a specific function while communicating through well-defined interfaces. This separation reduces coupling and allows components to evolve independently throughout the lifetime of the project.
+Each implemented layer performs a specific function while communicating through well-defined interfaces. This separation reduces coupling and allows components to evolve independently throughout the lifetime of the project.
 
 ---
 
@@ -114,15 +116,9 @@ Each layer performs a specific function while communicating through well-defined
 
 ## Frontend
 
-Provides the user interface for document management, configuration, querying, visualization, and interaction with the platform.
+> **Status: Planned.** The frontend directory is a scaffold. No UI has been implemented yet.
 
-Primary responsibilities include:
-
-- User interaction
-- Document uploads
-- Search interface
-- Visualization
-- Configuration management
+When implemented, the frontend will provide the user interface for document management, configuration, querying, visualization, and interaction with the platform.
 
 ---
 
@@ -306,7 +302,7 @@ Responsibilities include:
 - Preserving source chunk identities and metadata
 - Translating provider errors into internal exceptions
 
-Note: Vector storage and retrieval are future stages.
+Note: Vector storage and retrieval are fully implemented. Memory, agents, reranking, hybrid retrieval, and knowledge graphs are future stages.
 
 ---
 
@@ -336,7 +332,7 @@ Responsibilities include:
 
 - Persisting vector embeddings
 - Preserving source chunk identities and metadata
-- Supporting similarity search (for future retrieval)
+- Supporting similarity search
 - Translating provider errors into internal exceptions
 
 ---
@@ -367,7 +363,7 @@ Responsibilities:
 - Filter results based on thresholds
 - Deterministic result ordering
 
-Note: LLM generation/RAG and context assembly are future stages.
+Note: Memory, hybrid retrieval, reranking, and knowledge graphs are future stages.
 
 ---
 
@@ -400,42 +396,25 @@ Note: Memory, agents, reranking, hybrid retrieval, and knowledge graphs are futu
 
 ## Memory System
 
-Maintains conversational and persistent memory.
+> **Status: Planned (v2.0).** Memory management is not yet implemented.
 
-Responsibilities include:
-
-- Context management
-- Long-term memory
-- Memory retrieval
-- Session history
-- Memory optimization
+When implemented, the memory system will maintain conversational and persistent memory, including context management, long-term memory retrieval, and session history.
 
 ---
 
 ## Knowledge Layer
 
-Maintains structured knowledge representations.
+> **Status: Planned (v2.4).** The knowledge graph and entity systems are not yet implemented.
 
-Responsibilities include:
-
-- Vector storage
-- Knowledge graph
-- Entity management
-- Knowledge synthesis
+When implemented, the knowledge layer will maintain structured knowledge representations including a vector store integration (partially implemented), knowledge graph, entity management, and knowledge synthesis.
 
 ---
 
 ## Evaluation Layer
 
-Measures system quality and engineering performance.
+> **Status: Planned (v1.0+).** No benchmark or evaluation infrastructure has been implemented yet.
 
-Responsibilities include:
-
-- Benchmarking
-- Response evaluation
-- Retrieval evaluation
-- Performance monitoring
-- Experiment tracking
+When implemented, the evaluation layer will measure system quality and engineering performance through benchmarking, response evaluation, retrieval evaluation, performance monitoring, and experiment tracking.
 
 ---
 

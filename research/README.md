@@ -1,20 +1,22 @@
 # Research
 
-This directory will contain research experiments, literature reviews, and research logs for the Knowledge Intelligence Platform.
-
-## Intended Contents
-
-- Experiment reports following the standard experiment template
-- Literature review notes
-- Research question tracking
-- Hypothesis and results documentation
-- Links to benchmark artifacts
-
 ## Purpose
 
-Research activities are integrated into the engineering lifecycle. Every major architectural improvement should produce documented experimental findings stored or referenced from this directory.
+This directory will contain AI systems research artifacts for the Knowledge Intelligence Platform.
 
-## Related Documentation
+## Current Status
 
-- [Research Roadmap](../docs/Research-Roadmap.md)
-- [Benchmarking](../docs/Benchmarking.md)
+**Not yet active.** This directory is a scaffold placeholder.
+
+The backend engineering foundation (ingestion, chunking, embeddings, vector storage, retrieval, RAG) is implemented and tested. Research infrastructure — including experiment runners, evaluation datasets, and analysis notebooks — has not yet been built.
+
+All current research baselines are documented in [docs/Research-Roadmap.md](../docs/Research-Roadmap.md) and marked as **Baseline / Not Yet Evaluated**.
+
+## Planned Role (v1.0+)
+
+Planned contents include:
+- Experiment logs and results
+- Jupyter notebooks for analysis
+- Literature review notes
+- Research questions and hypotheses
+- Reproducible experiment scripts

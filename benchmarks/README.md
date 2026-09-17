@@ -1,20 +1,20 @@
 # Benchmarks
 
-This directory will contain performance benchmarks and evaluation scripts used to measure system quality across releases.
+## Purpose
 
-## Intended Contents
+This directory will contain performance benchmarking scripts, results, and reproducible evaluation experiments.
 
-- Retrieval quality benchmarks
-- Response generation evaluations
-- Latency and throughput tests
-- Version-to-version comparison scripts
-- Benchmark result artifacts and reports
+## Current Status
 
-## Development Milestone
+**Not yet implemented.** This directory is a scaffold placeholder.
 
-Benchmark scripts will be introduced alongside functional AI capabilities starting in **v0.3** and **v1.0**, following the methodology defined in the benchmarking documentation.
+No benchmarking experiments have been executed yet. The benchmarking methodology is defined in [docs/Benchmarking.md](../docs/Benchmarking.md). Benchmark infrastructure is planned for development alongside the v1.0 milestone.
 
-## Related Documentation
+## Planned Role (v1.0+)
 
-- [Benchmarking](../docs/Benchmarking.md)
-- [Research Roadmap](../docs/Research-Roadmap.md)
+Planned contents include:
+- Benchmark runner scripts
+- Retrieval quality evaluation (precision, recall, MRR)
+- Response quality evaluation (faithfulness, relevancy)
+- System performance measurements (latency, throughput)
+- Version-to-version comparison reports

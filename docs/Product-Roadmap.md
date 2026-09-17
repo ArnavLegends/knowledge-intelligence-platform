@@ -1,7 +1,7 @@
 # Product Roadmap
 
-**Document Version:** 1.0  
-**Project Version:** v0.1  
+**Document Version:** 1.1  
+**Project Version:** v0.3 (Core Foundation)  
 **Status:** Active
 
 ---
@@ -36,10 +36,10 @@ The development of the Knowledge Intelligence Platform is organized into a serie
 
 | Version | Theme | Primary Focus | Status |
 |----------|-------|---------------|--------|
-| v0.1 | Foundation | Repository, documentation, project structure | 🚧 In Progress |
-| v0.2 | Backend Foundation | FastAPI backend, configuration, logging, project architecture | 📅 Planned |
-| v0.3 | Knowledge Ingestion | Document ingestion, chunking, embeddings, vector database | 📅 Planned |
-| v1.0 | Production RAG | End-to-end Retrieval-Augmented Generation platform | 📅 Planned |
+| v0.1 | Foundation | Repository, documentation, project structure | ✅ Complete |
+| v0.2 | Backend Foundation | FastAPI backend, configuration, logging, project architecture | ✅ Complete |
+| v0.3 | Knowledge Ingestion | Document ingestion (TXT), chunking, embeddings, vector database, retrieval, RAG | ✅ Core Foundation Complete |
+| v1.0 | Production RAG | End-to-end production RAG platform — multi-format ingestion, frontend, evaluation | 🚧 Next Milestone |
 | v1.1 | User Experience | Improved frontend, usability, configuration, quality of life | 📅 Planned |
 | v1.2 | Retrieval Optimization | Hybrid search, reranking, metadata filtering, retrieval improvements | 📅 Planned |
 | v1.3 | Performance Engineering | Caching, optimization, monitoring, scalability | 📅 Planned |
@@ -57,7 +57,7 @@ The roadmap is intended to evolve as the project matures. Future milestones may 
 
 ---
 
-# Version v0.1 — Project Foundation
+# Version v0.1 — Project Foundation ✅ Complete
 
 ## Objective
 
@@ -150,7 +150,7 @@ Version v0.1 is complete when the project can transition from documentation and 
 
 ---
 
-# Version v0.2 — Backend Foundation
+# Version v0.2 — Backend Foundation ✅ Complete
 
 ## Objective
 
@@ -233,26 +233,30 @@ The backend is stable, modular, documented, and ready for AI feature development
 
 ---
 
-# Version v0.3 — Knowledge Ingestion
+# Version v0.3 — Knowledge Ingestion ✅ Core Foundation Complete
 
 ## Objective
 
-Develop the complete document ingestion pipeline that transforms raw documents into searchable knowledge representations suitable for Retrieval-Augmented Generation.
+Develop the document ingestion pipeline that transforms raw documents into searchable knowledge representations suitable for Retrieval-Augmented Generation.
 
 ---
 
 ## Key Deliverables
 
-- PDF ingestion
-- DOCX ingestion
-- Markdown ingestion
-- Text preprocessing
-- Document chunking
-- Metadata extraction
-- Embedding generation
-- Vector database integration
-- Index management
-- Ingestion pipeline testing
+| Deliverable | Status |
+|---|---|
+| TXT document ingestion | ✅ Implemented |
+| Text preprocessing & validation | ✅ Implemented |
+| Document chunking (fixed-size) | ✅ Implemented |
+| Embedding generation (OpenAI) | ✅ Implemented |
+| Vector database integration (ChromaDB) | ✅ Implemented |
+| Retrieval & semantic search | ✅ Implemented |
+| RAG generation pipeline | ✅ Implemented |
+| Index management | ✅ Implemented |
+| Ingestion pipeline testing (116 tests) | ✅ Implemented |
+| PDF ingestion | 📅 Planned (v1.0) |
+| DOCX ingestion | 📅 Planned (v1.0) |
+| Markdown ingestion | 📅 Planned (v1.0) |
 
 ---
 
@@ -293,10 +297,13 @@ At the completion of v0.3:
 
 ## Success Criteria
 
-- Multiple document formats supported.
-- Embeddings generated successfully.
-- Vector database populated.
-- Retrieval-ready dataset created.
+- Core ingestion pipeline (TXT) implemented and tested.
+- Embeddings generated and stored in ChromaDB.
+- Semantic retrieval functional.
+- End-to-end RAG generation functional.
+- 116 tests passing with CI validation.
+
+Multi-format ingestion (PDF, DOCX, Markdown) remains a v1.0 deliverable.
 
 ---
 
@@ -312,26 +319,25 @@ The platform possesses a reliable and reproducible knowledge ingestion pipeline.
 
 ---
 
-# Version v1.0 — Production RAG Platform
+# Version v1.0 — Production RAG Platform 🚧 Next Milestone
 
 ## Objective
 
-Deliver the first production-ready Retrieval-Augmented Generation platform by integrating document retrieval, language model reasoning, conversational interfaces, and evaluation capabilities into a cohesive system.
+Deliver the first production-ready Retrieval-Augmented Generation platform by completing multi-format document ingestion, adding a user-facing interface, integrating an evaluation framework, and preparing the system for real-world deployment.
+
+The backend RAG engine foundation (from v0.3) is already implemented. v1.0 focuses on completing the remaining production-readiness requirements.
 
 ---
 
 ## Key Deliverables
 
-- Semantic retrieval
-- Prompt construction
-- Context management
-- LLM integration
+- PDF, DOCX, and Markdown ingestion
 - Streaming responses
-- Conversation interface
-- Source citation
+- Conversational interface (frontend)
+- Source citation UI
 - Evaluation framework
 - Configuration dashboard
-- Initial deployment
+- Initial deployment readiness
 
 ---
 

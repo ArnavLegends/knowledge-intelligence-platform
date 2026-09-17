@@ -1,25 +1,22 @@
 # Frontend
 
+## Purpose
+
 This directory will contain the user interface for the Knowledge Intelligence Platform.
 
-## Planned Technology
+## Current Status
 
-- **Initial:** Streamlit for rapid prototyping and v1.0 delivery
-- **Future:** React or Next.js for production-grade UI (v1.1+)
+**Not yet implemented.** This directory is a scaffold placeholder.
 
-## Intended Responsibilities
+No frontend code exists in this release. The backend API is fully functional and can be tested directly via the OpenAPI UI at `http://localhost:8000/docs`.
 
+## Planned Role (v1.0+)
+
+- Initial interface planned as Streamlit for rapid prototyping.
+- Long-term plan includes a React-based interface for a production-grade user experience.
+
+Planned features include:
 - Document upload and management
-- Search and query interface
-- Conversation history display
-- Configuration and settings panels
-- Visualization of retrieval results and citations
-
-## Development Milestone
-
-Frontend development begins alongside the production RAG platform in **v1.0**. No UI code exists during v0.1.
-
-## Related Documentation
-
-- [Architecture](../docs/Architecture.md)
-- [Product Roadmap](../docs/Product-Roadmap.md) — v1.0 and v1.1 milestones
+- Conversational query interface
+- Source citation display
+- Configuration and settings management

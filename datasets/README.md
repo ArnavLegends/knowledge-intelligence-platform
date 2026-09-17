@@ -1,21 +1,19 @@
 # Datasets
 
-This directory will contain sample datasets and benchmark corpora used for development, testing, and evaluation.
+## Purpose
 
-## Intended Contents
+This directory will contain sample and benchmark datasets for evaluating the Knowledge Intelligence Platform.
 
-- Sample documents for local development
-- Benchmark question–answer pairs
-- Evaluation corpora for retrieval testing
-- Dataset manifests and metadata
+## Current Status
 
-## Guidelines
+**Not yet populated.** This directory is a scaffold placeholder.
 
-- Do not commit large proprietary datasets without explicit licensing approval.
-- Document dataset provenance, size, and intended use in accompanying metadata files.
-- Prefer small, representative samples for development; use external storage for large corpora.
+No datasets have been added yet. Benchmark and evaluation datasets are planned for inclusion alongside the v1.0 evaluation framework.
 
-## Related Documentation
+## Planned Role (v1.0+)
 
-- [Benchmarking](../docs/Benchmarking.md)
-- [Research Roadmap](../docs/Research-Roadmap.md)
+Planned contents include:
+- Sample document corpora for ingestion testing
+- Retrieval benchmark datasets (question-context-answer pairs)
+- Domain-specific test corpora
+- Evaluation datasets compatible with RAGAS or DeepEval
