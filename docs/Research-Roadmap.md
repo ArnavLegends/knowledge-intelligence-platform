@@ -236,6 +236,15 @@ This lifecycle ensures that engineering improvements are supported by measurable
 **Purpose:** Establish a reproducible embedding baseline for later retrieval experiments.
 *(Metrics and results will be recorded here when evaluated).*
 
+### VECTOR-BASELINE-001
+
+**Status:** Baseline / Not Yet Evaluated  
+**Strategy:** Initial vector storage backend  
+**Configuration:** `provider = chroma`, `collection = knowledge_base`, `persistence = local directory`  
+
+**Purpose:** Establish a reproducible storage baseline before retrieval experiments.
+*(Metrics and results will be recorded here when evaluated).*
+
 ---
 
 ## Research Themes by Project Version

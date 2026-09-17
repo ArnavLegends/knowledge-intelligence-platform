@@ -284,6 +284,39 @@ Responsibilities include:
 
 Note: Vector storage and retrieval are future stages.
 
+---
+
+## Vector Storage
+
+Persists normalized `Embedding` records for later retrieval, keeping application logic isolated from specific vector database vendors.
+
+The current implementation is:
+
+```
+EmbeddingService
+   ↓
+Embedding
+   ↓
+VectorStoreService
+   ↓
+VectorStoreManager
+   ↓
+VectorStoreProvider
+   ↓
+ChromaAdapter
+   ↓
+Stored Vectors
+```
+
+Responsibilities include:
+
+- Persisting vector embeddings
+- Preserving source chunk identities and metadata
+- Supporting similarity search (for future retrieval)
+- Translating provider errors into internal exceptions
+
+---
+
 ## Memory System
 
 Maintains conversational and persistent memory.

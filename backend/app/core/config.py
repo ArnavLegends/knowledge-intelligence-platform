@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     chunk_overlap: int = 200
     embedding_provider: str = "openai"
     embedding_model: str = "text-embedding-3-small"
+    vector_store_provider: str = "chroma"
+    vector_store_collection: str = "knowledge_base"
+    vector_store_persist_directory: str = "./.chroma_data"
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:

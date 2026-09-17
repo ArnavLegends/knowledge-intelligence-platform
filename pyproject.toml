@@ -33,6 +33,7 @@ dependencies = [
     "pydantic-settings>=2.7",
     "python-multipart>=0.0.18",
     "uvicorn[standard]>=0.34",
+    "chromadb>=0.4",
 ]
 
 [project.optional-dependencies]
