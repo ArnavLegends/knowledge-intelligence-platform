@@ -47,9 +47,7 @@ def test_expected_files_exist() -> None:
 
 def test_github_workflow_exists() -> None:
     workflow = ROOT / ".github" / "workflows" / "ci.yml"
-    assert workflow.is_file(), (
-        "Missing GitHub Actions workflow: .github/workflows/ci.yml"
-    )
+    assert workflow.is_file(), "Missing workflow: .github/workflows/ci.yml"
 
 
 def test_directory_readmes_exist() -> None:

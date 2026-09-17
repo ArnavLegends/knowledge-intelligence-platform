@@ -255,6 +255,30 @@ Responsibilities include:
 
 ---
 
+## Document Indexing
+
+Coordinates the full transformation of a normalized Document into searchable vectors.
+
+The current implementation is:
+
+```
+Document
+   ↓
+DocumentIndexingService
+   ├── ChunkingService
+   ├── EmbeddingService
+   └── VectorStoreService
+```
+
+Responsibilities include:
+- Accepting a normalized Document
+- Creating chunks
+- Generating embeddings
+- Storing vectors
+- Returning an indexing summary
+
+---
+
 ## Embedding Pipeline
 
 Transforms an ordered list of `Chunk` objects into normalized `Embedding` objects using an external embedding provider.
@@ -344,6 +368,33 @@ Responsibilities:
 - Deterministic result ordering
 
 Note: LLM generation/RAG and context assembly are future stages.
+
+---
+
+## RAG Generation System
+
+The final stage of the retrieval-augmented generation pipeline.
+
+The RAG flow:
+
+```
+User Query
+   ↓
+RAGService
+   ├── RetrievalService (retrieves chunks)
+   ├── ContextBuilder (assembles context string)
+   └── LLMService (generates grounded response)
+   ↓
+Grounded Response + Sources
+```
+
+Responsibilities:
+- Build deterministic context strings from retrieved chunks.
+- Format LLM prompts combining system instructions, context data, and the user query.
+- Maintain boundaries between context and instructions (Note: Delimiters provide structural text formatting but do not inherently secure against prompt injection).
+- Ensure the final response retains explicit provenance mapping.
+
+Note: Memory, agents, reranking, hybrid retrieval, and knowledge graphs are future stages.
 
 ---
 

@@ -1,15 +1,17 @@
 """Tests for the retrieval subsystem."""
 
-from unittest.mock import Mock
+from unittest.mock import create_autospec
 
 import pytest
 
 from app.core.config import Settings
 from app.core.exceptions import RetrievalError
 from app.services.embeddings.models import Embedding
+from app.services.embeddings.service import EmbeddingService
 from app.services.retrieval.models import RetrievalQuery, RetrievedChunk
 from app.services.retrieval.service import RetrievalService
 from app.services.vector_store.models import VectorSearchResult
+from app.services.vector_store.service import VectorStoreService
 
 
 def test_retrieval_query_valid():
@@ -42,8 +44,8 @@ def test_retrieved_chunk_valid():
 
 def test_retrieval_service_flow():
     """Test the complete retrieval service orchestration."""
-    mock_emb_service = Mock()
-    mock_vs_service = Mock()
+    mock_emb_service = create_autospec(EmbeddingService)
+    mock_vs_service = create_autospec(VectorStoreService)
     settings = Settings()
 
     # Setup mock embedding
@@ -95,17 +97,21 @@ def test_retrieval_service_flow():
 
 def test_retrieval_service_empty_query():
     """Test retrieval service handles empty queries by returning empty results."""
-    service = RetrievalService(embedding_service=Mock(), vector_store_service=Mock())
+    service = RetrievalService(
+        embedding_service=create_autospec(EmbeddingService),
+        vector_store_service=create_autospec(VectorStoreService),
+    )
     results = service.search(RetrievalQuery(text="   ", top_k=5))
     assert results == []
 
 
 def test_retrieval_service_handles_embedding_failure():
     """Test retrieval service propagates embedding failures."""
-    mock_emb_service = Mock()
+    mock_emb_service = create_autospec(EmbeddingService)
     mock_emb_service.embed_texts.side_effect = Exception("API error")
     service = RetrievalService(
-        embedding_service=mock_emb_service, vector_store_service=Mock()
+        embedding_service=mock_emb_service,
+        vector_store_service=create_autospec(VectorStoreService),
     )
 
     with pytest.raises(RetrievalError):
@@ -114,11 +120,11 @@ def test_retrieval_service_handles_embedding_failure():
 
 def test_retrieval_service_handles_vector_store_failure():
     """Test retrieval service propagates vector store failures."""
-    mock_emb_service = Mock()
+    mock_emb_service = create_autospec(EmbeddingService)
     mock_emb = Embedding(source_id="query", vector=[0.1], dimensions=1, metadata={})
     mock_emb_service.embed_texts.return_value = [mock_emb]
 
-    mock_vs_service = Mock()
+    mock_vs_service = create_autospec(VectorStoreService)
     mock_vs_service.search.side_effect = Exception("DB error")
 
     service = RetrievalService(

@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     vector_store_persist_directory: str = "./.chroma_data"
     retrieval_default_top_k: int = 5
     retrieval_default_threshold: float | None = None
+    rag_prompt_version: str = "v1"
+    rag_empty_context_message: str = (
+        "I could not find relevant information in the knowledge "
+        "base to answer your question."
+    )
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:

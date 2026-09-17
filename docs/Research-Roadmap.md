@@ -254,6 +254,15 @@ This lifecycle ensures that engineering improvements are supported by measurable
 **Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.
 *(Metrics and results will be recorded here when evaluated).*
 
+### RAG-BASELINE-001
+
+**Status:** Baseline / Not Yet Evaluated  
+**Pipeline:** Document Indexing + CHUNK-BASELINE-001 + EMBED-BASELINE-001 + VECTOR-BASELINE-001 + RETRIEVAL-BASELINE-001 + Deterministic Context Template  
+**Configuration:** `top_k = 5`, `llm_model = gpt-4o-mini`, `rag_prompt_version = v1`  
+
+**Purpose:** Establish a reproducible end-to-end RAG baseline before optimization experiments. 
+*(Metrics and results will be recorded here when evaluated).*
+
 ---
 
 ## Research Themes by Project Version

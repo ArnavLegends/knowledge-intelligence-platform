@@ -129,6 +129,16 @@ class RetrievalError(AppException):
         super().__init__(message)
 
 
+class RAGError(AppException):
+    """Raised when RAG orchestration fails."""
+
+    code = "rag_error"
+    status_code = 500
+
+    def __init__(self, message: str = "RAG operation failed.") -> None:
+        super().__init__(message)
+
+
 def error_payload(code: str, message: str) -> dict[str, dict[str, str]]:
     """Return the standard API error body."""
     return {"error": {"code": code, "message": message}}

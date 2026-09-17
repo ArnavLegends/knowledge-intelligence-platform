@@ -95,6 +95,7 @@ Each release should document significant engineering changes while avoiding unne
 - Upload validation and a parser registry
 - UTF-8 `.txt` parser
 - Versioned upload endpoint: `POST /api/v1/documents`
+- `DocumentIndexingService` orchestration for chunking, embedding, and vector storage
 
 ### Chunking & Segmentation Foundation
 
@@ -123,6 +124,13 @@ Each release should document significant engineering changes while avoiding unne
 - Vector store similarity search support (`VectorSearchResult`)
 - `RetrievalService` coordinating embedding and vector search
 - FastAPI `/api/v1/retrieval/search` endpoint
+
+### RAG Generation Foundation
+
+- `RAGRequest`, `ContextItem`, and `RAGResponse` models
+- `ContextBuilder` for deterministic prompt assembly from chunks
+- `RAGService` orchestrating the retrieval and LLM stages with empty-context handling
+- FastAPI `/api/v1/rag/answer` endpoint with full provenance tracking
 
 ---
 

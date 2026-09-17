@@ -38,7 +38,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black>=25.1",
     "httpx>=0.28",
     "pytest>=8.3",
     "pytest-cov>=6.0",
@@ -47,7 +46,6 @@ dev = [
 
 [dependency-groups]
 dev = [
-    "black>=25.1",
     "httpx>=0.28",
     "pytest>=8.3",
     "pytest-cov>=6.0",
@@ -87,21 +85,7 @@ ignore = []
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 
-# ------------------------------------------------------------------------------
-# Black — formatting
-# ------------------------------------------------------------------------------
-[tool.black]
-line-length = 88
-target-version = ["py311", "py312"]
-include = '\.pyi?$'
-extend-exclude = '''
-/(
-    \.git
-  | \.venv
-  | build
-  | dist
-)/
-'''
+
 
 # ------------------------------------------------------------------------------
 # pytest — testing
