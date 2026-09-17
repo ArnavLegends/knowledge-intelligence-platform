@@ -245,6 +245,15 @@ This lifecycle ensures that engineering improvements are supported by measurable
 **Purpose:** Establish a reproducible storage baseline before retrieval experiments.
 *(Metrics and results will be recorded here when evaluated).*
 
+### RETRIEVAL-BASELINE-001
+
+**Status:** Baseline / Not Yet Evaluated  
+**Strategy:** Dense semantic retrieval  
+**Configuration:** `top_k = 5`, `threshold = None`  
+
+**Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.
+*(Metrics and results will be recorded here when evaluated).*
+
 ---
 
 ## Research Themes by Project Version

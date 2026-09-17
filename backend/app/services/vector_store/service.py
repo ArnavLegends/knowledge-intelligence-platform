@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 from app.services.embeddings.models import Embedding
 from app.services.vector_store.manager import VectorStoreManager
-from app.services.vector_store.models import StoredVector
+from app.services.vector_store.models import StoredVector, VectorSearchResult
 
 
 class VectorStoreService:
@@ -41,3 +41,11 @@ class VectorStoreService:
     def count(self) -> int:
         """Return the total number of vectors in the collection."""
         return self._manager.provider.count()
+
+    def search(
+        self, query_vector: list[float], top_k: int, threshold: float | None = None
+    ) -> list[VectorSearchResult]:
+        """Perform a similarity search."""
+        return self._manager.provider.search(
+            query_vector=query_vector, top_k=top_k, threshold=threshold
+        )

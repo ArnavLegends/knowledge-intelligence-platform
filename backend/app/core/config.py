@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     vector_store_provider: str = "chroma"
     vector_store_collection: str = "knowledge_base"
     vector_store_persist_directory: str = "./.chroma_data"
+    retrieval_default_top_k: int = 5
+    retrieval_default_threshold: float | None = None
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:
@@ -44,3 +46,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+def get_settings() -> Settings:
+    return settings

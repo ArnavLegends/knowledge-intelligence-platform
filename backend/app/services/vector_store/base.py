@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
-from app.services.vector_store.models import StoredVector
+from app.services.vector_store.models import StoredVector, VectorSearchResult
 
 
 class VectorStoreProvider(ABC):
@@ -29,3 +29,9 @@ class VectorStoreProvider(ABC):
     @abstractmethod
     def count(self) -> int:
         """Return the total number of vectors in the collection."""
+
+    @abstractmethod
+    def search(
+        self, query_vector: list[float], top_k: int, threshold: float | None = None
+    ) -> list["VectorSearchResult"]:
+        """Perform similarity search."""

@@ -18,3 +18,9 @@ class StoredVector(BaseModel):
         if not value:
             raise ValueError("vector must not be empty")
         return value
+
+
+class VectorSearchResult(StoredVector):
+    """A search result containing the distance metric."""
+
+    distance: float | None = None

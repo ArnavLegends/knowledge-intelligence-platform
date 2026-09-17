@@ -317,6 +317,36 @@ Responsibilities include:
 
 ---
 
+## Retrieval System
+
+Connects embedding and vector-storage layers into a semantic retrieval pipeline.
+
+The retrieval flow:
+
+```
+User Query
+   ↓
+RetrievalService
+   ↓
+EmbeddingService (Query Vector)
+   ↓
+VectorStoreService
+   ↓
+VectorStoreManager / ChromaAdapter
+   ↓
+Retrieved Chunks
+```
+
+Responsibilities:
+- Provide unified query access across knowledge bases
+- Encode user questions into embeddings
+- Filter results based on thresholds
+- Deterministic result ordering
+
+Note: LLM generation/RAG and context assembly are future stages.
+
+---
+
 ## Memory System
 
 Maintains conversational and persistent memory.

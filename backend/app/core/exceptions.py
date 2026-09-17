@@ -119,6 +119,16 @@ class VectorStoreError(AppException):
         super().__init__(message)
 
 
+class RetrievalError(AppException):
+    """Raised when a retrieval operation fails."""
+
+    code = "retrieval_error"
+    status_code = 500
+
+    def __init__(self, message: str = "Retrieval operation failed.") -> None:
+        super().__init__(message)
+
+
 def error_payload(code: str, message: str) -> dict[str, dict[str, str]]:
     """Return the standard API error body."""
     return {"error": {"code": code, "message": message}}

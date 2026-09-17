@@ -1,6 +1,7 @@
 """Tests for the vector storage subsystem."""
 
 import uuid
+
 import pytest
 
 from app.core.config import Settings
@@ -139,3 +140,39 @@ def test_service_handles_empty_inputs():
     """Test VectorStoreService handles empty inputs gracefully."""
     service = VectorStoreService()
     service.store_embeddings([])
+
+
+def test_chroma_provider_search(chroma_provider):
+    """Test Chroma provider similarity search."""
+    vec1 = StoredVector(id="v1", vector=[1.0, 0.0], metadata={"doc": "1"})
+    vec2 = StoredVector(id="v2", vector=[0.0, 1.0], metadata={"doc": "2"})
+
+    chroma_provider.upsert([vec1, vec2])
+
+    # Query vector close to vec1
+    results = chroma_provider.search(query_vector=[0.9, 0.1], top_k=1)
+    assert len(results) == 1
+    assert results[0].id == "v1"
+    assert results[0].distance is not None
+    assert results[0].metadata == {"doc": "1"}
+
+
+def test_chroma_provider_search_empty_store(chroma_provider):
+    """Test search against an empty store."""
+    results = chroma_provider.search(query_vector=[1.0, 1.0], top_k=5)
+    assert results == []
+
+
+def test_chroma_provider_search_threshold(chroma_provider):
+    """Test search with distance threshold."""
+    vec1 = StoredVector(id="v1", vector=[1.0, 0.0])
+    vec2 = StoredVector(
+        id="v2", vector=[-1.0, 0.0]
+    )  # opposite direction, high distance
+
+    chroma_provider.upsert([vec1, vec2])
+
+    # Should exclude vec2 if threshold is low enough
+    results = chroma_provider.search(query_vector=[1.0, 0.0], top_k=2, threshold=0.5)
+    assert len(results) == 1
+    assert results[0].id == "v1"
