@@ -35,8 +35,12 @@ def test_search_endpoint_success():
 
 def test_search_endpoint_rejects_invalid_payload():
     """Test search API validates payload."""
-    client = TestClient(app)
-    response = client.post(
-        "/api/v1/retrieval/search", json={"top_k": 3}
-    )  # Missing query
-    assert response.status_code == 422
+    app.dependency_overrides[get_retrieval_service] = lambda: Mock()
+    try:
+        client = TestClient(app)
+        response = client.post(
+            "/api/v1/retrieval/search", json={"top_k": 3}
+        )  # Missing query
+        assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
