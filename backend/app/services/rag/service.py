@@ -2,9 +2,12 @@
 
 import logging
 
+from fastapi import Depends
+
 from app.core.config import Settings
 from app.core.config import settings as default_settings
 from app.core.exceptions import RAGError
+from app.core.workspace import get_workspace_id
 from app.services.llm.models import LLMMessage, LLMRequest
 from app.services.llm.service import LLMService
 from app.services.rag.context import ContextBuilder
@@ -124,6 +127,12 @@ class RAGService:
         )
 
 
-def get_rag_service() -> "RAGService":
-    """FastAPI dependency: constructs the RAG service using defaults."""
+def get_rag_service(
+    _workspace_id: str = Depends(get_workspace_id),
+) -> "RAGService":
+    """FastAPI dependency that constructs the RAG service.
+
+    Depends on get_workspace_id so that workspace validation always runs
+    before any external AI provider (LLM, retrieval) is instantiated.
+    """
     return RAGService()

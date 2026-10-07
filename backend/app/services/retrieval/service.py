@@ -2,9 +2,12 @@
 
 import logging
 
+from fastapi import Depends
+
 from app.core.config import Settings
 from app.core.config import settings as default_settings
 from app.core.exceptions import RetrievalError
+from app.core.workspace import get_workspace_id
 from app.services.embeddings.models import EmbeddingInput, EmbeddingRequest
 from app.services.embeddings.service import EmbeddingService
 from app.services.retrieval.models import RetrievalQuery, RetrievedChunk
@@ -88,6 +91,12 @@ class RetrievalService:
         return retrieved_chunks
 
 
-def get_retrieval_service() -> "RetrievalService":
-    """FastAPI dependency: constructs the retrieval service using defaults."""
+def get_retrieval_service(
+    _workspace_id: str = Depends(get_workspace_id),
+) -> "RetrievalService":
+    """FastAPI dependency that constructs the retrieval service.
+
+    Depends on get_workspace_id so that workspace validation always runs
+    before any external AI provider (embedding, vector store) is instantiated.
+    """
     return RetrievalService()

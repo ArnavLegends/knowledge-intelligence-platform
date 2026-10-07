@@ -3,9 +3,12 @@
 import logging
 from typing import Any
 
+from fastapi import Depends
+
 from app.core.config import Settings
 from app.core.config import settings as default_settings
 from app.core.exceptions import AppException
+from app.core.workspace import get_workspace_id
 from app.services.chunking.chunkers.fixed_size import FixedSizeChunker
 from app.services.chunking.service import ChunkingService
 from app.services.documents.models import Document
@@ -158,8 +161,14 @@ class DocumentIndexingService:
         )
 
 
-def get_indexing_service() -> "DocumentIndexingService":
-    """FastAPI dependency that constructs the document indexing service."""
+def get_indexing_service(
+    _workspace_id: str = Depends(get_workspace_id),
+) -> "DocumentIndexingService":
+    """FastAPI dependency that constructs the document indexing service.
+
+    Depends on get_workspace_id so that workspace validation always runs
+    before any external AI provider (embedding, vector store) is instantiated.
+    """
     from app.core.config import settings
 
     chunking_service = ChunkingService(

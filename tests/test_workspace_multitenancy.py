@@ -261,6 +261,44 @@ def test_missing_and_invalid_workspace_id_rejected():
     assert res5.json()["error"]["code"] == "bad_request"
 
 
+def test_invalid_workspace_never_constructs_providers():
+    """Workspace validation must short-circuit BEFORE any AI provider is built.
+
+    An invalid workspace ID must return HTTP 400 without ever instantiating
+    EmbeddingService, VectorStoreService, or LLMService (which require credentials).
+    This is a regression test for the CI failure where get_indexing_service()
+    was constructed before workspace validation, causing OpenAIError: Missing
+    credentials.
+    """
+    client = TestClient(app, raise_server_exceptions=True)
+
+    # Missing workspace on upload — must be 400, never 500 from missing credentials
+    res = client.post(
+        "/api/v1/documents",
+        files={"file": ("test.txt", b"content", "text/plain")},
+    )
+    assert res.status_code == 400, (
+        f"Expected 400, got {res.status_code}. "
+        "If 500, service factories are being constructed before workspace validation."
+    )
+
+    # Missing workspace on RAG — must be 400
+    res2 = client.post("/api/v1/rag/answer", json={"query": "test"})
+    assert res2.status_code == 400, (
+        f"Expected 400, got {res2.status_code}. "
+        "If 500, get_rag_service is being constructed before workspace validation."
+    )
+
+    # Missing workspace on retrieval — must be 400
+    res3 = client.post(
+        "/api/v1/retrieval/search", json={"text": "test", "workspace_id": "x"}
+    )
+    # retrieval endpoint may 400 or 422 depending on body validation, never 500
+    assert res3.status_code != 500, (
+        f"Got {res3.status_code} — service constructed before workspace validation."
+    )
+
+
 @pytest.mark.anyio
 async def test_concurrent_same_document_upload_is_idempotent(workspace_fixture):
     """Simultaneous uploads of the same document in the same workspace are safe."""
