@@ -225,6 +225,8 @@ def test_missing_and_invalid_workspace_id_rejected():
         files={"file": ("test.txt", b"content", "text/plain")},
     )
     assert res1.status_code == 400
+    assert res1.status_code != 500
+    assert res1.json()["error"]["code"] == "bad_request"
 
     # 2. Too short token
     res2 = client.post(
@@ -233,6 +235,8 @@ def test_missing_and_invalid_workspace_id_rejected():
         files={"file": ("test.txt", b"content", "text/plain")},
     )
     assert res2.status_code == 400
+    assert res2.status_code != 500
+    assert res2.json()["error"]["code"] == "bad_request"
 
     # 3. Invalid characters
     res3 = client.post(
@@ -241,14 +245,20 @@ def test_missing_and_invalid_workspace_id_rejected():
         files={"file": ("test.txt", b"content", "text/plain")},
     )
     assert res3.status_code == 400
+    assert res3.status_code != 500
+    assert res3.json()["error"]["code"] == "bad_request"
 
     # 4. Missing header on RAG query
     res4 = client.post("/api/v1/rag/answer", json={"query": "test"})
     assert res4.status_code == 400
+    assert res4.status_code != 500
+    assert res4.json()["error"]["code"] == "bad_request"
 
     # 5. Missing header on document listing
     res5 = client.get("/api/v1/documents")
     assert res5.status_code == 400
+    assert res5.status_code != 500
+    assert res5.json()["error"]["code"] == "bad_request"
 
 
 @pytest.mark.anyio

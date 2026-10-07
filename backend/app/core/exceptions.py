@@ -1,7 +1,8 @@
 """Application exception hierarchy and FastAPI exception handlers."""
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.logging import get_logger
 
@@ -152,6 +153,33 @@ async def app_exception_handler(request: Request, exc: AppException) -> JSONResp
     )
 
 
+_STATUS_CODE_MAP: dict[int, str] = {
+    400: "bad_request",
+    401: "unauthorized",
+    403: "forbidden",
+    404: "not_found",
+    405: "method_not_allowed",
+    409: "conflict",
+    422: "unprocessable_entity",
+    429: "too_many_requests",
+}
+
+
+async def http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+) -> JSONResponse:
+    """Return a consistent JSON error for HTTP exceptions preserving status code."""
+    status_code = exc.status_code
+    code = _STATUS_CODE_MAP.get(status_code, f"http_{status_code}")
+    message = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    headers = getattr(exc, "headers", None)
+    return JSONResponse(
+        status_code=status_code,
+        content=error_payload(code, message),
+        headers=headers,
+    )
+
+
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Log unexpected errors and return a generic 500 response."""
     logger.exception("Unhandled exception")
@@ -162,6 +190,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 
 
 def register_exception_handlers(app: FastAPI) -> None:
-    """Attach application and unhandled exception handlers to a FastAPI app."""
+    """Attach application, HTTP, and unhandled exception handlers to FastAPI app."""
     app.add_exception_handler(AppException, app_exception_handler)
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+    app.add_exception_handler(HTTPException, http_exception_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
