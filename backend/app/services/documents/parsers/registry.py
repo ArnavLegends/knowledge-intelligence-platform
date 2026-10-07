@@ -34,4 +34,17 @@ def build_default_registry() -> ParserRegistry:
     """Return a registry with the parsers available in this milestone."""
     registry = ParserRegistry()
     registry.register(TxtParser())
+
+    from app.services.documents.parsers.md import MarkdownParser
+
+    registry.register(MarkdownParser())
+
+    from app.services.documents.parsers.pdf import PdfParser
+
+    registry.register(PdfParser())
+
+    from app.services.documents.parsers.docx import DocxParser
+
+    registry.register(DocxParser())
+
     return registry

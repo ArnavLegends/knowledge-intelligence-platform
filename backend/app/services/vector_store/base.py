@@ -31,6 +31,10 @@ class VectorStoreProvider(ABC):
         """Return the total number of vectors in the collection."""
 
     @abstractmethod
+    def document_exists(self, document_id: str) -> bool:
+        """Check if any vectors exist for the given document_id."""
+
+    @abstractmethod
     def search(
         self, query_vector: list[float], top_k: int, threshold: float | None = None
     ) -> list["VectorSearchResult"]:

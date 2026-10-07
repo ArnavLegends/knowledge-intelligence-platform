@@ -1,5 +1,7 @@
 """RAG orchestration service."""
 
+import logging
+
 from app.core.config import Settings
 from app.core.config import settings as default_settings
 from app.core.exceptions import RAGError
@@ -9,6 +11,8 @@ from app.services.rag.context import ContextBuilder
 from app.services.rag.models import RAGRequest, RAGResponse
 from app.services.retrieval.models import RetrievalQuery
 from app.services.retrieval.service import RetrievalService
+
+logger = logging.getLogger(__name__)
 
 
 class RAGService:
@@ -30,6 +34,8 @@ class RAGService:
         if not query_text:
             raise RAGError("RAG query cannot be empty.")
 
+        logger.info("RAG query received: top_k=%s", request.top_k)
+
         # 1. Retrieve context
         try:
             retrieval_query = RetrievalQuery(
@@ -49,10 +55,13 @@ class RAGService:
         except Exception as e:
             raise RAGError(f"Retrieval step failed: {e}") from e
 
+        logger.debug("Retrieval complete: chunks=%d", len(retrieved_chunks))
+
         # 2. Build context representation
         context_items = ContextBuilder.build_context_items(retrieved_chunks)
 
         if not context_items:
+            logger.info("No relevant context found — returning empty-context response")
             # Handle empty context gracefully
             return RAGResponse(
                 answer=self._settings.rag_empty_context_message,
@@ -90,8 +99,15 @@ class RAGService:
         if not llm_response.content:
             raise RAGError("LLM returned an empty response.")
 
+        logger.info("RAG generation complete: sources=%d", len(context_items))
+
         # 4. Return results with provenance
         return RAGResponse(
             answer=llm_response.content,
             sources=context_items,
         )
+
+
+def get_rag_service() -> "RAGService":
+    """FastAPI dependency that constructs the RAG service using application defaults."""
+    return RAGService()

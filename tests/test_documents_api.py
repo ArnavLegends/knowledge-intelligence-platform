@@ -1,74 +1,112 @@
 """HTTP tests for POST /api/v1/documents."""
 
+from unittest.mock import MagicMock
+
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.services.indexing.models import IndexingResult
+from app.services.indexing.service import get_indexing_service
 
 UPLOAD_URL = "/api/v1/documents"
 
 
-def _client() -> TestClient:
+def _mock_indexing_service(chunks_indexed: int = 1) -> MagicMock:
+    """Build a mock DocumentIndexingService for tests that don't test indexing."""
+    mock = MagicMock()
+    mock.index_document.return_value = IndexingResult(
+        document_id="test-doc-id", chunks_indexed=chunks_indexed
+    )
+    return mock
+
+
+def _client(mock_indexer=None) -> TestClient:
+    if mock_indexer is not None:
+        app.dependency_overrides[get_indexing_service] = lambda: mock_indexer
     return TestClient(app, raise_server_exceptions=False)
 
 
 def test_document_upload_success() -> None:
-    client = _client()
-    response = client.post(
-        UPLOAD_URL,
-        files={"file": ("notes.txt", "hello café".encode(), "text/plain")},
-    )
+    mock_indexer = _mock_indexing_service(chunks_indexed=1)
+    client = _client(mock_indexer)
+    try:
+        response = client.post(
+            UPLOAD_URL,
+            files={"file": ("notes.txt", "hello café".encode(), "text/plain")},
+        )
 
-    assert response.status_code == 200
-    body = response.json()
-    assert body["filename"] == "notes.txt"
-    assert body["media_type"] == "text/plain"
-    assert body["text"] == "hello café"
-    assert body["source"] == "upload"
-    assert body["id"]
-    assert body["ingested_at"]
-    assert body["metadata"]["parser"] == "txt"
+        assert response.status_code == 200
+        body = response.json()
+        assert body["filename"] == "notes.txt"
+        assert body["media_type"] == "text/plain"
+        assert body["text"] == "hello café"
+        assert body["source"] == "upload"
+        assert body["id"]
+        assert body["ingested_at"]
+        assert body["metadata"]["parser"] == "txt"
+        assert body["chunks_indexed"] == 1
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_document_upload_rejects_empty_file() -> None:
-    client = _client()
-    response = client.post(
-        UPLOAD_URL,
-        files={"file": ("notes.txt", b"", "text/plain")},
-    )
+    mock_indexer = _mock_indexing_service()
+    client = _client(mock_indexer)
+    try:
+        response = client.post(
+            UPLOAD_URL,
+            files={"file": ("notes.txt", b"", "text/plain")},
+        )
 
-    assert response.status_code == 400
-    assert response.json() == {
-        "error": {
-            "code": "invalid_document",
-            "message": "Uploaded file is empty.",
+        assert response.status_code == 400
+        assert response.json() == {
+            "error": {
+                "code": "invalid_document",
+                "message": "Uploaded file is empty.",
+            }
         }
-    }
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_document_upload_rejects_unsupported_format() -> None:
-    client = _client()
-    response = client.post(
-        UPLOAD_URL,
-        files={"file": ("notes.pdf", b"%PDF-fake", "application/pdf")},
-    )
+    mock_indexer = _mock_indexing_service()
+    client = _client(mock_indexer)
+    try:
+        response = client.post(
+            UPLOAD_URL,
+            files={
+                "file": ("notes.unknown", b"fake content", "application/octet-stream")
+            },
+        )
 
-    assert response.status_code == 415
-    assert response.json()["error"]["code"] == "unsupported_format"
+        assert response.status_code == 415
+        assert response.json()["error"]["code"] == "unsupported_format"
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_document_upload_rejects_invalid_utf8() -> None:
-    client = _client()
-    response = client.post(
-        UPLOAD_URL,
-        files={"file": ("notes.txt", b"\xff\xfe", "text/plain")},
-    )
+    mock_indexer = _mock_indexing_service()
+    client = _client(mock_indexer)
+    try:
+        response = client.post(
+            UPLOAD_URL,
+            files={"file": ("notes.txt", b"\xff\xfe", "text/plain")},
+        )
 
-    assert response.status_code == 400
-    assert response.json()["error"]["code"] == "document_parse_error"
-    assert "UTF-8" in response.json()["error"]["message"]
+        assert response.status_code == 400
+        assert response.json()["error"]["code"] == "document_parse_error"
+        assert "UTF-8" in response.json()["error"]["message"]
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_document_upload_requires_file() -> None:
-    client = _client()
-    response = client.post(UPLOAD_URL)
-    assert response.status_code == 422
+    mock_indexer = _mock_indexing_service()
+    client = _client(mock_indexer)
+    try:
+        response = client.post(UPLOAD_URL)
+        assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()

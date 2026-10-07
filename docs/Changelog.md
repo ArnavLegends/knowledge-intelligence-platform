@@ -132,9 +132,37 @@ Each release should document significant engineering changes while avoiding unne
 - `RAGService` orchestrating the retrieval and LLM stages with empty-context handling
 - FastAPI `/api/v1/rag/answer` endpoint with full provenance tracking
 
+# [v0.4.0] — Multi-Format Document Ingestion
+
+**Date:** 2026-10-07
+
+## Added
+- **Multi-Format Parsers**: Implemented parsers for Markdown (`.md`, `.markdown`), PDF (`.pdf`), and DOCX (`.docx`) using `pypdf` and `python-docx` respectively.
+- **Multi-Format E2E Tests**: Added E2E tests for the new ingestion pipelines validating full end-to-end provenance.
+
+## Changed
+- **Dependencies**: Added `pypdf` and `python-docx` to `pyproject.toml`.
+- **Validation**: Updated format validation to reject files like `.unknown` properly instead of `.pdf`.
+
 ---
 
-# [Unreleased] — Repository Professionalization & Documentation Synchronization
+# [v0.3.0] — End-to-End RAG Workflow
+
+**Date:** 2026-10-07
+
+## Added
+- **E2E Integration Test**: Added `tests/test_e2e_rag.py` to ensure the core pipeline works perfectly without depending on real external APIs.
+- **FastAPI Factory Dependencies**: Added service factory getters (e.g. `get_indexing_service`, `get_rag_service`, `get_retrieval_service`) to support DI overrides in tests.
+
+## Changed
+- **Orchestration**: Refactored `POST /api/v1/documents` to trigger both ingestion and indexing.
+- **Chunk IDs**: Implemented deterministic SHA-256-based chunk IDs instead of random UUIDs to ensure idempotency.
+- **Service Injection**: Refactored `DocumentIndexingService`, `RetrievalService`, and `RAGService` to use strict constructor dependency injection without hidden defaults.
+- **Dependency Loading**: The API endpoints now correctly load services using FastAPI's `Depends()`.
+
+---
+
+# [v0.2.1] — Repository Professionalization & Documentation Synchronization
 
 **Date:** 2026-09-17
 

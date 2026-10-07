@@ -19,28 +19,31 @@ Designed with modern AI engineering practices, this platform currently implement
 The repository currently provides a fully functional backend API for document ingestion, chunking, semantic retrieval, and OpenAI-backed generation. A comprehensive test suite ensures architectural stability. Research and evaluation frameworks are planned but not yet active.
 
 ### What is Implemented Today
-- **Document Ingestion**: Parsing for TXT files.
+- **Document Ingestion**: Parsing for TXT, Markdown, PDF, and DOCX files.
 - **Chunking Pipeline**: Configurable chunking with overlap.
-- **Embedding Integration**: OpenAI embeddings adapter.
-- **Vector Storage**: Ephemeral and persistent ChromaDB adapter.
+- **Embedding Integration**: Pluggable architecture supporting OpenAI and Google Gemini embeddings.
+- **Vector Storage**: Ephemeral and persistent ChromaDB adapter (with provider-isolated namespaces).
 - **Semantic Retrieval**: Top-k similarity search with thresholds.
-- **RAG Generation**: Orchestrated response generation via OpenAI models.
+- **RAG Generation**: Orchestrated response generation via OpenAI and Google Gemini models.
 - **REST APIs**: Versioned endpoints for documents, retrieval, and RAG.
+- **Frontend UI**: Integrated Streamlit application.
+- **Evaluation**: Offline deterministic benchmark runner.
 
 ## Technology Stack
 
 ### Current Technologies
 - **Core**: Python 3.11+
 - **API Framework**: FastAPI, Pydantic, pydantic-settings
-- **AI/LLM SDK**: OpenAI Python SDK
+- **Frontend**: Streamlit
+- **AI/LLM SDK**: OpenAI Python SDK, Google GenAI SDK (Gemini)
 - **Vector Database**: ChromaDB
 - **Quality & Testing**: Pytest, Ruff, GitHub Actions CI
 
 ### Planned Technologies
 The following are planned for future major releases:
-- **Frontend**: Streamlit, React
+- **Frontend**: React
 - **Agent/AI Frameworks**: LangChain, LangGraph
-- **Additional LLMs**: Anthropic, Google Gemini, Local LLMs
+- **Additional LLMs**: Anthropic, Local LLMs
 - **Databases/Graphs**: PostgreSQL, Neo4j, Pinecone, Weaviate
 - **Evaluation**: RAGAS, DeepEval
 

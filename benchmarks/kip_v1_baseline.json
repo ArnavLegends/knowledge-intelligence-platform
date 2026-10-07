@@ -1,0 +1,46 @@
+{
+  "version": "v1.0-baseline",
+  "description": "Deterministic baseline benchmark dataset for KIP v1.0. Questions are designed to be answerable from the provided sample document. All results at this version are Baseline / Not Yet Evaluated with a live LLM.",
+  "cases": [
+    {
+      "id": "kip-001",
+      "question": "What is the name of the AI platform described in this document?",
+      "reference_answer": "Knowledge Intelligence Platform",
+      "expected_document_ids": [],
+      "expected_keywords": ["Knowledge Intelligence Platform", "KIP"],
+      "metadata": {"difficulty": "easy", "topic": "system identity"}
+    },
+    {
+      "id": "kip-002",
+      "question": "What vector database does KIP use for storing embeddings?",
+      "reference_answer": "ChromaDB",
+      "expected_document_ids": [],
+      "expected_keywords": ["ChromaDB", "Chroma"],
+      "metadata": {"difficulty": "easy", "topic": "vector store"}
+    },
+    {
+      "id": "kip-003",
+      "question": "Which document formats does KIP support for ingestion?",
+      "reference_answer": "TXT, Markdown, PDF, and DOCX",
+      "expected_document_ids": [],
+      "expected_keywords": ["TXT", "Markdown", "PDF", "DOCX"],
+      "metadata": {"difficulty": "medium", "topic": "ingestion formats"}
+    },
+    {
+      "id": "kip-004",
+      "question": "How are chunk IDs generated to ensure idempotency?",
+      "reference_answer": "Using SHA-256 hash of the document ID and chunk index",
+      "expected_document_ids": [],
+      "expected_keywords": ["SHA-256", "deterministic"],
+      "metadata": {"difficulty": "medium", "topic": "chunking"}
+    },
+    {
+      "id": "kip-005",
+      "question": "What happens when a query finds no relevant context?",
+      "reference_answer": "The system returns a predefined empty-context message",
+      "expected_document_ids": [],
+      "expected_keywords": ["cannot find", "knowledge base"],
+      "metadata": {"difficulty": "medium", "topic": "empty context handling"}
+    }
+  ]
+}

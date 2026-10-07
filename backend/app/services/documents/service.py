@@ -1,7 +1,5 @@
 """Application-facing document ingestion service."""
 
-from uuid import uuid4
-
 from app.core.config import settings as default_settings
 from app.services.documents.models import Document
 from app.services.documents.parsers.base import DocumentParser
@@ -33,11 +31,20 @@ class DocumentIngestionService:
         content: bytes,
         media_type: str | None = None,
     ) -> Document:
+        import hashlib
+
         safe_name = validate_upload(filename, content, self._max_upload_bytes)
         parser: DocumentParser = self._registry.select(safe_name, media_type)
         parsed = parser.parse(safe_name, content)
+
+        # Phase 1: Fix Document Idempotency
+        # Generate deterministic document ID based on the exact raw content.
+        # Identical file content yields identical document identity regardless
+        # of filename.
+        doc_id = hashlib.sha256(content).hexdigest()
+
         return Document.create(
-            document_id=str(uuid4()),
+            document_id=doc_id,
             filename=safe_name,
             media_type=parsed.media_type,
             text=parsed.text,

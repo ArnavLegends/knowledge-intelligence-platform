@@ -3,10 +3,12 @@
 from app.core.config import Settings
 
 
-def test_settings_default_values() -> None:
-    settings = Settings()
+def test_settings_default_values(monkeypatch) -> None:
+    monkeypatch.delenv("LLM_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    settings = Settings(_env_file=None)
     assert settings.app_name == "Knowledge Intelligence Platform"
-    assert settings.app_version == "0.2.0"
+    assert settings.app_version == "1.0.0"
     assert settings.environment == "development"
     assert settings.debug is False
     assert settings.log_level == "INFO"

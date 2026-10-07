@@ -42,6 +42,10 @@ class VectorStoreService:
         """Return the total number of vectors in the collection."""
         return self._manager.provider.count()
 
+    def document_exists(self, document_id: str) -> bool:
+        """Check if any vectors exist for the given document_id."""
+        return self._manager.provider.document_exists(document_id)
+
     def search(
         self, query_vector: list[float], top_k: int, threshold: float | None = None
     ) -> list[VectorSearchResult]:

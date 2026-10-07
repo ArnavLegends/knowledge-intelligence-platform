@@ -5,7 +5,6 @@ from app.core.config import settings as default_settings
 from app.core.exceptions import AppException
 from app.services.embeddings.base import EmbeddingProvider
 from app.services.embeddings.models import Embedding, EmbeddingRequest
-from app.services.embeddings.providers.openai import OpenAIEmbeddingProvider
 
 
 class EmbeddingManager:
@@ -31,12 +30,21 @@ class EmbeddingManager:
     def _create_provider(settings: Settings) -> EmbeddingProvider:
         provider_name = settings.embedding_provider.strip().lower()
         if provider_name == "openai":
+            from app.services.embeddings.providers.openai import OpenAIEmbeddingProvider
+
             return OpenAIEmbeddingProvider(
                 api_key=settings.llm_api_key,
                 model=settings.embedding_model,
             )
+        elif provider_name == "gemini":
+            from app.services.embeddings.providers.gemini import GeminiEmbeddingProvider
+
+            return GeminiEmbeddingProvider(
+                api_key=settings.llm_api_key,
+                model=settings.embedding_model,
+            )
         raise AppException(
-            "Unsupported embedding provider.",
+            f"Unsupported embedding provider: {provider_name}",
             code="unsupported_embedding_provider",
             status_code=500,
         )

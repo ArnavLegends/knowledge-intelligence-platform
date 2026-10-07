@@ -1,33 +1,29 @@
 """RAG API endpoints."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
 
 from app.core.config import Settings, get_settings
 from app.services.rag.models import RAGRequest, RAGResponse
-from app.services.rag.service import RAGService
+from app.services.rag.service import RAGService, get_rag_service
 
 router = APIRouter()
 
 
-class RAGAPIRequest(BaseModel):
-    """API payload for asking a question over the knowledge base."""
+class RAGAPIRequest(RAGRequest):
+    """API payload for asking a question over the knowledge base.
 
-    query: str
-    top_k: int | None = None
-    threshold: float | None = None
-
-
-def get_rag_service() -> RAGService:
-    """Dependency injection for the RAG service."""
-    return RAGService()
+    Inherits query, top_k, and threshold from RAGRequest.
+    Using the same model avoids schema duplication.
+    """
 
 
 @router.post("/answer", response_model=RAGResponse)
 async def answer(
     request: RAGAPIRequest,
-    service: RAGService = Depends(get_rag_service),  # noqa: B008
-    settings: Settings = Depends(get_settings),  # noqa: B008
+    service: Annotated[RAGService, Depends(get_rag_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> RAGResponse:
     """Generate an answer using retrieved knowledge."""
     top_k = (

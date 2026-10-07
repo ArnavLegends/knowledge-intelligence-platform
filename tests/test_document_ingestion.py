@@ -33,7 +33,7 @@ def test_ingestion_service_rejects_empty_file() -> None:
 def test_ingestion_service_rejects_unsupported_format() -> None:
     service = DocumentIngestionService()
     with pytest.raises(UnsupportedFormatError):
-        service.ingest("notes.pdf", b"%PDF-fake")
+        service.ingest("notes.unknown", b"random content")
 
 
 def test_ingestion_service_rejects_invalid_utf8() -> None:

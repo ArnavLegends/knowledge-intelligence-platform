@@ -34,6 +34,9 @@ dependencies = [
     "python-multipart>=0.0.18",
     "uvicorn[standard]>=0.34",
     "chromadb>=0.4",
+    "pypdf>=5.0",
+    "python-docx>=1.1",
+    "google-genai>=0.3",
 ]
 
 [project.optional-dependencies]
@@ -68,6 +71,8 @@ exclude = [
     ".venv",
     "build",
     "dist",
+    "frontend",    # Streamlit UI — not part of backend lint surface
+    "test_upload.py",  # One-off dev script at repo root
 ]
 
 [tool.ruff.lint]
@@ -93,7 +98,7 @@ known-first-party = ["app"]
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
-pythonpath = ["backend"]
+pythonpath = ["backend", "."]
 addopts = [
     "--strict-config",
     "--strict-markers",

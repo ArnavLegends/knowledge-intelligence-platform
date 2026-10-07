@@ -58,6 +58,8 @@ Ingest an uploaded file and return a normalized document object.
 |-------|------|-------------|
 | `file` | File | The file to upload. Currently supports `.txt` (UTF-8). |
 
+> **Idempotency Note:** Document upload is idempotent based on exact file content (SHA-256). If the exact same file content is uploaded multiple times, the API will return the existing document metadata with `chunks_indexed=0`, preventing duplicate vectors in the knowledge base.
+
 **Response:** `200 OK`
 
 ```json

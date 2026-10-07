@@ -5,7 +5,6 @@ from app.core.config import settings as default_settings
 from app.core.exceptions import AppException
 from app.services.llm.base import LLMProvider
 from app.services.llm.models import LLMRequest, LLMResponse
-from app.services.llm.providers.openai import OpenAIProvider
 
 
 class LLMManager:
@@ -31,12 +30,21 @@ class LLMManager:
     def _create_provider(settings: Settings) -> LLMProvider:
         provider_name = settings.llm_provider.strip().lower()
         if provider_name == "openai":
+            from app.services.llm.providers.openai import OpenAIProvider
+
             return OpenAIProvider(
                 api_key=settings.llm_api_key,
                 model=settings.llm_model,
             )
+        elif provider_name == "gemini":
+            from app.services.llm.providers.gemini import GeminiProvider
+
+            return GeminiProvider(
+                api_key=settings.llm_api_key,
+                model=settings.llm_model,
+            )
         raise AppException(
-            "Unsupported LLM provider.",
+            f"Unsupported LLM provider: {provider_name}",
             code="unsupported_llm_provider",
             status_code=500,
         )

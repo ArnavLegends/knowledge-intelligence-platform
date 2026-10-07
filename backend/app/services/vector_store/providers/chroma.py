@@ -108,6 +108,13 @@ class ChromaVectorStoreProvider(VectorStoreProvider):
         except Exception as e:
             raise VectorStoreError(f"ChromaDB count failed: {e}") from e
 
+    def document_exists(self, document_id: str) -> bool:
+        try:
+            result = self._collection.get(where={"document_id": document_id}, limit=1)
+            return bool(result and result["ids"])
+        except Exception as e:
+            raise VectorStoreError(f"ChromaDB document_exists failed: {e}") from e
+
     def search(
         self, query_vector: list[float], top_k: int, threshold: float | None = None
     ) -> list[VectorSearchResult]:

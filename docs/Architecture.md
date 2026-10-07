@@ -221,6 +221,7 @@ Responsibilities include:
 - Parser selection
 - Text extraction
 - Normalized document representation
+- **Document Identity**: Generates a deterministic `document_id` based on the exact SHA-256 hash of the raw file content. This ensures idempotent behavior: repeatedly uploading the exact same file yields the exact same logical document, preventing duplicate downstream processing.
 
 ---
 
@@ -248,6 +249,7 @@ Responsibilities include:
 - Preserving source metadata and ordering
 - Supporting configurable overlap and sizes
 - Preparing text for future embedding storage
+- **Chunk Identity**: Generates a deterministic `chunk_id` using a SHA-256 hash of the `document_id` and the chunk's `index`. Because document IDs are content-based, chunk IDs remain perfectly stable across re-indexing operations.
 
 ---
 

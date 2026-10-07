@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Knowledge Intelligence Platform"
-    app_version: str = "0.2.0"
+    app_version: str = "1.0.0"
     environment: str = "development"
     debug: bool = False
     log_level: str = "INFO"

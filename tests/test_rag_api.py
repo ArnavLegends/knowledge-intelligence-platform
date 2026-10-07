@@ -4,9 +4,9 @@ from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 
-from app.api.v1.endpoints.rag import get_rag_service
 from app.main import app
 from app.services.rag.models import ContextItem, RAGResponse
+from app.services.rag.service import get_rag_service
 
 
 def test_rag_answer_endpoint_success():
@@ -22,19 +22,20 @@ def test_rag_answer_endpoint_success():
     app.dependency_overrides[get_rag_service] = lambda: mock_service
 
     client = TestClient(app)
-    response = client.post(
-        "/api/v1/rag/answer", json={"query": "test query", "top_k": 3}
-    )
+    try:
+        response = client.post(
+            "/api/v1/rag/answer", json={"query": "test query", "top_k": 3}
+        )
 
-    assert response.status_code == 200
-    data = response.json()
-    assert "answer" in data
-    assert data["answer"] == "Hello World"
-    assert "sources" in data
-    assert len(data["sources"]) == 1
-    assert data["sources"][0]["chunk_id"] == "c1"
-
-    app.dependency_overrides.clear()
+        assert response.status_code == 200
+        data = response.json()
+        assert "answer" in data
+        assert data["answer"] == "Hello World"
+        assert "sources" in data
+        assert len(data["sources"]) == 1
+        assert data["sources"][0]["chunk_id"] == "c1"
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_rag_answer_endpoint_rejects_invalid():
@@ -43,10 +44,12 @@ def test_rag_answer_endpoint_rejects_invalid():
     app.dependency_overrides[get_rag_service] = lambda: mock_service
 
     client = TestClient(app)
-    response = client.post("/api/v1/rag/answer", json={"top_k": 3})  # Missing query
+    try:
+        response = client.post("/api/v1/rag/answer", json={"top_k": 3})  # Missing query
 
-    assert response.status_code == 422
-    app.dependency_overrides.clear()
+        assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
 
 
 def test_rag_answer_endpoint_handles_rag_error():
@@ -58,12 +61,13 @@ def test_rag_answer_endpoint_handles_rag_error():
     app.dependency_overrides[get_rag_service] = lambda: mock_service
 
     client = TestClient(app)
-    response = client.post("/api/v1/rag/answer", json={"query": "test query"})
+    try:
+        response = client.post("/api/v1/rag/answer", json={"query": "test query"})
 
-    assert response.status_code == 500
-    data = response.json()
-    assert "error" in data
-    assert data["error"]["code"] == "rag_error"
-    assert "Something went wrong" in data["error"]["message"]
-
-    app.dependency_overrides.clear()
+        assert response.status_code == 500
+        data = response.json()
+        assert "error" in data
+        assert data["error"]["code"] == "rag_error"
+        assert "Something went wrong" in data["error"]["message"]
+    finally:
+        app.dependency_overrides.clear()

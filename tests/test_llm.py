@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from google.genai.errors import APIError
 from pydantic import ValidationError
 
 from app.core.config import Settings
@@ -11,6 +12,7 @@ from app.core.exceptions import AppException, LLMProviderError
 from app.services.llm.base import LLMProvider
 from app.services.llm.manager import LLMManager
 from app.services.llm.models import LLMMessage, LLMRequest, LLMResponse, LLMUsage
+from app.services.llm.providers.gemini import GeminiProvider
 from app.services.llm.providers.openai import OpenAIProvider
 
 
@@ -249,3 +251,84 @@ def test_application_depends_on_normalized_types_not_sdk() -> None:
 
     assert type(response).__module__ == "app.services.llm.models"
     assert "openai" not in type(response).__module__
+
+
+def test_gemini_adapter_translates_internal_request() -> None:
+    provider = GeminiProvider(
+        api_key="sk-test",
+        model="gemini-2.5-flash",
+        client=MagicMock(),
+    )
+    request = LLMRequest(
+        messages=[
+            LLMMessage(role="system", content="Be brief."),
+            LLMMessage(role="user", content="Hello"),
+            LLMMessage(role="assistant", content="Hi"),
+            LLMMessage(role="user", content="Continue"),
+        ],
+        model="gemini-exp",
+        temperature=0.4,
+        max_output_tokens=64,
+    )
+
+    contents, config = provider._to_gemini_payload(request)
+
+    assert config.temperature == 0.4
+    assert config.max_output_tokens == 64
+    assert config.system_instruction == "Be brief."
+
+    assert len(contents) == 3
+    assert contents[0].role == "user"
+    assert contents[0].parts[0].text == "Hello"
+    assert contents[1].role == "model"
+    assert contents[1].parts[0].text == "Hi"
+    assert contents[2].role == "user"
+    assert contents[2].parts[0].text == "Continue"
+
+
+def test_gemini_adapter_returns_normalized_response() -> None:
+    client = MagicMock()
+    mock_response = SimpleNamespace(
+        text="ok",
+        usage_metadata=SimpleNamespace(
+            prompt_token_count=4, candidates_token_count=5, total_token_count=9
+        ),
+        candidates=[SimpleNamespace(finish_reason=SimpleNamespace(name="STOP"))],
+    )
+    client.models.generate_content.return_value = mock_response
+
+    provider = GeminiProvider(
+        api_key="sk-test", model="gemini-2.5-flash", client=client
+    )
+    response = provider.generate(_request())
+
+    assert isinstance(response, LLMResponse)
+    assert response.content == "ok"
+    assert response.provider == "gemini"
+    assert response.usage == LLMUsage(
+        prompt_tokens=4, completion_tokens=5, total_tokens=9
+    )
+    assert response.finish_reason == "STOP"
+
+    client.models.generate_content.assert_called_once()
+    call_kwargs = client.models.generate_content.call_args.kwargs
+    assert call_kwargs["model"] == "gemini-2.5-flash"
+
+
+def test_gemini_adapter_maps_provider_failures() -> None:
+    client = MagicMock()
+    client.models.generate_content.side_effect = APIError("secret", 500, "INTERNAL")
+    provider = GeminiProvider(
+        api_key="sk-test", model="gemini-2.5-flash", client=client
+    )
+
+    with pytest.raises(LLMProviderError) as exc_info:
+        provider.generate(_request())
+
+    assert exc_info.value.code == "llm_provider_error"
+    assert "secret" not in exc_info.value.message
+
+
+def test_gemini_adapter_requires_api_key() -> None:
+    with pytest.raises(LLMProviderError):
+        GeminiProvider(api_key="", model="gemini-2.5-flash")

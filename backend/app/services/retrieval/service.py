@@ -72,3 +72,8 @@ class RetrievalService:
             )
 
         return retrieved_chunks
+
+
+def get_retrieval_service() -> "RetrievalService":
+    """FastAPI dependency: constructs the retrieval service using defaults."""
+    return RetrievalService()

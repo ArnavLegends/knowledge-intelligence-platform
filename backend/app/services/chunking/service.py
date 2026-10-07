@@ -1,6 +1,6 @@
 """Application-facing chunking service."""
 
-import uuid
+import hashlib
 
 from app.services.chunking.chunkers.base import DocumentChunker
 from app.services.chunking.models import Chunk
@@ -19,8 +19,13 @@ class ChunkingService:
 
         chunks = []
         for index, text in enumerate(text_segments):
+            # Generate deterministic ID based on document ID and chunk index
+            # This ensures re-indexing the same document produces the same chunk IDs
+            chunk_hash_input = f"{document.id}:{index}".encode()
+            deterministic_id = hashlib.sha256(chunk_hash_input).hexdigest()
+
             chunk = Chunk(
-                id=str(uuid.uuid4()),
+                id=deterministic_id,
                 document_id=document.id,
                 index=index,
                 text=text,

@@ -4,12 +4,14 @@ from unittest.mock import Mock, patch
 
 import openai
 import pytest
+from google.genai.errors import APIError
 
 from app.core.config import Settings
 from app.core.exceptions import AppException, EmbeddingProviderError
 from app.services.chunking.models import Chunk
 from app.services.embeddings.manager import EmbeddingManager
 from app.services.embeddings.models import Embedding, EmbeddingInput, EmbeddingRequest
+from app.services.embeddings.providers.gemini import GeminiEmbeddingProvider
 from app.services.embeddings.providers.openai import OpenAIEmbeddingProvider
 from app.services.embeddings.service import EmbeddingService
 
@@ -177,3 +179,59 @@ def test_embedding_service_empty():
     """Test EmbeddingService handles empty list."""
     service = EmbeddingService(manager=Mock())
     assert service.embed_chunks([]) == []
+
+
+def test_gemini_adapter_success():
+    """Test Gemini adapter translates request and response correctly."""
+    mock_client = Mock()
+
+    # Setup mock response
+    mock_response = Mock()
+    item1 = Mock()
+    item1.values = [0.1, 0.2]
+    item2 = Mock()
+    item2.values = [0.3, 0.4]
+    mock_response.embeddings = [item1, item2]
+    mock_client.models.embed_content.return_value = mock_response
+
+    provider = GeminiEmbeddingProvider(api_key="fake", client=mock_client)
+
+    req = EmbeddingRequest(
+        model="custom-model",
+        inputs=[
+            EmbeddingInput(source_id="c1", text="text1", metadata={"a": 1}),
+            EmbeddingInput(source_id="c2", text="text2", metadata={"b": 2}),
+        ],
+    )
+
+    embeddings = provider.embed(req)
+
+    # Assert request formatting
+    mock_client.models.embed_content.assert_called_once_with(
+        contents=["text1", "text2"], model="custom-model"
+    )
+
+    # Assert response formatting
+    assert len(embeddings) == 2
+    assert embeddings[0].source_id == "c1"
+    assert embeddings[0].vector == [0.1, 0.2]
+    assert embeddings[0].dimensions == 2
+    assert embeddings[0].provider == "gemini"
+    assert embeddings[0].model == "custom-model"
+
+    assert embeddings[1].source_id == "c2"
+    assert embeddings[1].vector == [0.3, 0.4]
+
+
+def test_gemini_adapter_failure():
+    """Test Gemini adapter translates API errors."""
+    mock_client = Mock()
+    mock_client.models.embed_content.side_effect = APIError(
+        "API failed", 500, "INTERNAL"
+    )
+
+    provider = GeminiEmbeddingProvider(api_key="fake", client=mock_client)
+    req = EmbeddingRequest(inputs=[EmbeddingInput(source_id="c1", text="text")])
+
+    with pytest.raises(EmbeddingProviderError):
+        provider.embed(req)
