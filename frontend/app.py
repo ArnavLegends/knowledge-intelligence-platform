@@ -67,23 +67,82 @@ if "docs_loaded_for_ws" not in st.session_state:
 
 
 def _get_headers() -> dict[str, str]:
-    return {"X-KIP-Workspace-ID": st.session_state.workspace_id}
+    ws_id = st.session_state.get("workspace_id", "")
+    return {"X-KIP-Workspace-ID": ws_id}
 
 
-def _backend_healthy() -> bool:
+def _is_local_url(url: str) -> bool:
+    """Check if the given API base URL points to a local development server."""
+    lower = url.lower()
+    return "localhost" in lower or "127.0.0.1" in lower or "0.0.0.0" in lower
+
+
+@st.cache_data(ttl=15, show_spinner=False)
+def _check_backend_status(
+    api_base: str = API_BASE, timeout: int | None = None
+) -> tuple[bool, str]:
+    """Check health of the backend API with deployment-aware messaging.
+
+    Tolerates Render free-tier cold starts without blocking the UI indefinitely.
+    Returns:
+        tuple[bool, str]: (is_healthy, status_message)
+    """
+    health_url = f"{api_base}/health"
+    if timeout is None:
+        timeout = 3 if _is_local_url(api_base) else 10
+
     try:
-        r = requests.get(HEALTH_ENDPOINT, timeout=3)
-        return r.status_code == 200
+        r = requests.get(health_url, timeout=timeout)
+        if r.status_code == 200:
+            return True, "✅ Backend is running"
+        return (
+            False,
+            f"⚠️ Backend returned unexpected status HTTP {r.status_code} at `{api_base}`.",
+        )
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+        if not _is_local_url(api_base):
+            return (
+                False,
+                "⏳ Backend is waking up. The free Render instance may take "
+                "up to a minute after inactivity. Try again shortly.",
+            )
+        return (
+            False,
+            f"⚠️ Backend is not reachable at `{api_base}`. Start it with:\n"
+            "```\ncd backend && uvicorn app.main:app --reload\n```",
+        )
     except Exception:
-        return False
+        if not _is_local_url(api_base):
+            return (
+                False,
+                "⏳ Backend is waking up. The free Render instance may take "
+                "up to a minute after inactivity. Try again shortly.",
+            )
+        return (
+            False,
+            f"⚠️ Backend is not reachable at `{api_base}`. Start it with:\n"
+            "```\ncd backend && uvicorn app.main:app --reload\n```",
+        )
 
 
-def _fetch_workspace_documents() -> list[dict]:
+def _backend_healthy(api_base: str = API_BASE, timeout: int | None = None) -> bool:
+    """Check if the backend is currently healthy and reachable."""
+    healthy, _ = _check_backend_status(api_base, timeout=timeout)
+    return healthy
+
+
+def _fetch_workspace_documents(timeout: int | None = None) -> list[dict]:
+    """Fetch indexed documents for the current workspace.
+
+    Tolerates Render cold-starts with production timeout consistent with upload/query.
+    """
+    if timeout is None:
+        timeout = 30 if _is_local_url(API_BASE) else 60
     try:
         response = requests.get(
             DOCUMENTS_ENDPOINT,
             headers=_get_headers(),
-            timeout=10,
+            timeout=timeout,
         )
         if response.status_code == 200:
             return response.json()
@@ -128,7 +187,11 @@ def _api_error_message(exc: requests.HTTPError) -> str:
 
 
 # Synchronize documents from backend if workspace switched or on initial load
-if st.session_state.docs_loaded_for_ws != st.session_state.workspace_id:
+if (
+    hasattr(st, "runtime")
+    and st.runtime.exists()
+    and st.session_state.docs_loaded_for_ws != st.session_state.workspace_id
+):
     st.session_state.uploaded_docs = _fetch_workspace_documents()
     st.session_state.docs_loaded_for_ws = st.session_state.workspace_id
 
@@ -201,17 +264,17 @@ st.caption(
 )
 
 # Backend status banner
-if _backend_healthy():
-    st.success("✅ Backend is running", icon=None)
-else:
-    st.error(
-        "⚠️ Backend is not reachable at "
-        f"`{API_BASE}`. Start it with:\n"
-        "```\n"
-        "cd backend && uvicorn app.main:app --reload\n"
-        "```",
-        icon=None,
-    )
+if hasattr(st, "runtime") and st.runtime.exists():
+    backend_ok, status_msg = _check_backend_status(API_BASE)
+    if backend_ok:
+        st.success(status_msg, icon=None)
+    elif "waking up" in status_msg:
+        st.warning(status_msg, icon=None)
+        if st.button("🔄 Check Status Now", key="retry_health_check"):
+            st.cache_data.clear()
+            st.rerun()
+    else:
+        st.error(status_msg, icon=None)
 
 st.divider()
 
