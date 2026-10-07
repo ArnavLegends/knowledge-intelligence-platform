@@ -63,13 +63,8 @@ async def upload_document(
     # 1. Parse and normalize (generates deterministic document ID based on content)
     document = ingestion_service.ingest(file.filename, content, file.content_type)
 
-    # 2. Check if already indexed
-    from app.services.vector_store.service import VectorStoreService
-
-    vector_store = VectorStoreService()
-
-    if vector_store.document_exists(document.id):
-        # Already indexed, skip chunking and embedding
+    # 2. Check if already indexed (via the same vector store the indexing service uses)
+    if indexing_service.document_exists(document.id):
         return DocumentResponse.from_internal(document, chunks_indexed=0)
 
     # 3. Chunk, embed, and store in vector store

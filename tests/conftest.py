@@ -118,3 +118,33 @@ def e2e_pipeline():
     client = TestClient(app)
     yield client, vs_service
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def deterministic_indexing_service():
+    """Isolated deterministic indexing service for direct unit testing."""
+    collection_name = f"idx_test_{uuid.uuid4().hex[:12]}"
+
+    emb_service = EmbeddingService(
+        manager=EmbeddingManager(provider=DeterministicEmbeddingProvider())
+    )
+    vs_provider = ChromaVectorStoreProvider(
+        collection_name=collection_name, persist_directory=None
+    )
+    vs_service = VectorStoreService(manager=VectorStoreManager(provider=vs_provider))
+
+    indexing_service = DocumentIndexingService(
+        chunking_service=ChunkingService(
+            chunker=FixedSizeChunker(chunk_size=200, chunk_overlap=20)
+        ),
+        embedding_service=emb_service,
+        vector_store_service=vs_service,
+    )
+
+    # Temporarily override dependency to avoid leaks if some inner part uses it,
+    # though usually passed directly in idempotency tests.
+    app.dependency_overrides[get_indexing_service] = lambda: indexing_service
+
+    yield indexing_service
+
+    app.dependency_overrides.pop(get_indexing_service, None)

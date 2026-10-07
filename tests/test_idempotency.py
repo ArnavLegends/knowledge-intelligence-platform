@@ -1,4 +1,10 @@
-"""Idempotency tests for document ingestion and indexing."""
+"""Idempotency tests for document ingestion and indexing.
+
+These tests must be fully offline and require no external API credentials.
+The deterministic_indexing_service fixture (defined in conftest.py) wires
+an ephemeral Chroma collection with a DeterministicEmbeddingProvider so
+that no real LLM or embedding provider is ever instantiated.
+"""
 
 import hashlib
 
@@ -6,7 +12,6 @@ import pytest
 
 from app.api.v1.documents import upload_document
 from app.services.documents.service import DocumentIngestionService
-from app.services.indexing.service import get_indexing_service
 
 
 class MockUploadFile:
@@ -20,10 +25,12 @@ class MockUploadFile:
 
 
 @pytest.mark.anyio
-async def test_duplicate_upload_prevents_duplicate_indexing():
-    """Test duplicate upload does not index twice (chunks_indexed=0)."""
+async def test_duplicate_upload_prevents_duplicate_indexing(
+    deterministic_indexing_service,
+):
+    """Identical content uploaded twice: second upload must be a no-op."""
     ingestion = DocumentIngestionService()
-    indexing = get_indexing_service()
+    indexing = deterministic_indexing_service
 
     file1 = MockUploadFile("test.txt", b"Hello idempotency")
     file2 = MockUploadFile("test.txt", b"Hello idempotency")
@@ -37,9 +44,12 @@ async def test_duplicate_upload_prevents_duplicate_indexing():
 
 
 @pytest.mark.anyio
-async def test_same_filename_different_content_creates_new_document():
+async def test_same_filename_different_content_creates_new_document(
+    deterministic_indexing_service,
+):
+    """Same filename but different content must produce distinct documents."""
     ingestion = DocumentIngestionService()
-    indexing = get_indexing_service()
+    indexing = deterministic_indexing_service
 
     file1 = MockUploadFile("test.txt", b"Hello A")
     file2 = MockUploadFile("test.txt", b"Hello B")
@@ -53,9 +63,12 @@ async def test_same_filename_different_content_creates_new_document():
 
 
 @pytest.mark.anyio
-async def test_different_filename_same_content_is_idempotent():
+async def test_different_filename_same_content_is_idempotent(
+    deterministic_indexing_service,
+):
+    """Different filenames with identical content must collapse to one document."""
     ingestion = DocumentIngestionService()
-    indexing = get_indexing_service()
+    indexing = deterministic_indexing_service
 
     file1 = MockUploadFile("test1.txt", b"Hello exact content")
     file2 = MockUploadFile("test2.txt", b"Hello exact content")
@@ -69,6 +82,7 @@ async def test_different_filename_same_content_is_idempotent():
 
 
 def test_deterministic_identity_across_process_instances():
+    """SHA-256 document IDs must be stable regardless of instantiation context."""
     content = b"Process A"
     expected_id = hashlib.sha256(content).hexdigest()
 

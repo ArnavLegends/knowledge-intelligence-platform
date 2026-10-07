@@ -14,6 +14,7 @@ UPLOAD_URL = "/api/v1/documents"
 def _mock_indexing_service(chunks_indexed: int = 1) -> MagicMock:
     """Build a mock DocumentIndexingService for tests that don't test indexing."""
     mock = MagicMock()
+    mock.document_exists.return_value = False
     mock.index_document.return_value = IndexingResult(
         document_id="test-doc-id", chunks_indexed=chunks_indexed
     )

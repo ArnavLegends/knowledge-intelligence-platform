@@ -25,6 +25,10 @@ class DocumentIndexingService:
         self._embedding_service = embedding_service
         self._vector_store_service = vector_store_service
 
+    def document_exists(self, document_id: str) -> bool:
+        """Return True if any vectors for this document_id are already stored."""
+        return self._vector_store_service.document_exists(document_id)
+
     def index_document(self, document: Document) -> IndexingResult:
         """Process a Document through the indexing pipeline."""
         logger.info(
