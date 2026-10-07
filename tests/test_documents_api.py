@@ -24,7 +24,11 @@ def _mock_indexing_service(chunks_indexed: int = 1) -> MagicMock:
 def _client(mock_indexer=None) -> TestClient:
     if mock_indexer is not None:
         app.dependency_overrides[get_indexing_service] = lambda: mock_indexer
-    return TestClient(app, raise_server_exceptions=False)
+    return TestClient(
+        app,
+        headers={"X-KIP-Workspace-ID": "test-workspace-123"},
+        raise_server_exceptions=False,
+    )
 
 
 def test_document_upload_success() -> None:
@@ -109,5 +113,28 @@ def test_document_upload_requires_file() -> None:
     try:
         response = client.post(UPLOAD_URL)
         assert response.status_code == 422
+    finally:
+        app.dependency_overrides.clear()
+
+
+def test_document_upload_rejects_missing_or_invalid_workspace() -> None:
+    mock_indexer = _mock_indexing_service()
+    app.dependency_overrides[get_indexing_service] = lambda: mock_indexer
+    raw_client = TestClient(app, raise_server_exceptions=False)
+    try:
+        # 1. Missing header
+        res1 = raw_client.post(
+            UPLOAD_URL,
+            files={"file": ("notes.txt", b"hello", "text/plain")},
+        )
+        assert res1.status_code == 400
+
+        # 2. Invalid short token
+        res2 = raw_client.post(
+            UPLOAD_URL,
+            headers={"X-KIP-Workspace-ID": "short"},
+            files={"file": ("notes.txt", b"hello", "text/plain")},
+        )
+        assert res2.status_code == 400
     finally:
         app.dependency_overrides.clear()

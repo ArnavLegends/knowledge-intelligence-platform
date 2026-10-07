@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Knowledge Intelligence Platform"
-    app_version: str = "1.0.0"
+    app_version: str = "1.1.0"
     environment: str = "development"
     debug: bool = False
     log_level: str = "INFO"
@@ -28,9 +28,16 @@ class Settings(BaseSettings):
     chunk_overlap: int = 200
     embedding_provider: str = "openai"
     embedding_model: str = "text-embedding-3-small"
+    embedding_dimensions: int = 768
     vector_store_provider: str = "chroma"
     vector_store_collection: str = "knowledge_base"
     vector_store_persist_directory: str = "./.chroma_data"
+    qdrant_url: str | None = None
+    qdrant_api_key: str | None = None
+    qdrant_collection: str = "knowledge_base"
+    qdrant_timeout_seconds: float = 10.0
+    max_documents_per_workspace: int = 50
+    max_chunks_per_workspace: int = 1000
     retrieval_default_top_k: int = 5
     retrieval_default_threshold: float | None = None
     rag_prompt_version: str = "v1"

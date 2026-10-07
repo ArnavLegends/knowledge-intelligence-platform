@@ -6,6 +6,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, File, UploadFile
 from pydantic import BaseModel
 
+from app.core.workspace import get_workspace_id
 from app.services.documents.models import Document
 from app.services.documents.service import (
     DocumentIngestionService,
@@ -44,6 +45,18 @@ class DocumentResponse(BaseModel):
         )
 
 
+class WorkspaceDocumentItem(BaseModel):
+    """Metadata for a document indexed within a workspace."""
+
+    document_id: str
+    filename: str
+    chunks_indexed: int
+    media_type: str = "application/octet-stream"
+    size_bytes: int = 0
+    parser: str = ""
+    status: str = "indexed"
+
+
 @router.post("/documents", response_model=DocumentResponse)
 async def upload_document(
     file: Annotated[UploadFile, File()],
@@ -51,25 +64,45 @@ async def upload_document(
         DocumentIngestionService, Depends(get_document_ingestion_service)
     ],
     indexing_service: Annotated[DocumentIndexingService, Depends(get_indexing_service)],
+    workspace_id: Annotated[str, Depends(get_workspace_id)] = "default",
 ) -> DocumentResponse:
-    """Ingest an uploaded file, index it into the knowledge base, and return metadata.
+    """Ingest an uploaded file, index it into workspace, and return metadata.
 
-    The document is both ingested (parsed/normalized) and indexed (chunked,
-    embedded, stored in the vector store) within the same request. A successful
-    response means the content is immediately queryable via the RAG endpoint.
+    Requires X-KIP-Workspace-ID header. Operations are scoped to workspace.
     """
     content = await file.read()
 
     # 1. Parse and normalize (generates deterministic document ID based on content)
     document = ingestion_service.ingest(file.filename, content, file.content_type)
 
-    # 2. Check if already indexed (via the same vector store the indexing service uses)
-    if indexing_service.document_exists(document.id):
+    # 2. Check if already indexed in this specific workspace
+    if indexing_service.document_exists(document.id, workspace_id):
         return DocumentResponse.from_internal(document, chunks_indexed=0)
 
-    # 3. Chunk, embed, and store in vector store
-    indexing_result = indexing_service.index_document(document)
+    # 3. Chunk, embed, and store in vector store scoped to workspace
+    indexing_result = indexing_service.index_document(document, workspace_id)
 
     return DocumentResponse.from_internal(
         document, chunks_indexed=indexing_result.chunks_indexed
     )
+
+
+@router.get("/documents", response_model=list[WorkspaceDocumentItem])
+async def list_workspace_documents(
+    indexing_service: Annotated[DocumentIndexingService, Depends(get_indexing_service)],
+    workspace_id: Annotated[str, Depends(get_workspace_id)] = "default",
+) -> list[WorkspaceDocumentItem]:
+    """List documents and metadata belonging strictly to the requested workspace."""
+    docs = indexing_service.list_documents(workspace_id)
+    return [
+        WorkspaceDocumentItem(
+            document_id=d.get("document_id", d.get("id", "")),
+            filename=d.get("filename", "unknown"),
+            chunks_indexed=d.get("chunks_indexed", 0),
+            media_type=d.get("media_type", "application/octet-stream"),
+            size_bytes=d.get("size_bytes", 0),
+            parser=d.get("parser", ""),
+            status=d.get("status", "indexed"),
+        )
+        for d in docs
+    ]

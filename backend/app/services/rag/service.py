@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class RAGService:
-    """Coordinates retrieval and generation to answer queries."""
+    """Coordinates retrieval and generation to answer queries within a workspace."""
 
     def __init__(
         self,
@@ -29,17 +29,25 @@ class RAGService:
         self._settings = settings or default_settings
 
     def answer(self, request: RAGRequest) -> RAGResponse:
-        """Retrieve relevant context and generate an answer."""
+        """Retrieve relevant context and generate an answer scoped to workspace."""
+        if not request.workspace_id or not request.workspace_id.strip():
+            raise RAGError("workspace_id is required for RAG operations.")
+
         query_text = request.query.strip()
         if not query_text:
             raise RAGError("RAG query cannot be empty.")
 
-        logger.info("RAG query received: top_k=%s", request.top_k)
+        logger.info(
+            "RAG query received: workspace_id=%s top_k=%s",
+            request.workspace_id[:8] + "...",
+            request.top_k,
+        )
 
-        # 1. Retrieve context
+        # 1. Retrieve context scoped strictly to workspace_id
         try:
             retrieval_query = RetrievalQuery(
                 text=query_text,
+                workspace_id=request.workspace_id,
                 top_k=(
                     request.top_k
                     if request.top_k is not None
@@ -55,14 +63,25 @@ class RAGService:
         except Exception as e:
             raise RAGError(f"Retrieval step failed: {e}") from e
 
-        logger.debug("Retrieval complete: chunks=%d", len(retrieved_chunks))
+        # Defensive check: ensure no cross-tenant contamination in retrieved chunks
+        filtered_chunks = []
+        for chunk in retrieved_chunks:
+            chunk_ws = chunk.metadata.get("workspace_id")
+            if chunk_ws is not None and chunk_ws != request.workspace_id:
+                logger.warning(
+                    "Security violation: cross-workspace chunk filtered in RAG: %s",
+                    request.workspace_id[:8],
+                )
+                continue
+            filtered_chunks.append(chunk)
+
+        logger.debug("Retrieval complete: chunks=%d", len(filtered_chunks))
 
         # 2. Build context representation
-        context_items = ContextBuilder.build_context_items(retrieved_chunks)
+        context_items = ContextBuilder.build_context_items(filtered_chunks)
 
         if not context_items:
             logger.info("No relevant context found — returning empty-context response")
-            # Handle empty context gracefully
             return RAGResponse(
                 answer=self._settings.rag_empty_context_message,
                 sources=[],
@@ -90,7 +109,7 @@ class RAGService:
                     LLMMessage(role="user", content=user_content),
                 ],
                 model=self._settings.llm_model,
-                temperature=0.0,  # Deterministic configuration choice
+                temperature=0.0,
             )
             llm_response = self._llm_service.generate(llm_request)
         except Exception as e:
@@ -99,9 +118,6 @@ class RAGService:
         if not llm_response.content:
             raise RAGError("LLM returned an empty response.")
 
-        logger.info("RAG generation complete: sources=%d", len(context_items))
-
-        # 4. Return results with provenance
         return RAGResponse(
             answer=llm_response.content,
             sources=context_items,
@@ -109,5 +125,5 @@ class RAGService:
 
 
 def get_rag_service() -> "RAGService":
-    """FastAPI dependency that constructs the RAG service using application defaults."""
+    """FastAPI dependency: constructs the RAG service using defaults."""
     return RAGService()

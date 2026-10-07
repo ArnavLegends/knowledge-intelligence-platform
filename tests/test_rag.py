@@ -63,7 +63,11 @@ def test_rag_service_flow():
     # Mock retrieval
     mock_retrieval.search.return_value = [
         RetrievedChunk(
-            id="c1", document_id="d1", text="chunk text", score=0.1, metadata={}
+            id="c1",
+            document_id="d1",
+            text="chunk text",
+            score=0.1,
+            metadata={"workspace_id": "default"},
         )
     ]
 

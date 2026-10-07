@@ -94,3 +94,26 @@ def test_deterministic_identity_across_process_instances():
 
     assert doc1.id == expected_id
     assert doc2.id == expected_id
+
+
+@pytest.mark.anyio
+async def test_same_file_different_workspaces_are_independent(
+    deterministic_indexing_service,
+):
+    """Same content uploaded in different workspaces must index independently."""
+    ingestion = DocumentIngestionService()
+    indexing = deterministic_indexing_service
+
+    file_a = MockUploadFile("shared.txt", b"Identical knowledge payload")
+    file_b = MockUploadFile("shared.txt", b"Identical knowledge payload")
+
+    res_a = await upload_document(
+        file_a, ingestion, indexing, workspace_id="workspace_alpha"
+    )
+    assert res_a.chunks_indexed > 0
+
+    res_b = await upload_document(
+        file_b, ingestion, indexing, workspace_id="workspace_beta"
+    )
+    assert res_b.chunks_indexed > 0
+    assert res_a.id == res_b.id

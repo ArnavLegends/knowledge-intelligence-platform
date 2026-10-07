@@ -58,13 +58,13 @@ def test_retrieval_service_flow():
     mock_res1 = VectorSearchResult(
         id="c1",
         vector=[0.1, 0.2],
-        metadata={"document_id": "d1", "text": "text1"},
+        metadata={"document_id": "d1", "text": "text1", "workspace_id": "default"},
         distance=0.1,
     )
     mock_res2 = VectorSearchResult(
         id="c2",
         vector=[0.3, 0.4],
-        metadata={"document_id": "d1", "text": "text2"},
+        metadata={"document_id": "d1", "text": "text2", "workspace_id": "default"},
         distance=0.5,
     )
     mock_vs_service.search.return_value = [mock_res1, mock_res2]
@@ -91,7 +91,7 @@ def test_retrieval_service_flow():
     # Verify delegations
     mock_emb_service.embed_texts.assert_called_once()
     mock_vs_service.search.assert_called_once_with(
-        query_vector=[0.1, 0.2], top_k=2, threshold=None
+        query_vector=[0.1, 0.2], top_k=2, workspace_id="default", threshold=None
     )
 
 

@@ -6,9 +6,10 @@ from pydantic import BaseModel, Field
 
 
 class RAGRequest(BaseModel):
-    """A request to generate an answer using retrieved context."""
+    """A request to generate an answer using retrieved context within a workspace."""
 
     query: str
+    workspace_id: str = "default"
     top_k: int | None = None
     threshold: float | None = None
 

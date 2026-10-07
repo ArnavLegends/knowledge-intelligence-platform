@@ -322,8 +322,9 @@ def test_idempotent_indexing_does_not_duplicate(e2e_pipeline):
     result2 = indexing_svc.index_document(doc)
     count_end = vs_service.count()
 
-    assert result1.chunks_indexed == result2.chunks_indexed, (
-        "Same document must produce the same number of chunks on both runs"
+    assert result1.chunks_indexed > 0
+    assert result2.chunks_indexed == 0, (
+        "Re-indexing an existing doc in workspace must be a no-op (0 new chunks)"
     )
     assert count_end == count_mid, (
         f"Vector store size must NOT grow on re-indexing. "

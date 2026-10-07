@@ -9,6 +9,14 @@ from app.services.rag.models import ContextItem, RAGResponse
 from app.services.rag.service import get_rag_service
 
 
+def _client() -> TestClient:
+    return TestClient(
+        app,
+        headers={"X-KIP-Workspace-ID": "test-workspace-123"},
+        raise_server_exceptions=False,
+    )
+
+
 def test_rag_answer_endpoint_success():
     """Test successful RAG API."""
     mock_service = Mock()
@@ -21,7 +29,7 @@ def test_rag_answer_endpoint_success():
 
     app.dependency_overrides[get_rag_service] = lambda: mock_service
 
-    client = TestClient(app)
+    client = _client()
     try:
         response = client.post(
             "/api/v1/rag/answer", json={"query": "test query", "top_k": 3}
@@ -43,7 +51,7 @@ def test_rag_answer_endpoint_rejects_invalid():
     mock_service = Mock()
     app.dependency_overrides[get_rag_service] = lambda: mock_service
 
-    client = TestClient(app)
+    client = _client()
     try:
         response = client.post("/api/v1/rag/answer", json={"top_k": 3})  # Missing query
 
@@ -60,14 +68,24 @@ def test_rag_answer_endpoint_handles_rag_error():
     mock_service.answer.side_effect = RAGError("Something went wrong.")
     app.dependency_overrides[get_rag_service] = lambda: mock_service
 
-    client = TestClient(app)
+    client = _client()
     try:
-        response = client.post("/api/v1/rag/answer", json={"query": "test query"})
+        response = client.post(
+            "/api/v1/rag/answer", json={"query": "test query", "top_k": 3}
+        )
 
         assert response.status_code == 500
         data = response.json()
-        assert "error" in data
         assert data["error"]["code"] == "rag_error"
-        assert "Something went wrong" in data["error"]["message"]
+        assert "Something went wrong." in data["error"]["message"]
     finally:
         app.dependency_overrides.clear()
+
+
+def test_rag_answer_endpoint_rejects_missing_workspace():
+    """Test RAG endpoint rejects missing workspace header."""
+    raw_client = TestClient(app, raise_server_exceptions=False)
+    response = raw_client.post(
+        "/api/v1/rag/answer", json={"query": "test query", "top_k": 3}
+    )
+    assert response.status_code == 400

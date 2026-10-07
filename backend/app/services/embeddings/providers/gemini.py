@@ -1,6 +1,7 @@
 """Gemini embedding provider adapter."""
 
 from google import genai
+from google.genai import types
 
 from app.core.exceptions import EmbeddingProviderError
 from app.services.embeddings.base import EmbeddingProvider
@@ -8,12 +9,13 @@ from app.services.embeddings.models import Embedding, EmbeddingRequest
 
 
 class GeminiEmbeddingProvider(EmbeddingProvider):
-    """Adapter for Google Gemini's embedding API."""
+    """Adapter for Google Gemini's embedding API with configurable dimensionality."""
 
     def __init__(
         self,
         api_key: str,
-        model: str = "text-embedding-004",
+        model: str = "gemini-embedding-2",
+        output_dimensionality: int | None = None,
         client: object | None = None,
     ) -> None:
         if not api_key and client is None:
@@ -22,6 +24,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
             )
         self._client = client or genai.Client(api_key=api_key)
         self._default_model = model
+        self._output_dimensionality = output_dimensionality
 
     @property
     def name(self) -> str:
@@ -34,16 +37,24 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         if not texts:
             return []
 
+        embed_config = None
+        if self._output_dimensionality:
+            try:
+                embed_config = types.EmbedContentConfig(
+                    output_dimensionality=self._output_dimensionality
+                )
+            except Exception:
+                embed_config = {"output_dimensionality": self._output_dimensionality}
+
         try:
-            # Generate embeddings for the list of texts
-            response = self._client.models.embed_content(
-                model=model,
-                contents=texts,
-            )
+            kwargs = {"model": model, "contents": texts}
+            if embed_config is not None:
+                kwargs["config"] = embed_config
+
+            response = self._client.models.embed_content(**kwargs)
         except Exception as e:
             raise EmbeddingProviderError(f"Gemini embedding failed: {e}") from e
 
-        # Ensure we have the same number of embeddings as inputs
         if not response.embeddings or len(response.embeddings) != len(texts):
             num_embeds = len(response.embeddings) if response.embeddings else 0
             raise EmbeddingProviderError(
@@ -55,6 +66,17 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         for i, item in enumerate(response.embeddings):
             inp = request.inputs[i]
             vector = item.values
+
+            # Validate vector dimensionality if configured
+            if (
+                self._output_dimensionality
+                and len(vector) != self._output_dimensionality
+            ):
+                raise EmbeddingProviderError(
+                    f"Gemini embedding dimension mismatch: expected "
+                    f"{self._output_dimensionality}, got {len(vector)}."
+                )
+
             embeddings.append(
                 Embedding(
                     source_id=inp.source_id,

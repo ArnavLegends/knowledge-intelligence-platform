@@ -6,9 +6,10 @@ from pydantic import BaseModel, Field
 
 
 class RetrievalQuery(BaseModel):
-    """A search query for retrieving chunks."""
+    """A search query for retrieving chunks within a specific workspace."""
 
     text: str
+    workspace_id: str = "default"
     top_k: int = Field(default=5, gt=0)
     threshold: float | None = None
 

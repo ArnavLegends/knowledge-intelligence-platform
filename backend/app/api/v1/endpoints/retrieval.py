@@ -1,9 +1,12 @@
 """Retrieval API endpoints."""
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from app.core.config import Settings, get_settings
+from app.core.workspace import get_workspace_id
 from app.services.retrieval.models import RetrievalQuery, RetrievedChunk
 from app.services.retrieval.service import RetrievalService
 
@@ -32,11 +35,11 @@ def get_retrieval_service() -> RetrievalService:
 @router.post("/search", response_model=RetrievalResponse)
 async def search(
     request: RetrievalRequest,
+    workspace_id: Annotated[str, Depends(get_workspace_id)],
     service: RetrievalService = Depends(get_retrieval_service),  # noqa: B008
     settings: Settings = Depends(get_settings),  # noqa: B008
 ) -> RetrievalResponse:
-    """Perform a semantic similarity search."""
-
+    """Perform a semantic similarity search scoped strictly to the workspace."""
     top_k = (
         request.top_k if request.top_k is not None else settings.retrieval_default_top_k
     )
@@ -48,6 +51,7 @@ async def search(
 
     query = RetrievalQuery(
         text=request.query,
+        workspace_id=workspace_id,
         top_k=top_k,
         threshold=threshold,
     )

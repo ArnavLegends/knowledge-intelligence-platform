@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 # Enforce ephemeral (in-memory) ChromaDB for all tests to prevent
 # .chroma_data directory generation in the project root.
 os.environ["VECTOR_STORE_PERSIST_DIRECTORY"] = ""
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
 
 from app.main import app
 from app.services.chunking.chunkers.fixed_size import FixedSizeChunker
@@ -115,7 +116,11 @@ def e2e_pipeline():
     app.dependency_overrides[get_rag_service] = lambda: rag_service
     app.dependency_overrides[get_llm_service] = lambda: llm_service
 
-    client = TestClient(app)
+    client = TestClient(
+        app,
+        headers={"X-KIP-Workspace-ID": "test-default-workspace"},
+        raise_server_exceptions=False,
+    )
     yield client, vs_service
     app.dependency_overrides.clear()
 
@@ -141,10 +146,21 @@ def deterministic_indexing_service():
         vector_store_service=vs_service,
     )
 
-    # Temporarily override dependency to avoid leaks if some inner part uses it,
-    # though usually passed directly in idempotency tests.
     app.dependency_overrides[get_indexing_service] = lambda: indexing_service
 
     yield indexing_service
 
     app.dependency_overrides.pop(get_indexing_service, None)
+
+
+@pytest.fixture
+def in_memory_qdrant_provider():
+    """In-memory Qdrant provider for unit and integration testing."""
+    from app.services.vector_store.providers.qdrant import QdrantVectorStoreProvider
+
+    col_name = f"test_col_{uuid.uuid4().hex[:8]}"
+    return QdrantVectorStoreProvider(
+        collection_name=col_name,
+        url=":memory:",
+        embedding_dimensions=_EMBEDDING_DIMS,
+    )

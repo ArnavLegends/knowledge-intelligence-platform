@@ -2,7 +2,7 @@
 
 ## Status
 
-**Implemented (v1.0).** A minimal Streamlit frontend is available at `frontend/app.py`.
+**Implemented (v1.1.0).** A clean Streamlit frontend is available at `frontend/app.py` supporting multi-tenant workspaces and persistent cloud deployment.
 
 ## Running the Frontend
 
@@ -23,28 +23,30 @@ The UI will open at `http://localhost:8501`.
 
 ## Features
 
-- Upload documents (TXT, Markdown, PDF, DOCX) and see indexing status
-- Enter a natural-language question and receive an AI-generated answer
-- See retrieved source chunks with document IDs, chunk IDs, and relevance scores
-- Handles empty retrieval, API errors, and backend unavailability clearly
-- Backend health status displayed on load
+- **Multi-Tenant Workspaces:** Private workspace token in sidebar; switch or resume existing workspaces.
+- **Document Management:** Upload documents (TXT, Markdown, PDF, DOCX) and automatically view indexed documents for the active workspace.
+- **Grounded Q&A:** Natural-language questioning with RAG, displaying answers and source citations with provenance scores.
+- **Resilient Error Handling:** Graceful display of vector store and upstream LLM errors without crashing.
 
-## What It Does NOT Do
+## Security Model
 
-- Authentication
-- Persistent session history
-- Duplicate backend logic (all processing done server-side)
-- Agent workflows, memory, or knowledge graph features
+Workspace access uses private bearer tokens (`X-KIP-Workspace-ID`). All knowledge indexing and retrieval are strictly scoped to the active workspace.
 
 ## Configuration
 
-The frontend connects to `http://127.0.0.1:8000` by default.
-Edit the `API_BASE` constant at the top of `app.py` to point to a different backend URL.
+The backend URL is configured via the `KIP_API_BASE_URL` environment variable.
 
-## Dependencies
+| Variable | Default | Description |
+|---|---|---|
+| `KIP_API_BASE_URL` | `http://127.0.0.1:8000` | URL of the KIP FastAPI backend |
 
-`streamlit` must be installed:
+**Local development** — no configuration needed; default points to localhost.
+
+**Deployed environment** — set `KIP_API_BASE_URL` in Streamlit Community Cloud settings:
 
 ```bash
-pip install streamlit
+export KIP_API_BASE_URL=https://kip-api.onrender.com
+streamlit run frontend/app.py
 ```
+
+Do **not** hardcode credentials or backend URLs directly in `app.py`.

@@ -42,6 +42,7 @@ class EmbeddingManager:
             return GeminiEmbeddingProvider(
                 api_key=settings.llm_api_key,
                 model=settings.embedding_model,
+                output_dimensionality=settings.embedding_dimensions,
             )
         raise AppException(
             f"Unsupported embedding provider: {provider_name}",

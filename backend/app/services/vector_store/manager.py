@@ -34,8 +34,20 @@ class VectorStoreManager:
                 collection_name=collection_name,
                 persist_directory=settings.vector_store_persist_directory,
             )
+        elif provider_name == "qdrant":
+            from app.services.vector_store.providers.qdrant import (
+                QdrantVectorStoreProvider,
+            )
+
+            return QdrantVectorStoreProvider(
+                collection_name=settings.qdrant_collection,
+                url=settings.qdrant_url,
+                api_key=settings.qdrant_api_key,
+                timeout_seconds=settings.qdrant_timeout_seconds,
+                embedding_dimensions=settings.embedding_dimensions,
+            )
         raise AppException(
-            "Unsupported vector store provider.",
+            f"Unsupported vector store provider: {provider_name}",
             code="unsupported_vector_store_provider",
             status_code=500,
         )

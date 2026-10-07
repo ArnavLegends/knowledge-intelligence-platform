@@ -26,6 +26,9 @@ def test_indexing_service_flow():
 
     mock_emb = Embedding(source_id="c1", vector=[0.1], dimensions=1)
     mock_embedding.embed_chunks.return_value = [mock_emb]
+    mock_vs.document_exists.return_value = False
+    mock_vs.list_documents.return_value = []
+    mock_vs.count.return_value = 0
 
     service = DocumentIndexingService(
         chunking_service=mock_chunking,
@@ -50,7 +53,7 @@ def test_indexing_service_flow():
 
     mock_chunking.chunk_document.assert_called_once_with(doc)
     mock_embedding.embed_chunks.assert_called_once_with([mock_chunk])
-    mock_vs.store_embeddings.assert_called_once_with([mock_emb])
+    mock_vs.store_embeddings.assert_called_once_with([mock_emb], workspace_id="default")
 
 
 def test_indexing_service_empty_document():
@@ -58,6 +61,8 @@ def test_indexing_service_empty_document():
     mock_chunking = create_autospec(ChunkingService)
     mock_embedding = create_autospec(EmbeddingService)
     mock_vs = create_autospec(VectorStoreService)
+    mock_vs.document_exists.return_value = False
+    mock_vs.list_documents.return_value = []
 
     mock_chunking.chunk_document.return_value = []
 

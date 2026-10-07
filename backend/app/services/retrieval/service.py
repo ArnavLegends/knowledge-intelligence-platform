@@ -1,5 +1,7 @@
 """Application-facing retrieval service."""
 
+import logging
+
 from app.core.config import Settings
 from app.core.config import settings as default_settings
 from app.core.exceptions import RetrievalError
@@ -8,9 +10,11 @@ from app.services.embeddings.service import EmbeddingService
 from app.services.retrieval.models import RetrievalQuery, RetrievedChunk
 from app.services.vector_store.service import VectorStoreService
 
+logger = logging.getLogger(__name__)
+
 
 class RetrievalService:
-    """Provides high-level retrieval capabilities."""
+    """Provides high-level retrieval capabilities scoped to workspaces."""
 
     def __init__(
         self,
@@ -23,7 +27,9 @@ class RetrievalService:
         self._settings = settings or default_settings
 
     def search(self, query: RetrievalQuery) -> list[RetrievedChunk]:
-        """Perform a semantic search to retrieve relevant chunks."""
+        """Perform a semantic search strictly scoped to the query's workspace."""
+        if not query.workspace_id or not query.workspace_id.strip():
+            raise RetrievalError("workspace_id is required for retrieval operations.")
 
         if not query.text.strip():
             return []
@@ -43,23 +49,31 @@ class RetrievalService:
 
         query_vector = embeddings[0].vector
 
-        # 2. Search the vector store
+        # 2. Search the vector store with mandatory workspace filter
         try:
             results = self._vector_store_service.search(
                 query_vector=query_vector,
                 top_k=query.top_k,
+                workspace_id=query.workspace_id,
                 threshold=query.threshold,
             )
         except Exception as e:
             raise RetrievalError(f"Vector store search failed: {e}") from e
 
-        # 3. Convert to RetrievedChunk
+        # 3. Convert to RetrievedChunk with defensive isolation check
         retrieved_chunks = []
         for res in results:
+            # Defensive validation: reject any result not matching workspace_id
+            chunk_ws = res.metadata.get("workspace_id")
+            if chunk_ws is not None and chunk_ws != query.workspace_id:
+                logger.warning(
+                    "Security invariant violation: discarded cross-tenant chunk in %s",
+                    query.workspace_id[:8],
+                )
+                continue
+
             doc_id = res.metadata.get("document_id")
             text = res.metadata.get("text")
-
-            # Clean internal metadata keys if desired, but we can just pass it through
 
             retrieved_chunks.append(
                 RetrievedChunk(

@@ -1,0 +1,15 @@
+# Knowledge Intelligence Platform (KIP) - Production Dependencies
+# Suitable for Streamlit Community Cloud and Render deployments
+fastapi>=0.115.0
+uvicorn[standard]>=0.34.0
+pydantic-settings>=2.7.0
+python-multipart>=0.0.18
+chromadb>=0.4.0
+qdrant-client>=1.11.0
+pypdf>=5.0.0
+python-docx>=1.1.0
+google-genai>=0.3.0
+openai>=1.60.0
+streamlit>=1.38.0
+requests>=2.31.0
+httpx>=0.28.0
