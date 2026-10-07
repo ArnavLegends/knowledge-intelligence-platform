@@ -38,7 +38,6 @@ MAX_UPLOAD_MB = 2
 
 st.set_page_config(
     page_title="KIP — Knowledge Intelligence Platform",
-    page_icon="🧠",
     layout="wide",
 )
 
@@ -59,6 +58,10 @@ if "last_query" not in st.session_state:
     st.session_state.last_query = ""
 if "docs_loaded_for_ws" not in st.session_state:
     st.session_state.docs_loaded_for_ws = None
+if "uploader_key_version" not in st.session_state:
+    st.session_state.uploader_key_version = 0
+if "last_index_result" not in st.session_state:
+    st.session_state.last_index_result = None
 
 
 # ---------------------------------------------------------------------------
@@ -69,6 +72,18 @@ if "docs_loaded_for_ws" not in st.session_state:
 def _get_headers() -> dict[str, str]:
     ws_id = st.session_state.get("workspace_id", "")
     return {"X-KIP-Workspace-ID": ws_id}
+
+
+def _resolve_document_name(doc_id: str, uploaded_docs: list[dict]) -> str:
+    """Resolve a document ID to its original filename from workspace documents."""
+    for doc in uploaded_docs:
+        if doc.get("document_id") == doc_id or doc.get("id") == doc_id:
+            filename = doc.get("filename")
+            if filename:
+                return str(filename)
+    if doc_id and len(doc_id) > 16:
+        return f"Document {doc_id[:8]}…"
+    return doc_id or "Document"
 
 
 def _is_local_url(url: str) -> bool:
@@ -201,34 +216,35 @@ if (
 # ---------------------------------------------------------------------------
 
 with st.sidebar:
-    st.header("🏢 Workspace")
-    st.caption("Each workspace is completely isolated from other users.")
+    st.header("Workspace")
+    st.caption("Each workspace is isolated from other workspaces.")
 
-    st.text_input(
-        "Current Workspace Token",
-        value=st.session_state.workspace_id,
-        help="Copy this token to resume this workspace from any device.",
-        key="current_ws_display",
-        disabled=True,
+    st.markdown("**Workspace access token**")
+    st.code(st.session_state.workspace_id, language=None)
+    st.caption(
+        "Keep this token to resume this workspace from another browser or device."
     )
 
-    if st.button("🆕 Create New Workspace", use_container_width=True):
+    if st.button("Create New Workspace", use_container_width=True):
         st.session_state.workspace_id = secrets.token_urlsafe(32)
         st.session_state.uploaded_docs = []
         st.session_state.last_answer = None
         st.session_state.last_sources = []
         st.session_state.last_query = ""
         st.session_state.docs_loaded_for_ws = st.session_state.workspace_id
+        st.session_state.last_index_result = None
         st.rerun()
 
     st.divider()
-    st.subheader("Switch / Resume")
+    st.subheader("Resume existing workspace")
+    st.caption("Paste a workspace access token to reconnect to an existing workspace.")
     resume_token = st.text_input(
-        "Enter existing token",
-        placeholder="Paste workspace token...",
+        "Workspace access token",
+        placeholder="Paste workspace access token…",
         key="resume_input",
+        label_visibility="collapsed",
     )
-    if st.button("🔗 Connect to Workspace", use_container_width=True):
+    if st.button("Connect", use_container_width=True):
         token_clean = resume_token.strip()
         if token_clean and len(token_clean) >= 8:
             st.session_state.workspace_id = token_clean
@@ -237,19 +253,19 @@ with st.sidebar:
             st.session_state.last_answer = None
             st.session_state.last_sources = []
             st.session_state.last_query = ""
+            st.session_state.last_index_result = None
             st.rerun()
         else:
             st.error("Please enter a valid workspace token (minimum 8 characters).")
 
-    if st.button("🔄 Refresh Documents", use_container_width=True):
+    if st.button("Reload Documents", use_container_width=True):
         st.session_state.uploaded_docs = _fetch_workspace_documents()
         st.rerun()
 
     st.divider()
-    st.info(
-        "ℹ️ **Security Model:** Workspace access currently uses a private "
-        "workspace token. Anyone who possesses the token can access that workspace. "
-        "Full account authentication is planned for a later milestone."
+    st.caption(
+        "ℹ️ **Security Note:** Anyone possessing this workspace access token "
+        "can access and query documents in this workspace."
     )
 
 
@@ -257,20 +273,23 @@ with st.sidebar:
 # UI — Header
 # ---------------------------------------------------------------------------
 
-st.title("🧠 Knowledge Intelligence Platform")
-st.caption(
-    "Upload documents, build a workspace knowledge base, and ask questions using RAG. "
-    f"Backend: `{API_BASE}` · [API Docs]({API_DOCS})"
-)
+st.title("KIP — Knowledge Intelligence Platform")
+st.caption("Workspace knowledge, retrieval, and grounded generation")
 
-# Backend status banner
+# Compact operational status
 if hasattr(st, "runtime") and st.runtime.exists():
     backend_ok, status_msg = _check_backend_status(API_BASE)
     if backend_ok:
-        st.success(status_msg, icon=None)
+        st.caption(
+            f"● **Operational** · API connected (`{API_BASE}`) · [Docs]({API_DOCS})"
+        )
     elif "waking up" in status_msg:
-        st.warning(status_msg, icon=None)
-        if st.button("🔄 Check Status Now", key="retry_health_check"):
+        st.warning(
+            "⏳ **Backend waking up** — The free Render instance may take "
+            "up to a minute after inactivity. Please wait or check status.",
+            icon=None,
+        )
+        if st.button("Check Status Now", key="retry_health_check"):
             st.cache_data.clear()
             st.rerun()
     else:
@@ -289,13 +308,14 @@ col_left, col_right = st.columns([1, 1], gap="large")
 # ---------------------------------------------------------------------------
 
 with col_left:
-    st.subheader("📄 Upload Documents")
+    st.subheader("Upload Documents")
 
+    uploader_key = f"file_uploader_{st.session_state.uploader_key_version}"
     uploaded_file = st.file_uploader(
-        "Upload a document to index into this workspace",
+        "Select a document to index into this workspace",
         type=SUPPORTED_TYPES,
         help=f"Supported: {', '.join(f'.{t}' for t in SUPPORTED_TYPES)}. Max {MAX_UPLOAD_MB} MB.",
-        key="file_uploader",
+        key=uploader_key,
     )
 
     top_k = st.slider(
@@ -308,51 +328,73 @@ with col_left:
     )
 
     if uploaded_file is not None:
-        file_bytes = uploaded_file.read()
+        file_bytes = uploaded_file.getvalue()
         file_size_mb = len(file_bytes) / (1024 * 1024)
+        ext = (
+            uploaded_file.name.rsplit(".", 1)[-1].upper()
+            if "." in uploaded_file.name
+            else "FILE"
+        )
+
+        st.markdown(
+            f"**Selected:** `{uploaded_file.name}`  \n"
+            f"*{file_size_mb:.2f} MB · {ext}*"
+        )
 
         if file_size_mb > MAX_UPLOAD_MB:
             st.error(
-                f"File is {file_size_mb:.1f} MB. Maximum allowed is {MAX_UPLOAD_MB} MB."
+                f"File size ({file_size_mb:.1f} MB) exceeds maximum allowed {MAX_UPLOAD_MB} MB."
             )
         else:
-            with st.spinner(f"Uploading and indexing '{uploaded_file.name}'…"):
-                try:
-                    result = _upload_document(
-                        file_bytes,
-                        uploaded_file.name,
-                        uploaded_file.type or "application/octet-stream",
-                    )
-                    chunks_indexed = result.get("chunks_indexed", 0)
-
-                    # Refresh workspace documents from backend
-                    st.session_state.uploaded_docs = _fetch_workspace_documents()
-
-                    if chunks_indexed > 0:
-                        st.success(
-                            f"✅ **{result['filename']}** newly indexed successfully — "
-                            f"{chunks_indexed} chunks stored."
+            if st.button("Index Document", type="primary", use_container_width=True):
+                with st.spinner(f"Indexing '{uploaded_file.name}'…"):
+                    try:
+                        result = _upload_document(
+                            file_bytes,
+                            uploaded_file.name,
+                            uploaded_file.type or "application/octet-stream",
                         )
-                    else:
-                        st.info(
-                            f"ℹ️ **{result['filename']}** was already indexed in this workspace."
-                        )
-                except requests.HTTPError as e:
-                    st.error(f"Upload failed: {_api_error_message(e)}")
-                except requests.ConnectionError:
-                    st.error("Cannot reach the backend. Is it running?")
-                except Exception as e:
-                    st.error(f"Unexpected error during upload: {e}")
+                        chunks_indexed = result.get("chunks_indexed", 0)
+                        st.session_state.last_index_result = {
+                            "success": True,
+                            "filename": result.get("filename", uploaded_file.name),
+                            "chunks": chunks_indexed,
+                        }
+                        # Synchronize documents list
+                        st.session_state.uploaded_docs = _fetch_workspace_documents()
+                        # Reset file uploader widget
+                        st.session_state.uploader_key_version += 1
+                        st.rerun()
+                    except requests.HTTPError as e:
+                        st.error(f"Upload failed: {_api_error_message(e)}")
+                    except requests.ConnectionError:
+                        st.error("Cannot reach the backend. Is it running?")
+                    except Exception as e:
+                        st.error(f"Unexpected error during upload: {e}")
+
+    # Display indexing feedback if present
+    if st.session_state.last_index_result:
+        idx_res = st.session_state.last_index_result
+        if idx_res.get("chunks", 0) > 0:
+            st.success(
+                f"✅ **{idx_res['filename']}** newly indexed successfully — "
+                f"{idx_res['chunks']} chunks stored."
+            )
+        else:
+            st.info(
+                f"ℹ️ **{idx_res['filename']}** was already indexed in this workspace."
+            )
 
     # Indexed documents list
     st.divider()
     if st.session_state.uploaded_docs:
-        st.markdown("#### 📚 Workspace Documents")
+        st.markdown("#### Workspace Documents")
         for doc in st.session_state.uploaded_docs:
             doc_id = doc.get("document_id", doc.get("id", "unknown"))
             chunks = doc.get("chunks_indexed", 0)
+            filename = doc.get("filename", "document")
             with st.expander(
-                f"📄 **{doc.get('filename', 'document')}** — {chunks} chunks",
+                f"📄 {filename} — {chunks} chunks",
                 expanded=False,
             ):
                 st.json(
@@ -365,14 +407,17 @@ with col_left:
                     }
                 )
     else:
-        st.info("No documents indexed in this workspace yet. Upload a file above to get started.")
+        st.info(
+            "No documents indexed in this workspace yet. "
+            "Select a file above and click Index Document."
+        )
 
 # ---------------------------------------------------------------------------
 # Right column: Query & Answer
 # ---------------------------------------------------------------------------
 
 with col_right:
-    st.subheader("💬 Ask a Question")
+    st.subheader("Ask a Question")
 
     query = st.text_area(
         "Enter your question",
@@ -382,7 +427,7 @@ with col_right:
         key="query_input",
     )
 
-    ask_btn = st.button("🔍 Ask", type="primary", use_container_width=True)
+    ask_btn = st.button("Ask", type="primary", use_container_width=True)
 
     if ask_btn:
         if not query.strip():
@@ -406,34 +451,39 @@ with col_right:
 
     # Display answer
     if st.session_state.last_answer is not None:
-        st.markdown("#### 💡 Answer")
-        st.success(st.session_state.last_answer, icon="🤖")
+        st.markdown("#### Answer")
+        st.write(st.session_state.last_answer)
 
         sources = st.session_state.last_sources
         if sources:
-            st.markdown(f"#### 🔎 Sources ({len(sources)} retrieved)")
+            st.divider()
+            st.markdown(f"##### Sources ({len(sources)})")
             for i, src in enumerate(sources, start=1):
+                doc_id = src.get("document_id", "")
+                filename = _resolve_document_name(
+                    doc_id, st.session_state.uploaded_docs
+                )
                 score = src.get("score")
                 score_str = f"{score:.4f}" if isinstance(score, float) else str(score)
-                doc_id = src.get("document_id", "Unknown")
+                rank = src.get("rank", i)
+                chunk_id = src.get("chunk_id", "—")
+                excerpt = src.get("text", "")
 
-                with st.expander(
-                    f"[{i}] Document: {doc_id} (Score: {score_str})",
-                    expanded=(i == 1),
-                ):
-                    st.caption(
-                        f"**Chunk ID:** `{src.get('chunk_id', '—')}` | **Rank:** {src.get('rank', i)}"
-                    )
-                    st.markdown(f"```text\n{src.get('text', '')}\n```")
+                st.markdown(f"**{i}. {filename}**")
+                st.caption(f"Chunk {rank} · Relevance: {score_str}")
+
+                with st.expander("▸ View retrieved excerpt", expanded=False):
+                    st.text(excerpt)
+                    st.caption(f"Chunk ID: `{chunk_id}` · Document ID: `{doc_id}`")
         else:
+            st.divider()
             st.info(
-                "ℹ️ No relevant context was found in the workspace knowledge base for this question. "
+                "No relevant context was found in the workspace knowledge base for this question. "
                 "Try uploading a document that contains the answer first."
             )
 
 st.divider()
 st.caption(
     "KIP v1.1.0 · Knowledge Intelligence Platform · "
-    "Powered by FastAPI + ChromaDB / Qdrant + configurable AI providers. · "
-    "For evaluation and research use."
+    "FastAPI + ChromaDB / Qdrant multi-tenant cloud architecture."
 )
