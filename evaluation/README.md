@@ -2,21 +2,31 @@
 
 ## Purpose
 
-This directory will contain the AI evaluation framework for measuring retrieval quality, response quality, and system performance.
+This directory contains the lightweight, self-contained AI evaluation harness for measuring retrieval hit rates, answer generation accuracy, and provenance tracking across the Knowledge Intelligence Platform.
 
-## Current Status
+## Current Status (v1.1.0)
 
-**Not yet implemented.** This directory is a scaffold placeholder.
+**Implemented.** The core mechanical evaluation framework was implemented during the v1.0 milestone and verified across unit and integration tests.
 
-No evaluation framework or evaluation harness has been built yet. The evaluation methodology and planned metrics are defined in [docs/Benchmarking.md](../docs/Benchmarking.md).
+### Implemented Components
 
-Evaluation infrastructure is planned for development alongside the v1.0 milestone. No external evaluation tools (RAGAS, DeepEval, etc.) are currently integrated.
+- **`evaluation/models.py`:** Pydantic domain models defining `EvaluationSample`, `EvaluationDataset`, `EvaluationResult`, `EvaluationMetricScore`, and `EvaluationReport`.
+- **`evaluation/runner.py`:** Execution engine that runs benchmark datasets (e.g. `benchmarks/kip_v1_baseline.json`) against the RAG pipeline or mock providers to compute:
+  - **Hit Rate:** Ratio of queries where relevant context chunk was successfully retrieved.
+  - **Exact Match:** Mechanical equality against reference answers.
+  - **Provenance Accuracy:** Verification that retrieved chunk IDs contain ground-truth document IDs.
 
-## Planned Role (v1.0+)
+No external evaluation packages (such as heavy LLM-as-a-judge frameworks) are required for baseline execution, keeping the evaluation pipeline deterministic and fast.
 
-Planned contents include:
-- Evaluation harness and runner
-- Custom evaluation metrics
-- Integration with RAGAS and/or DeepEval
-- Per-version evaluation report generation
-- Latency and throughput profiling utilities
+## Planned Role (v1.2+)
+
+Planned enhancements for future versions:
+- Integration with external evaluation frameworks (RAGAS, DeepEval) for automated LLM-as-a-judge evaluation of answer relevance and faithfulness.
+- Automated per-version evaluation reporting against standardized benchmark corpora.
+- Latency and throughput profiling utilities.
+
+## Related Documentation
+
+- [Benchmarking & Evaluation](../docs/Benchmarking.md)
+- [Research Roadmap](../docs/Research-Roadmap.md)
+- [Product Roadmap](../docs/Product-Roadmap.md)

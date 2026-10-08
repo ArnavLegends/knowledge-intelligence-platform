@@ -1,8 +1,8 @@
 # Research Roadmap
 
-**Document Version:** 1.1  
-**Project Version:** v0.3 (Core Foundation)  
-**Status:** Active
+**Document Version:** 2.0  
+**Project Version:** v1.1.0 (Feature Frozen)  
+**Status:** Complete / Frozen  
 
 ---
 
@@ -28,7 +28,8 @@ The platform emphasizes applied AI systems research, where experimental findings
 
 Research activities should prioritize reproducibility, objectivity, and practical impact over novelty alone.
 
-> **Current Research Infrastructure Status:** The backend engineering foundation (document ingestion, chunking, embedding, vector storage, retrieval, RAG) is implemented and tested. Dedicated research infrastructure (evaluation harness, benchmark datasets, experiment tracking) is planned for development alongside v1.0. No evaluated experimental results exist yet — all research records are currently marked as **Baseline / Not Yet Evaluated**.
+> **Research Infrastructure Status (v1.1.0):**  
+> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0, utilizing a mechanical benchmark suite (`benchmarks/kip_v1_baseline.json`) that measures Hit Rate, Exact Match, and Provenance Accuracy deterministically. In v1.1.0, Qdrant Cloud vector search and Gemini dense embeddings were added as production options. Systematic comparative experimentation across chunking strategies, hybrid BM25 + dense search, and cross-encoder reranking is planned for v1.2 under the 14-step research lifecycle. All comparative research records remain marked as **Baseline / Not Yet Evaluated against empirical benchmark matrix** to maintain complete scientific integrity.
 
 ---
 
@@ -68,24 +69,24 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 
 ### Retrieval Systems
 
-- Dense Retrieval
-- Sparse Retrieval
-- Hybrid Retrieval
-- Query Expansion
-- Metadata Filtering
-- Reranking
-- Context Selection
+- Dense Retrieval (Implemented: Gemini `text-embedding-004`, OpenAI `text-embedding-3-small`)
+- Sparse Retrieval (Planned: BM25 / SPLADE)
+- Hybrid Retrieval (Planned: Convex / Reciprocal Rank Fusion)
+- Query Expansion (Planned: HyDE / multi-query)
+- Metadata Filtering (Implemented: `workspace_id` payload filter)
+- Reranking (Planned: Cross-Encoder / Cohere Rerank)
+- Context Selection (Implemented: Top-K truncation)
 
 ### Language Models
 
-- Prompt Engineering
+- Prompt Engineering (Implemented: v1 deterministic prompt template)
 - Context Window Optimization
-- Model Comparison
-- Response Grounding
+- Model Comparison (Implemented: Gemini 2.5 Flash vs OpenAI GPT-4o-mini)
+- Response Grounding (Implemented: Provenance attribution card)
 - Hallucination Reduction
 - Response Quality Analysis
 
-### AI Memory
+### AI Memory (Deferred)
 
 - Short-Term Memory
 - Long-Term Memory
@@ -93,7 +94,7 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 - Context Prioritization
 - Memory Retrieval Strategies
 
-### Agentic AI
+### Agentic AI (Deferred)
 
 - Planning Algorithms
 - Multi-Step Reasoning
@@ -103,13 +104,13 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 
 ### Knowledge Representation
 
-- Vector Databases
-- Knowledge Graphs
-- Entity Linking
-- Relationship Extraction
-- Hybrid Knowledge Systems
+- Vector Databases (Implemented: ChromaDB & Qdrant Cloud)
+- Knowledge Graphs (Deferred)
+- Entity Linking (Deferred)
+- Relationship Extraction (Deferred)
+- Hybrid Knowledge Systems (Deferred)
 
-### Multimodal Intelligence
+### Multimodal Intelligence (Deferred)
 
 - Image Understanding
 - OCR
@@ -119,11 +120,11 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 
 ### AI Evaluation
 
-- Retrieval Benchmarks
-- Response Evaluation
+- Retrieval Benchmarks (Implemented: `benchmarks/kip_v1_baseline.json`)
+- Response Evaluation (Implemented: `evaluation/runner.py`)
 - Latency Analysis
-- Explainability
-- Reliability
+- Explainability (Implemented: Provenance source citations)
+- Reliability & Error Classification (Implemented: Top-K empty vs zero-doc distinction)
 - Robustness
 
 ---
@@ -149,7 +150,7 @@ Every significant engineering improvement should be evaluated using a standardiz
 - Recall
 - Mean Reciprocal Rank (MRR)
 - Normalized Discounted Cumulative Gain (NDCG)
-- Hit Rate
+- Hit Rate (Implemented in `evaluation/runner.py`)
 
 #### Response Quality
 
@@ -158,61 +159,42 @@ Every significant engineering improvement should be evaluated using a standardiz
 - Context Relevance
 - Completeness
 - Hallucination Rate
+- Exact Match (Implemented in `evaluation/runner.py`)
 
 #### System Performance
 
-- Latency
-- Throughput
+- Latency (p50, p95, p99)
+- Throughput (requests/sec)
 - Memory Usage
-- CPU Utilization
 - Storage Requirements
 
 #### User Experience
 
 - Response Consistency
-- Explainability
-- Ease of Use
+- Explainability (Provenance cards)
+- User Feedback Sentiment (Implemented via feedback webhook)
 - Reliability
 
 ---
 
-## Experiment Lifecycle
+## 14-Step Systematic Research Lifecycle
 
-Every experiment conducted within the Knowledge Intelligence Platform should follow a consistent lifecycle to ensure reproducibility and maintain high research standards.
+To ensure scientific rigor and reproducible engineering, all future research experiments (starting in v1.2) must follow the formalized 14-step research lifecycle:
 
-### Step 1 — Define the Research Question
-
-Clearly identify the engineering problem or hypothesis to be investigated.
-
-### Step 2 — Design the Experiment
-
-Define datasets, evaluation metrics, baseline systems, variables, and expected outcomes.
-
-### Step 3 — Implement
-
-Develop the experimental feature or architectural improvement while documenting implementation decisions.
-
-### Step 4 — Execute
-
-Run experiments under controlled conditions while collecting all relevant measurements.
-
-### Step 5 — Analyze
-
-Interpret experimental results using quantitative and qualitative evaluation.
-
-### Step 6 — Document
-
-Record methodology, observations, limitations, and conclusions.
-
-### Step 7 — Integrate
-
-If the experiment demonstrates measurable improvements, integrate the findings into the production platform.
-
-### Step 8 — Benchmark
-
-Compare results against previous project versions and established baselines.
-
-This lifecycle ensures that engineering improvements are supported by measurable evidence and can be reproduced in future project iterations.
+1. **Literature Review:** Survey existing academic literature, benchmarks, and industrial state of the art.
+2. **Gap Analysis:** Identify specific limitations in current KIP architecture or retrieval baselines.
+3. **Research Question:** Formulate falsifiable, hypothesis-driven research questions.
+4. **Benchmark / Test Set:** Define standardized datasets with ground truth queries, relevance judgments, and expected answers.
+5. **Dense Retrieval Baseline:** Execute the baseline dense retrieval pipeline (`evaluation/runner.py`) to record initial metrics.
+6. **Chunking / Segmentation Experiment:** Test alternative document chunking algorithms (semantic, sentence-boundary, recursive).
+7. **Hybrid Retrieval:** Implement and test sparse + dense fusion (e.g., BM25 + Qdrant vectors with RRF).
+8. **Reranking:** Evaluate cross-encoder rerankers on top-N candidates to optimize NDCG and Precision.
+9. **Context Optimization:** Test context compression, deduplication, and dynamic prompt budget allocation.
+10. **Metrics Collection:** Gather automated Hit Rate, MRR, NDCG, faithfulness, and execution latency.
+11. **Results Analysis:** Statistically compare experimental results against dense baselines.
+12. **Decision Gate:** Formally decide whether performance gains justify computational cost and code complexity.
+13. **Integration:** Merge validated improvements into core production RAG pipeline.
+14. **Deprecation & Documentation:** Update architecture documents, deprecate inferior methods, and archive baseline run logs.
 
 ---
 
@@ -220,50 +202,69 @@ This lifecycle ensures that engineering improvements are supported by measurable
 
 ### CHUNK-BASELINE-001
 
-**Status:** Baseline / Not Yet Evaluated  
-**Strategy:** Fixed-size character chunking  
+**Status:** Baseline Established (v0.3.0 / v1.0.0)  
+**Strategy:** Fixed-size character chunking with sliding window overlap  
 **Initial Configuration:** `chunk_size = 1000`, `chunk_overlap = 200`  
 **Variables:** chunk size, overlap  
 
-**Purpose:** Establish a deterministic baseline for future chunking experiments.
-*(Metrics and results will be recorded here when evaluated).*
+**Purpose:** Establish a deterministic baseline for future chunking experiments.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### EMBED-BASELINE-001
 
-**Status:** Baseline / Not Yet Evaluated  
-**Strategy:** Initial configured embedding provider/model  
-**Configuration:** `provider = openai`, `model = text-embedding-3-small`  
+**Status:** Baseline Established (v0.3.0 / v1.0.0)  
+**Strategy:** OpenAI dense embedding  
+**Configuration:** `provider = openai`, `model = text-embedding-3-small`, `dimensions = 1536`  
 **Variables:** embedding model, dimensionality, batch/input size  
 
-**Purpose:** Establish a reproducible embedding baseline for later retrieval experiments.
-*(Metrics and results will be recorded here when evaluated).*
+**Purpose:** Establish a reproducible embedding baseline for retrieval experiments.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
+
+### EMBED-BASELINE-002
+
+**Status:** Baseline Established (v1.1.0)  
+**Strategy:** Google Gemini dense embedding with 1:1 Content/Part batching  
+**Configuration:** `provider = gemini`, `model = text-embedding-004` (aliased as `gemini-embedding-2`), `dimensions = 768`  
+**Variables:** batch size, truncation behavior, token usage  
+
+**Purpose:** Establish a high-throughput, zero-cost embedding baseline for production testing.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### VECTOR-BASELINE-001
 
-**Status:** Baseline / Not Yet Evaluated  
-**Strategy:** Initial vector storage backend  
+**Status:** Baseline Established (v0.3.0 / v1.0.0)  
+**Strategy:** Local embedded vector storage  
 **Configuration:** `provider = chroma`, `collection = knowledge_base`, `persistence = local directory`  
 
-**Purpose:** Establish a reproducible storage baseline before retrieval experiments.
-*(Metrics and results will be recorded here when evaluated).*
+**Purpose:** Establish a reproducible storage baseline for local unit testing and development.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
+
+### VECTOR-BASELINE-002
+
+**Status:** Baseline Established (v1.1.0)  
+**Strategy:** Managed cloud serverless vector storage with deterministic workspace filtering  
+**Configuration:** `provider = qdrant`, `collection = knowledge_base`, `filter = workspace_id`, `distance = COSINE`  
+
+**Purpose:** Establish a scalable, multi-tenant cloud storage baseline.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### RETRIEVAL-BASELINE-001
 
-**Status:** Baseline / Not Yet Evaluated  
-**Strategy:** Dense semantic retrieval  
+**Status:** Baseline Established (v0.3.0 / v1.0.0 / v1.1.0)  
+**Strategy:** Dense cosine semantic retrieval with Top-K cutoff  
 **Configuration:** `top_k = 5`, `threshold = None`  
 
-**Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.
-*(Metrics and results will be recorded here when evaluated).*
+**Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### RAG-BASELINE-001
 
-**Status:** Baseline / Not Yet Evaluated  
-**Pipeline:** Document Indexing + CHUNK-BASELINE-001 + EMBED-BASELINE-001 + VECTOR-BASELINE-001 + RETRIEVAL-BASELINE-001 + Deterministic Context Template  
-**Configuration:** `top_k = 5`, `llm_model = gpt-4o-mini`, `rag_prompt_version = v1`  
+**Status:** Baseline Established (v1.0.0 / v1.1.0)  
+**Pipeline:** Document Indexing + Fixed Chunking + Dense Embedding + Vector Retrieval + Deterministic Context Template  
+**Configuration:** `top_k = 5`, `llm_model = gemini-2.5-flash` / `gpt-4o-mini`, `rag_prompt_version = v1`  
 
-**Purpose:** Establish a reproducible end-to-end RAG baseline before optimization experiments. 
-*(Metrics and results will be recorded here when evaluated).*
+**Purpose:** Establish a reproducible end-to-end RAG baseline before optimization experiments.  
+*(Comparative benchmark sweeps scheduled for v1.2).*
 
 ---
 
@@ -273,22 +274,22 @@ The research roadmap evolves alongside the product roadmap. Each product milesto
 
 | Product Version | Primary Research Themes | Research Status |
 |-----------------|-------------------------|----------------|
-| v0.1 | Documentation standards, engineering workflows, reproducibility | ✅ Foundation established |
-| v0.2 | Backend architecture, modular software design | ✅ Foundation established |
-| v0.3 | Document chunking, embedding strategies, vector indexing | 📦 Baselines defined, not yet evaluated |
-| v1.0 | RAG pipeline, prompt engineering, context management | 📅 Planned |
-| v1.1 | User experience evaluation, developer productivity | 📅 Planned |
-| v1.2 | Hybrid retrieval, reranking, metadata filtering, query expansion | 📅 Planned |
-| v1.3 | Performance optimization, caching, scalability, observability | 📅 Planned |
-| v2.0 | Conversational memory, long-term memory architectures | 📅 Planned |
-| v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned |
-| v2.2 | Planning algorithms, autonomous agents, multi-step reasoning | 📅 Planned |
-| v2.3 | Knowledge synthesis, explainability, intelligent orchestration | 📅 Planned |
-| v2.4 | Knowledge graphs, entity linking, graph-based retrieval | 📅 Planned |
-| v3.0 | Multimodal retrieval, multimodal reasoning, unified knowledge representation | 📅 Planned |
-| v3.1 | Collaboration systems, access control, collaborative AI workflows | 📅 Planned |
-| v3.2 | Cloud deployment, distributed systems, operational AI | 📅 Planned |
-| v4.0 | Enterprise AI systems, scalability, governance, security | 📅 Planned |
+| v0.1 | Documentation standards, engineering workflows, reproducibility | ✅ Completed |
+| v0.2 | Backend architecture, modular software design | ✅ Completed |
+| v0.3 | Document chunking, embedding strategies, vector indexing | ✅ Completed |
+| v1.0 | RAG pipeline, prompt engineering, evaluation harness (`runner.py`) | ✅ Completed |
+| v1.1 | Multi-tenant vector filtering (Qdrant), Gemini batching, user feedback persistence | ✅ Completed |
+| v1.2 | Hybrid retrieval (BM25 + dense), cross-encoder reranking, 14-step research lifecycle | 🔬 Planned Candidate |
+| v1.3 | Performance optimization, caching, latency profiling, observability | 📅 Planned → Deferred |
+| v2.0 | Conversational memory, long-term memory architectures | 📅 Planned → Deferred |
+| v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned → Deferred |
+| v2.2 | Planning algorithms, autonomous agents, multi-step reasoning | 📅 Planned → Deferred |
+| v2.3 | Knowledge synthesis, explainability, intelligent orchestration | 📅 Planned → Deferred |
+| v2.4 | Knowledge graphs, entity linking, graph-based retrieval | 📅 Planned → Deferred |
+| v3.0 | Multimodal retrieval, multimodal reasoning, unified knowledge representation | 📅 Planned → Deferred |
+| v3.1 | Collaboration systems, access control, collaborative AI workflows | 📅 Planned → Deferred |
+| v3.2 | Cloud deployment, distributed systems, operational AI | 📅 Planned → Deferred |
+| v4.0 | Enterprise AI systems, scalability, governance, security | 📅 Planned → Deferred |
 
 Every major product release should include at least one research question, one benchmark, and documented experimental findings.
 
@@ -352,10 +353,10 @@ Publication is considered an optional outcome rather than the primary objective.
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 1.1 |
-| Project Version | v0.3 (Core Foundation) |
-| Status | Active |
-| Last Reviewed | 2026-09-17 |
+| Document Version | 2.0 |
+| Project Version | v1.1.0 (Feature Frozen) |
+| Status | Complete / Frozen |
+| Last Reviewed | 2026-10-08 |
 
 ### Review Policy
 

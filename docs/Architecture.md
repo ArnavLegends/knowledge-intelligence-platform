@@ -1,20 +1,23 @@
 # System Architecture
 
-**Document Version:** 1.1  
-**Project Version:** v0.3 (Core Foundation)  
-**Status:** Active
+**Document Version:** 2.0  
+**Project Version:** v1.1.0 (Feature Frozen)  
+**Status:** Active System Architecture Document
 
 ---
 
 # Purpose
 
-This document defines the high-level architecture of the Knowledge Intelligence Platform.
+This document defines the high-level architecture of the Knowledge Intelligence Platform (KIP).
 
 It describes the overall organization of the system, major software components, architectural principles, communication patterns, data flow, and technology boundaries.
 
 The objective is to provide a stable architectural blueprint that guides implementation while allowing individual components to evolve independently over time.
 
-This document intentionally focuses on system-level design rather than implementation details, ensuring that it remains relevant as technologies and frameworks change.
+This document explicitly distinguishes between:
+- **CURRENT REALITY**: Subsystems and flows implemented and verified in the codebase today.
+- **PLANNED (v1.2)**: Capabilities scheduled for upcoming research milestones (e.g., hybrid search, reranking).
+- **PLANNED → DEFERRED**: Architectural patterns (agents, memory, multimodal, graph databases, relational databases) intentionally postponed to preserve system focus and simplicity.
 
 ---
 
@@ -78,34 +81,43 @@ Ensure experiments and benchmarks can be reproduced consistently across environm
 
 The Knowledge Intelligence Platform follows a layered architecture in which each layer has a clearly defined responsibility.
 
-**Implemented layers** are shown without annotation. **Planned layers** are marked.
+**Implemented layers** are shown with their active components. **Planned / Deferred layers** are marked explicitly.
 
-```
-                    User
-                     │
-                     ▼
-             [PLANNED] Frontend Interface
-                     │
-                     ▼
-              FastAPI Backend
-                     │
-     ┌───────────────┼────────────────┐
-     ▼               ▼                ▼
- Documents        RAG / Retrieval   LLM Service
- Ingestion             │
-     ▼                ▼
-  Chunking         Retrieval
-     ▼             Service
-  Embeddings           │
-     ▼                ▼
-  Vector Store     Context
-   (ChromaDB)      Builder
+```text
+                    User / Browser
+                         │
+                         ▼
+             Frontend Interface (Streamlit)
+                         │
+                         │ HTTPS (X-KIP-Workspace-ID Header)
+                         ▼
+                  FastAPI Backend
+       ┌─────────────────┼──────────────────┐
+       ▼                 ▼                  ▼
+   Documents       RAG / Retrieval    LLM Service
+   Ingestion             │             (Gemini / OpenAI)
+       ▼                 ▼                  │
+    Chunking         Retrieval              │
+       ▼              Service               │
+   Embeddings            │                  │
+(Gemini / OpenAI)        ▼                  │
+       ▼              Context               │
+  Vector Store        Builder               │
+(Qdrant / Chroma)        │                  │
+       │                 └─────────┬────────┘
+       │                           ▼
+       └──────────────────> Grounded Response
+                                   │
+               Feedback Pipeline   ▼
+FastAPI ──(Authenticated GET)──> Apps Script ──> Google Sheet
 
-[PLANNED] Memory System
-[PLANNED] Knowledge Graph
-[PLANNED] Agentic Workflows
-[PLANNED] Evaluation Layer
-[PLANNED] Monitoring & Observability
+[PLANNED - v1.2] Hybrid Retrieval (BM25) & Reranking
+[PLANNED → DEFERRED] Memory System (v2.0)
+[PLANNED → DEFERRED] Tool Calling & External APIs (v2.1)
+[PLANNED → DEFERRED] Agentic Workflows (v2.2)
+[PLANNED → DEFERRED] Knowledge Graph (v2.4)
+[PLANNED → DEFERRED] Multimodal Intelligence & OCR (v3.0)
+[PLANNED → DEFERRED] Enterprise RBAC & PostgreSQL (v4.0)
 ```
 
 Each implemented layer performs a specific function while communicating through well-defined interfaces. This separation reduces coupling and allows components to evolve independently throughout the lifetime of the project.
@@ -116,9 +128,11 @@ Each implemented layer performs a specific function while communicating through 
 
 ## Frontend
 
-> **Status: Planned.** The frontend directory is a scaffold. No UI has been implemented yet.
+> **Status: Implemented (v1.1.0).** An interactive Streamlit frontend is implemented at `frontend/app.py`.
 
-When implemented, the frontend will provide the user interface for document management, configuration, querying, visualization, and interaction with the platform.
+The frontend provides the user interface for workspace session management, document uploads (TXT, MD, PDF, DOCX) with progress indicators, workspace document library listing, grounded natural-language Q&A with Top-K slider controls (1–20), citation inspection with provenance scores, Render backend cold-start resilience pings, and in-app feedback submission.
+
+*Architectural Note on Frontend Migration*: An eventual migration to React or Next.js is classified as **Planned → Deferred** until customized UX requirements necessitate migrating away from Streamlit.
 
 ---
 
@@ -201,27 +215,27 @@ Transforms uploaded files into a normalized internal Document without persisting
 
 The current implementation is:
 
-```
-Uploaded File
+```text
+Uploaded File (.txt, .md, .pdf, .docx)
    ↓
-Validation
+Validation (MAX_UPLOAD_BYTES ≤ 2 MB)
    ↓
-Parser Selection
+Parser Selection (ParserRegistry)
    ↓
-Parser
+Parser (TXTParser, MarkdownParser, PDFParser, DOCXParser)
    ↓
 Normalized Document
 ```
 
-FastAPI routes depend on DocumentIngestionService. Parser selection uses a registry so additional formats can be added without changing the ingestion service. This milestone supports `.txt` only.
+FastAPI routes depend on DocumentIngestionService. Parser selection uses an extensible `ParserRegistry` supporting Plain Text (`.txt`), Markdown (`.md`, `.markdown`), Portable Document Format (`.pdf` via `pypdf`), and Microsoft Word (`.docx` via `python-docx`). Additional formats can be added without modifying the core ingestion service.
 
 Responsibilities include:
 
-- Upload validation
-- Parser selection
-- Text extraction
+- Upload validation and file size enforcement
+- Format-specific parser selection
+- Text extraction and metadata normalization
 - Normalized document representation
-- **Document Identity**: Generates a deterministic `document_id` based on the exact SHA-256 hash of the raw file content. This ensures idempotent behavior: repeatedly uploading the exact same file yields the exact same logical document, preventing duplicate downstream processing.
+- **Document Identity**: Generates a deterministic `document_id` based on the exact SHA-256 hash of the raw file content (`hashlib.sha256(content).hexdigest()`). This ensures idempotent behavior: repeatedly uploading the exact same file yields the exact same logical document, preventing duplicate downstream processing.
 
 ---
 
@@ -231,7 +245,7 @@ Converts a normalized `Document` into deterministic, ordered `Chunk` objects. Ch
 
 The current implementation is:
 
-```
+```text
 Document
    ↓
 ChunkingService
@@ -247,9 +261,9 @@ Responsibilities include:
 
 - Segmenting full-text documents
 - Preserving source metadata and ordering
-- Supporting configurable overlap and sizes
+- Supporting configurable overlap and sizes (`CHUNK_SIZE`, `CHUNK_OVERLAP`)
 - Preparing text for future embedding storage
-- **Chunk Identity**: Generates a deterministic `chunk_id` using a SHA-256 hash of the `document_id` and the chunk's `index`. Because document IDs are content-based, chunk IDs remain perfectly stable across re-indexing operations.
+- **Chunk Identity**: Generates a deterministic `chunk_id` using a SHA-256 hash of the `document_id` and the chunk's `index` (`hashlib.sha256(f"{doc_id}:{chunk_index}".encode()).hexdigest()`). Because document IDs are content-based, chunk IDs remain perfectly stable across re-indexing operations.
 
 ---
 
@@ -259,7 +273,7 @@ Coordinates the full transformation of a normalized Document into searchable vec
 
 The current implementation is:
 
-```
+```text
 Document
    ↓
 DocumentIndexingService
@@ -272,7 +286,7 @@ Responsibilities include:
 - Accepting a normalized Document
 - Creating chunks
 - Generating embeddings
-- Storing vectors
+- Storing vectors scoped to the active workspace
 - Returning an indexing summary
 
 ---
@@ -283,14 +297,14 @@ Transforms an ordered list of `Chunk` objects into normalized `Embedding` object
 
 The current implementation is:
 
-```
+```text
 Chunk
    ↓
 EmbeddingService
    ↓
 EmbeddingManager
    ↓
-EmbeddingProvider
+EmbeddingProvider (Gemini / OpenAI)
    ↓
 Provider Adapter
    ↓
@@ -300,11 +314,11 @@ Normalized Embedding
 Responsibilities include:
 
 - Creating internal provider-agnostic embedding requests
-- Delegating text embedding generation
+- Delegating text embedding generation to configured providers:
+  - **Google Gemini**: `GeminiEmbeddingProvider` utilizing `gemini-embedding-2` (768 output dimensions) with batched chunk processing via `types.Content` objects.
+  - **OpenAI**: `OpenAIEmbeddingProvider` utilizing `text-embedding-3-small` or `text-embedding-3-large`.
 - Preserving source chunk identities and metadata
 - Translating provider errors into internal exceptions
-
-Note: Vector storage and retrieval are fully implemented. Memory, agents, reranking, hybrid retrieval, and knowledge graphs are future stages.
 
 ---
 
@@ -312,9 +326,9 @@ Note: Vector storage and retrieval are fully implemented. Memory, agents, rerank
 
 Persists normalized `Embedding` records for later retrieval, keeping application logic isolated from specific vector database vendors.
 
-The current implementation is:
+The current implementation supports dual vector storage backends:
 
-```
+```text
 EmbeddingService
    ↓
 Embedding
@@ -324,18 +338,71 @@ VectorStoreService
 VectorStoreManager
    ↓
 VectorStoreProvider
-   ↓
-ChromaAdapter
+   ├── ChromaVectorStoreProvider (Local Development & Automated Test Suite)
+   └── QdrantVectorStoreProvider (Cloud Deployed Multi-Tenant Store)
    ↓
 Stored Vectors
 ```
 
+### Dual Vector Store Roles
+1. **ChromaDB** (`VECTOR_STORE_PROVIDER=chroma`):
+   - Fast, local vector database.
+   - Test suites enforce an in-memory Chroma instance (`tests/conftest.py`) to prevent disk pollution.
+2. **Qdrant Cloud** (`VECTOR_STORE_PROVIDER=qdrant`):
+   - Cloud production vector store hosted on Qdrant Cloud Free Tier.
+   - Implements indexed payload multitenancy in a single shared collection (`knowledge_base`).
+   - Uses deterministic UUID5 point IDs: `uuid5(NAMESPACE_URL, f"kip://{workspace_id}/{chunk_id}")`.
+
 Responsibilities include:
 
 - Persisting vector embeddings
-- Preserving source chunk identities and metadata
-- Supporting similarity search
+- Preserving source chunk identities, workspace IDs, and metadata
+- Supporting similarity search with tenant payload filtering
 - Translating provider errors into internal exceptions
+
+---
+
+## Multi-Tenant Workspace Architecture
+
+> **Status: Implemented (v1.1.0).** Cryptographically isolated multi-tenancy.
+
+KIP enforces workspace-level tenant isolation:
+- **Workspace Token**: Every request includes `X-KIP-Workspace-ID: <token>` containing a high-entropy URL-safe token.
+- **FastAPI Dependency**: Validated in `backend/app/core/workspace.py` before route execution.
+- **Payload-Based Multitenancy**: In Qdrant Cloud, vectors are tagged with `"workspace_id": "<token>"`. Searches strictly filter by `workspace_id == requested_workspace_id`.
+- **Cross-Tenant Leakage Prevention**: Verified by automated multi-tenancy tests (`tests/test_workspace_multitenancy.py`).
+- **Workspace Limits**: Free-tier safeguards enforce `MAX_DOCUMENTS_PER_WORKSPACE=50` and `MAX_CHUNKS_PER_WORKSPACE=1000`.
+
+---
+
+## Feedback Pipeline Architecture
+
+> **Status: Implemented (v1.1.0).** Zero-cost persistent feedback loop.
+
+```text
+Client (Streamlit / API)
+   │
+   │ POST /api/v1/feedback
+   ▼
+FastAPI Backend (backend/app/api/v1/feedback.py)
+   │
+   ├─ Validates category in ALLOWED_CATEGORIES
+   ├─ Validates message is non-empty and ≤ 30 words
+   ├─ Validates FEEDBACK_WEBHOOK_URL and FEEDBACK_WEBHOOK_TOKEN
+   │
+   │ Authenticated HTTPS GET
+   │ Query params: ?token=...&category=...&message=...&workspace_id=...&timestamp=...
+   ▼
+Google Apps Script Web App (doGet handler)
+   │
+   ├─ Validates token matches WEBHOOK_TOKEN
+   ├─ Validates category and 30-word limit
+   ├─ Appends row to Google Sheet
+   ▼
+Returns HTTP 200 "OK" ──> FastAPI returns HTTP 200 {"status": "recorded"}
+```
+
+*Historical Transition*: Earlier v1.1 implementations evaluated an HTTP POST webhook. During cloud testing on free Google Apps Script web apps, direct POST requests returned HTTP 404 before reaching Apps Script runtime code. The transport was redesigned in commit `ce1c42a` to an authenticated HTTPS `GET` query-parameter transport dispatched to `doGet()`, which verified end-to-end persistence in Google Sheets.
 
 ---
 
@@ -345,7 +412,7 @@ Connects embedding and vector-storage layers into a semantic retrieval pipeline.
 
 The retrieval flow:
 
-```
+```text
 User Query
    ↓
 RetrievalService
@@ -354,18 +421,18 @@ EmbeddingService (Query Vector)
    ↓
 VectorStoreService
    ↓
-VectorStoreManager / ChromaAdapter
+VectorStoreManager / QdrantAdapter or ChromaAdapter
    ↓
-Retrieved Chunks
+Retrieved Chunks (Scoped to Workspace)
 ```
 
 Responsibilities:
 - Provide unified query access across knowledge bases
 - Encode user questions into embeddings
-- Filter results based on thresholds
+- Filter results based on workspace ID and distance thresholds
 - Deterministic result ordering
 
-Note: Memory, hybrid retrieval, reranking, and knowledge graphs are future stages.
+Note: Memory, hybrid retrieval (BM25), reranking, and knowledge graphs are future stages.
 
 ---
 
@@ -375,13 +442,13 @@ The final stage of the retrieval-augmented generation pipeline.
 
 The RAG flow:
 
-```
+```text
 User Query
    ↓
 RAGService
-   ├── RetrievalService (retrieves chunks)
+   ├── RetrievalService (retrieves chunks scoped to workspace)
    ├── ContextBuilder (assembles context string)
-   └── LLMService (generates grounded response)
+   └── LLMService (generates grounded response via Gemini / OpenAI)
    ↓
 Grounded Response + Sources
 ```
@@ -389,8 +456,9 @@ Grounded Response + Sources
 Responsibilities:
 - Build deterministic context strings from retrieved chunks.
 - Format LLM prompts combining system instructions, context data, and the user query.
-- Maintain boundaries between context and instructions (Note: Delimiters provide structural text formatting but do not inherently secure against prompt injection).
-- Ensure the final response retains explicit provenance mapping.
+- Maintain boundaries between context and instructions.
+- Ensure the final response retains explicit provenance mapping with ranked source citations.
+- Return predefined empty-context message when no relevant chunks are found.
 
 Note: Memory, agents, reranking, hybrid retrieval, and knowledge graphs are future stages.
 
@@ -398,25 +466,29 @@ Note: Memory, agents, reranking, hybrid retrieval, and knowledge graphs are futu
 
 ## Memory System
 
-> **Status: Planned (v2.0).** Memory management is not yet implemented.
+> **Status: Planned → Deferred (v2.0).** Memory management is not yet implemented.
 
-When implemented, the memory system will maintain conversational and persistent memory, including context management, long-term memory retrieval, and session history.
+When implemented, the memory system will maintain conversational and persistent memory, including context management, long-term memory retrieval, and session history. Stateless request-response RAG is prioritized in v1.1.
 
 ---
 
 ## Knowledge Layer
 
-> **Status: Planned (v2.4).** The knowledge graph and entity systems are not yet implemented.
+> **Status: Planned → Deferred (v2.4).** The knowledge graph and entity systems are not yet implemented.
 
-When implemented, the knowledge layer will maintain structured knowledge representations including a vector store integration (partially implemented), knowledge graph, entity management, and knowledge synthesis.
+When implemented, the knowledge layer will maintain structured knowledge representations including a vector store integration (implemented in v1.0/v1.1), knowledge graph, entity management, and knowledge synthesis.
 
 ---
 
 ## Evaluation Layer
 
-> **Status: Planned (v1.0+).** No benchmark or evaluation infrastructure has been implemented yet.
+> **Status: Implemented Mechanical Evaluation & Baseline (v1.0/v1.1).**
 
-When implemented, the evaluation layer will measure system quality and engineering performance through benchmarking, response evaluation, retrieval evaluation, performance monitoring, and experiment tracking.
+The evaluation layer currently provides:
+- **Evaluation Runner**: `evaluation/runner.py` executes test cases directly against internal services without network latency.
+- **Evaluation Models**: `evaluation/models.py` computes mechanical metrics: Document Hit Rate, Mean Reciprocal Rank (MRR), Keyword Coverage, and stage latencies.
+- **Baseline Dataset**: `benchmarks/kip_v1_baseline.json` defines a 5-case deterministic test set for KIP v1.0/v1.1.
+- **Experimental Status**: Baseline / Not Yet Evaluated with live LLM judges. Live research experiments are planned for v1.2.
 
 ---
 
@@ -638,30 +710,53 @@ Used for feature development, testing, and experimentation.
 
 Components:
 
-- Frontend
-- FastAPI Backend
-- Local Vector Database
-- Local PostgreSQL
-- Local LLM (optional)
-- Docker Compose
+- Frontend (Streamlit running on port 8501)
+- FastAPI Backend (Uvicorn running on port 8000)
+- Local Vector Database (ChromaDB persistent directory or Qdrant Cloud)
+- Local PostgreSQL (optional / future)
+- Local LLM (optional / future)
+- Docker Compose (containerized development)
 
 ---
 
-## Production Environment
+## Implemented Cloud Deployment (v1.1.0 Zero-Cost Production Topology)
 
-Supports reliable and scalable deployments.
+The current live deployment implements a zero-cost cloud topology across specialized serverless and container tiers:
+
+- **Frontend Tier**: Streamlit Community Cloud hosting `frontend/app.py`
+  - Communicates with backend via HTTPS REST calls (`BACKEND_URL`).
+  - Manages client-side workspace sessions and feedback forms.
+- **Backend Tier**: Render Web Service (Free Tier) hosting FastAPI via `uvicorn backend.app.main:app`
+  - Handles multi-format ingestion, chunking, embedding generation, retrieval, and RAG answering.
+  - Automatically spins down after 15 minutes of inactivity; exhibits a 30–50 second cold-start spin-up on next request.
+- **Vector Storage Tier**: Qdrant Cloud (Free Tier)
+  - Single managed cluster hosting collection `knowledge_base` with 768-dimensional vectors (COSINE distance).
+  - Multi-tenant workspace isolation enforced at query time via `workspace_id` payload filters.
+  - Deterministic point IDs generated via MD5 UUID conversion of chunk identifiers.
+- **LLM / Embedding Provider**: Google Gemini API (Free Tier)
+  - Text generation via `gemini-2.5-flash`.
+  - Dense embeddings via `text-embedding-004` (768 dimensions), utilizing 1:1 `Content`/`Part` batch formatting.
+- **Feedback Persistence Tier**: Google Apps Script Web App (`doGet`) + Google Sheet
+  - Backend dispatches authenticated HTTPS GET requests with URL query parameters (`token`, `category`, `message`, `workspace_id`, `timestamp`).
+  - Google Apps Script parses parameters and appends structured rows to `Sheet1`.
+
+---
+
+## Production Environment (Target / Enterprise)
+
+Supports reliable, high-availability, and enterprise-scale deployments.
 
 Components:
 
 - Load Balancer
-- Frontend Service
-- Backend API
+- Frontend Service (Streamlit or React)
+- Backend API (FastAPI clustered workers)
 - AI Orchestrator
-- Vector Database
-- Relational Database
-- Object Storage
-- Monitoring Stack
-- Logging Infrastructure
+- Vector Database (Clustered Qdrant or Milvus)
+- Relational Database (Managed PostgreSQL for workspaces, users, audit logs)
+- Object Storage (S3 / GCS for original document artifacts)
+- Monitoring Stack (Prometheus, Grafana)
+- Logging Infrastructure (Centralized ELK or CloudWatch)
 
 ---
 
@@ -669,8 +764,8 @@ Components:
 
 - Containerized services
 - Infrastructure as Code
-- Automated deployments
-- Environment isolation
+- Automated deployments (GitHub Actions CI/CD)
+- Environment isolation (development, staging, production)
 - Horizontal scalability
 - High availability
 - Automated backups
@@ -683,41 +778,43 @@ Security is considered a foundational architectural concern rather than an optio
 
 ## Authentication
 
-- User authentication
-- Token-based authentication
+- User authentication (Future)
+- Token-based workspace validation (`X-KIP-Workspace-ID` header, Current: v1.1.0)
+- Feedback webhook token authentication (`FEEDBACK_WEBHOOK_TOKEN`, Current: v1.1.0)
 - Session management
 
 ---
 
 ## Authorization
 
-- Role-Based Access Control (RBAC)
-- Permission management
-- Workspace isolation
+- Role-Based Access Control (RBAC) (Future)
+- Permission management (Future)
+- Workspace isolation via vector payload filtering (Current: v1.1.0)
+- Workspace upload quotas and document size limits (Current: v1.1.0)
 
 ---
 
 ## Data Protection
 
-- Encryption in transit
-- Encryption at rest
-- Secure secret management
+- Encryption in transit (TLS/HTTPS across all public endpoints)
+- Encryption at rest (managed by cloud database providers)
+- Secure secret management (environment variables via cloud dashboards, zero hardcoded keys)
 
 ---
 
 ## API Security
 
-- Input validation
-- Rate limiting
-- Request authentication
-- API versioning
+- Input validation (Pydantic models with strict typing, length constraints, and regex validation)
+- Rate limiting and retry backoff (exponential backoff for external LLM/embedding APIs)
+- Request authentication via workspace headers and shared secret tokens
+- API versioning (`/api/v1/` route prefixes)
 
 ---
 
 ## Operational Security
 
-- Audit logging
-- Monitoring
+- Audit logging (structured logs across ingestion, retrieval, and feedback pipelines)
+- Monitoring (FastAPI `/health` endpoint for uptime probes)
 - Incident detection
 - Backup strategy
 - Disaster recovery
@@ -730,18 +827,20 @@ Future versions may incorporate enterprise authentication providers, advanced co
 
 The architecture is technology-agnostic wherever practical. Individual technologies may evolve while preserving the overall system design.
 
-| Architectural Layer | Current Technology | Future Alternatives |
-|---------------------|-------------------|---------------------|
-| Frontend | Streamlit | React, Next.js |
-| Backend API | FastAPI | Remains configurable |
-| Orchestration | LangGraph / Custom | Alternative orchestration frameworks |
-| Language Models | OpenAI | Anthropic, Gemini, Local LLMs |
-| Embeddings | Sentence Transformers | OpenAI, BGE, E5, Jina |
-| Vector Database | ChromaDB | FAISS, Pinecone, Weaviate, Milvus |
-| Database | PostgreSQL | MySQL, SQLite |
-| Knowledge Graph | Neo4j | Memgraph, Amazon Neptune |
-| Evaluation | RAGAS, DeepEval | Custom evaluation frameworks |
-| Deployment | Docker | Kubernetes, Cloud Services |
+| Architectural Layer | Current Implementation (v1.1.0) | Historical / Testing | Future / Deferred Alternatives |
+|---------------------|---------------------------------|----------------------|--------------------------------|
+| Frontend | Streamlit (`frontend/app.py`) | Streamlit (v0.1) | React, Next.js, Vue.js |
+| Backend API | FastAPI (`backend/app/main.py`) | FastAPI (v0.1) | Remains configurable |
+| Orchestration | Modular Custom Pipeline (`rag/pipeline.py`) | Procedural script (v0.1) | LangChain, LangGraph, AutoGen |
+| Language Models | Google Gemini (`gemini-2.5-flash`), OpenAI (`gpt-4o-mini`) | Mock / Echo (v0.1) | Anthropic Claude, Local LLMs (Ollama, vLLM) |
+| Embeddings | Google Gemini (`text-embedding-004`), OpenAI (`text-embedding-3-small`) | Deterministic Mock (v0.1) | Sentence Transformers, BGE, E5, Jina |
+| Vector Storage | Qdrant Cloud (Managed Serverless) | ChromaDB (Local SQLite) | FAISS, Pinecone, Weaviate, Milvus |
+| Workspace Isolation | Qdrant Payload Filter (`workspace_id`) | In-Memory (v0.1) | PostgreSQL Schema Isolation, Row-Level Security |
+| Feedback Persistence | Google Apps Script (`doGet`) + Google Sheet | Direct POST Webhook (Deprecated) | PostgreSQL, Supabase, Airtable |
+| Evaluation | Custom Mechanical Evaluator (`evaluation/runner.py`) | Manual inspection | RAGAS, DeepEval, TruLens |
+| Relational Storage | In-Memory / Vector Payload Metadata | Not used | PostgreSQL, SQLite (Deferred to v2.0+) |
+| Knowledge Graph | Not implemented (Deferred) | Not used | Neo4j, Memgraph, Amazon Neptune |
+| Deployment | Render + Streamlit Cloud + Qdrant Cloud | Localhost | Docker Compose, Kubernetes, AWS/GCP |
 
 Technology choices should remain modular so that components can be replaced without requiring significant architectural redesign.
 
@@ -754,11 +853,11 @@ The architecture is expected to evolve alongside advancements in AI systems engi
 Future architectural enhancements may include:
 
 - Distributed AI orchestration
-- Multi-agent collaboration
+- Multi-agent collaboration (Deferred to v2.0+)
 - Advanced reasoning pipelines
-- Knowledge graph reasoning
+- Knowledge graph reasoning (Deferred to v3.0+)
 - Federated knowledge retrieval
-- Multimodal processing pipelines
+- Multimodal processing pipelines (Deferred to v4.0+)
 - Enterprise deployment patterns
 - Intelligent workflow automation
 - Cloud-native AI services
@@ -774,10 +873,10 @@ Architectural evolution should remain incremental and evidence-based. Significan
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 1.0 |
-| Project Version | v0.1 |
-| Status | Active |
-| Last Reviewed | YYYY-MM-DD |
+| Document Version | 2.0 |
+| Project Version | v1.1.0 (Feature Frozen) |
+| Status | Complete / Frozen |
+| Last Reviewed | 2026-10-08 |
 
 ## Review Policy
 

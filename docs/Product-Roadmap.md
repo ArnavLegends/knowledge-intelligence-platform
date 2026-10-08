@@ -1,20 +1,22 @@
 # Product Roadmap
 
-**Document Version:** 1.1  
-**Project Version:** v0.3 (Core Foundation)  
-**Status:** Active
+**Document Version:** 2.0  
+**Project Version:** v1.1.0 (Feature Frozen)  
+**Status:** Active Forward-Looking Roadmap
 
 ---
 
 ## Purpose
 
-This document defines the long-term engineering roadmap for the Knowledge Intelligence Platform.
+This document defines the long-term engineering roadmap for the Knowledge Intelligence Platform (KIP).
 
 It outlines the planned evolution of the platform across multiple versions, identifies the objectives of each development milestone, and establishes a structured sequence for implementing new capabilities.
 
 The roadmap serves as the primary planning document for product development. It ensures that engineering efforts remain incremental, measurable, and aligned with the project's vision and strategic objectives.
 
-While implementation details may evolve over time, the roadmap provides a stable framework for prioritizing features, organizing releases, and tracking overall project progress.
+While implementation details evolve over time, the roadmap provides a stable framework for prioritizing features, organizing releases, and tracking overall project progress.
+
+For a detailed, chronological engineering record of all completed milestones and commit-by-commit decisions, see [PROJECT_HISTORY.md](PROJECT_HISTORY.md). For release notes, see [Changelog.md](Changelog.md). For current system state, see [CURRENT_STATUS.md](CURRENT_STATUS.md).
 
 ---
 
@@ -35,23 +37,25 @@ The roadmap is intended to evolve over time. Future milestones may be refined, e
 The development of the Knowledge Intelligence Platform is organized into a series of major milestones. Each milestone builds upon previous versions while introducing new capabilities in a controlled and measurable manner.
 
 | Version | Theme | Primary Focus | Status |
-|----------|-------|---------------|--------|
-| v0.1 | Foundation | Repository, documentation, project structure | ✅ Complete |
-| v0.2 | Backend Foundation | FastAPI backend, configuration, logging, project architecture | ✅ Complete |
-| v0.3 | Knowledge Ingestion | Document ingestion (TXT), chunking, embeddings, vector database, retrieval, RAG | ✅ Core Foundation Complete |
-| v1.0 | Production RAG | End-to-end production RAG platform — multi-format ingestion, frontend, evaluation | 🚧 Next Milestone |
-| v1.1 | User Experience | Improved frontend, usability, configuration, quality of life | 📅 Planned |
-| v1.2 | Retrieval Optimization | Hybrid search, reranking, metadata filtering, retrieval improvements | 📅 Planned |
-| v1.3 | Performance Engineering | Caching, optimization, monitoring, scalability | 📅 Planned |
-| v2.0 | AI Memory | Persistent memory, conversation history, personalization | 📅 Planned |
-| v2.1 | Tool Integration | Tool calling, external services, automation | 📅 Planned |
-| v2.2 | Agentic AI | Multi-step reasoning and autonomous agent workflows | 📅 Planned |
-| v2.3 | Knowledge Intelligence | Advanced reasoning, planning, and orchestration | 📅 Planned |
-| v2.4 | Knowledge Graph | Knowledge graph integration and graph-based retrieval | 📅 Planned |
-| v3.0 | Multimodal Intelligence | Image, audio, and multimodal document understanding | 📅 Planned |
-| v3.1 | Collaboration | Multi-user workspaces and collaboration features | 📅 Planned |
-| v3.2 | Cloud Platform | Deployment, monitoring, scalability, production operations | 📅 Planned |
-| v4.0 | Enterprise Platform | Enterprise-ready AI knowledge intelligence ecosystem | 📅 Planned |
+|---|---|---|:---:|
+| **v0.1** | Foundation | Repository, documentation, project structure | ✅ Complete |
+| **v0.2** | Backend Foundation | FastAPI backend, configuration, logging, project architecture | ✅ Complete |
+| **v0.3** | Knowledge Ingestion | Document ingestion (TXT), chunking, embeddings, ChromaDB, retrieval, RAG | ✅ Complete |
+| **v1.0** | Production RAG | Multi-format ingestion (MD, PDF, DOCX), Gemini multi-provider, Streamlit UI, evaluation harness | ✅ Complete |
+| **v1.1** | Multi-Tenant Cloud | Workspace bearer tokens, Qdrant Cloud, Render deployment, public testing, authenticated GET feedback | ✅ Complete & Frozen |
+| **Current** | Documentation Reconciliation | Complete project history audit, synchronizing all docs with live code | 🚧 In Progress |
+| **Active** | Public Testing & Feedback | Community testing on deployed cloud, feedback collection via Google Sheets | ⚡ Active / Available |
+| **v1.2** | Retrieval Intelligence | Research-driven retrieval: chunking experiments, hybrid search, reranking | 📅 Next Milestone |
+| **v1.3** | Performance Engineering | Caching, optimization, monitoring, scalability | 📅 Planned |
+| **v2.0** | AI Memory | Persistent memory, conversation history, personalization | 📅 Planned → Deferred |
+| **v2.1** | Tool Integration | Tool calling, external services, automation | 📅 Planned → Deferred |
+| **v2.2** | Agentic AI | Multi-step reasoning and autonomous agent workflows | 📅 Planned → Deferred |
+| **v2.3** | Knowledge Intelligence | Advanced reasoning, planning, and orchestration | 📅 Planned → Deferred |
+| **v2.4** | Knowledge Graph | Knowledge graph integration and graph-based retrieval | 📅 Planned → Deferred |
+| **v3.0** | Multimodal Intelligence | Image, audio, and multimodal document understanding | 📅 Planned → Deferred |
+| **v3.1** | Collaboration | Multi-user workspaces and collaboration features | 📅 Planned → Deferred |
+| **v3.2** | Cloud Platform | Deployment, monitoring, scalability, production operations | 📅 Planned → Deferred |
+| **v4.0** | Enterprise Platform | Enterprise-ready AI knowledge intelligence ecosystem | 📅 Planned → Deferred |
 
 The roadmap is intended to evolve as the project matures. Future milestones may be refined based on implementation experience, research outcomes, technological advances, and user feedback.
 
@@ -233,7 +237,7 @@ The backend is stable, modular, documented, and ready for AI feature development
 
 ---
 
-# Version v0.3 — Knowledge Ingestion ✅ Core Foundation Complete
+# Version v0.3 — Knowledge Ingestion ✅ Complete
 
 ## Objective
 
@@ -253,10 +257,10 @@ Develop the document ingestion pipeline that transforms raw documents into searc
 | Retrieval & semantic search | ✅ Implemented |
 | RAG generation pipeline | ✅ Implemented |
 | Index management | ✅ Implemented |
-| Ingestion pipeline testing (116 tests) | ✅ Implemented |
-| PDF ingestion | 📅 Planned (v1.0) |
-| DOCX ingestion | 📅 Planned (v1.0) |
-| Markdown ingestion | 📅 Planned (v1.0) |
+| Ingestion pipeline testing | ✅ Implemented (validated via full pytest suite) |
+| PDF ingestion | ✅ Implemented in v1.0 |
+| DOCX ingestion | ✅ Implemented in v1.0 |
+| Markdown ingestion | ✅ Implemented in v1.0 |
 
 ---
 
@@ -301,9 +305,9 @@ At the completion of v0.3:
 - Embeddings generated and stored in ChromaDB.
 - Semantic retrieval functional.
 - End-to-end RAG generation functional.
-- 116 tests passing with CI validation.
+- Comprehensive automated test suite passing with CI validation.
 
-Multi-format ingestion (PDF, DOCX, Markdown) remains a v1.0 deliverable.
+Multi-format ingestion (PDF, DOCX, Markdown) was promoted and delivered in v1.0.
 
 ---
 
@@ -319,25 +323,25 @@ The platform possesses a reliable and reproducible knowledge ingestion pipeline.
 
 ---
 
-# Version v1.0 — Production RAG Platform 🚧 Next Milestone
+# Version v1.0 — Production RAG Platform ✅ Complete
 
 ## Objective
 
-Deliver the first production-ready Retrieval-Augmented Generation platform by completing multi-format document ingestion, adding a user-facing interface, integrating an evaluation framework, and preparing the system for real-world deployment.
-
-The backend RAG engine foundation (from v0.3) is already implemented. v1.0 focuses on completing the remaining production-readiness requirements.
+Deliver the first production-ready Retrieval-Augmented Generation platform by completing multi-format document ingestion, adding a user-facing interface, integrating an evaluation framework, integrating Google Gemini as an alternative provider, ensuring deterministic identity for idempotency, and preparing the system for real-world deployment.
 
 ---
 
 ## Key Deliverables
 
-- PDF, DOCX, and Markdown ingestion
-- Streaming responses
-- Conversational interface (frontend)
-- Source citation UI
-- Evaluation framework
-- Configuration dashboard
-- Initial deployment readiness
+- **Multi-Format Ingestion**: PDF (`pypdf`), DOCX (`python-docx`), and Markdown (`.md`) ingestion via extensible `ParserRegistry`. (✅ Implemented)
+- **Deterministic Identity**: Content-based SHA-256 document IDs and deterministic SHA-256 chunk IDs. (✅ Implemented)
+- **Google Gemini Provider**: Added `GeminiProvider` (`gemini-2.5-flash`) and `GeminiEmbeddingProvider` (`gemini-embedding-2`, 768 dimensions). (✅ Implemented)
+- **Conversational Interface (Frontend)**: Single-page Streamlit application (`frontend/app.py`). (✅ Implemented)
+- **Source Citation UI**: Ranked chunk provenance display with document IDs, chunk indices, and relevance scores. (✅ Implemented)
+- **Evaluation Framework**: `evaluation/runner.py` and `evaluation/models.py` executing mechanical evaluations (hit rate, MRR, keyword coverage, latency). (✅ Implemented)
+- **Benchmark Baseline Dataset**: `benchmarks/kip_v1_baseline.json` with 5 deterministic test cases. (✅ Implemented)
+- **Streaming Responses**: (📅 Planned → Deferred)
+- **Configuration Dashboard**: (📅 Planned → Deferred to Streamlit UI controls)
 
 ---
 
@@ -353,7 +357,7 @@ Construct optimized prompts using retrieved context.
 
 ### Language Model Integration
 
-Support multiple LLM providers through a unified abstraction layer.
+Support multiple LLM providers (Gemini, OpenAI) through a unified abstraction layer.
 
 ### Response Generation
 
@@ -361,7 +365,7 @@ Generate grounded responses with supporting citations.
 
 ### Evaluation
 
-Measure retrieval quality, response quality, latency, and hallucination rate.
+Measure retrieval quality, response quality, latency, and keyword coverage.
 
 ---
 
@@ -369,21 +373,21 @@ Measure retrieval quality, response quality, latency, and hallucination rate.
 
 At the completion of v1.0:
 
-- Users can upload documents.
+- Users can upload documents (TXT, MD, PDF, DOCX).
 - Documents become searchable.
 - Natural language questions receive grounded responses.
-- Sources are cited.
-- System quality is benchmarked.
+- Sources are cited with explicit provenance.
+- System quality is benchmarked with deterministic evaluation tooling.
 
 ---
 
 ## Success Criteria
 
-- Stable RAG pipeline.
+- Stable multi-format RAG pipeline.
 - Accurate semantic retrieval.
-- Reliable response generation.
+- Reliable response generation with empty-context fallback.
 - Evaluation framework operational.
-- End-to-end workflow functioning.
+- End-to-end workflow functioning and tested.
 
 ---
 
@@ -395,50 +399,54 @@ Requires completion of v0.3.
 
 ## Exit Criteria
 
-The platform operates as a complete production-ready Retrieval-Augmented Generation system suitable for continued feature expansion.
+The platform operates as a complete production-ready Retrieval-Augmented Generation system suitable for multi-tenant and cloud expansion.
 
 ---
 
-# Version v1.1 — User Experience & Developer Experience
+# Version v1.1 — Multi-Tenant Cloud Knowledge Layer & Public Testing ✅ Complete & Frozen
 
 ## Objective
 
-Enhance the usability, accessibility, and maintainability of the platform by improving both the end-user experience and the developer workflow.
+Transform KIP into a cloud-ready, multi-tenant platform deployable at zero cost ($0 / ₹0) across free-tier cloud infrastructure, enhance end-user and developer experience, and prepare the platform for public community testing with persistent feedback collection.
 
 ---
 
 ## Key Deliverables
 
-- Improved frontend interface
-- Better document management
-- Advanced settings panel
-- User preferences
-- API documentation
-- Enhanced logging
-- Improved error messages
-- CLI utilities
-- Configuration improvements
-- Better project documentation
+- **Multi-Tenant Workspaces**: Cryptographically secure bearer-token tenant isolation via `X-KIP-Workspace-ID` header. (✅ Implemented)
+- **Qdrant Cloud Provider**: `QdrantVectorStoreProvider` with indexed payload filtering and deterministic UUID5 point IDs (`uuid5(NAMESPACE_URL, "kip://<workspace_id>/<chunk_id>")`). (✅ Implemented)
+- **Workspace Document Management**: `GET /api/v1/documents` endpoint to list documents and chunk counts scoped strictly to the workspace. (✅ Implemented)
+- **Workspace Guardrails**: `MAX_DOCUMENTS_PER_WORKSPACE=50` and `MAX_CHUNKS_PER_WORKSPACE=1000` to prevent free-tier quota exhaustion. (✅ Implemented)
+- **Zero-Cost Cloud Deployment**: Deployed topology: Streamlit Community Cloud + Render Free Web Service + Qdrant Cloud Free Tier + Gemini Free Tier. (✅ Implemented)
+- **Render Cold-Start Handling**: Frontend ping with exponential retry and user-friendly status indicators during container wake-up. (✅ Implemented)
+- **Gemini Batch Embeddings Fix**: Batched chunk embedding via `types.Content` objects to support large multi-file uploads reliably. (✅ Implemented)
+- **Streamlit UX State Reset**: Question, answer, source, and error state reset upon switching or creating workspaces. (✅ Implemented)
+- **Configurable Top-K**: Expanded retrieval Top-K slider in UI from 1 to 20 without silent backend truncation. (✅ Implemented)
+- **Cross-Document RAG**: Verified multi-document retrieval contributions to a single query. (✅ Implemented)
+- **Public Testing Orientation**: "Welcome to KIP" orientation section, suggested test workflows, and in-app feedback box. (✅ Implemented)
+- **Public Feedback API**: `POST /api/v1/feedback` endpoint validating category, non-empty message, and 30-word limit. (✅ Implemented)
+- **Authenticated GET Feedback Transport**: Backend forwards feedback submissions via authenticated HTTPS `GET` with URL query parameters to Google Apps Script `doGet()`, persisting submissions to Google Sheets with token redaction. (✅ Implemented)
+- **API Documentation & Enhanced Logging**: Full OpenAPI schemas, structured logging, and status code preservation. (✅ Implemented)
 
 ---
 
 ## Major Components
 
-### Frontend Improvements
+### Multi-Tenancy & Workspace Isolation
 
-Improve usability through a cleaner and more intuitive interface.
+Ensure strict tenant boundary separation across API dependencies and vector database payload filters.
 
-### Developer Experience
+### Cloud Vector Storage
 
-Simplify development with better documentation, tooling, and project organization.
+Persist vectors reliably in Qdrant Cloud while retaining ChromaDB for local development and offline automated testing.
 
-### User Configuration
+### Operational Resilience
 
-Allow users to configure retrieval parameters, models, and platform settings.
+Gracefully handle cloud free-tier operational realities (Render 15-minute sleep cycles, provider rate limits).
 
-### Error Handling
+### Persistent Feedback Pipeline
 
-Provide meaningful feedback for system and API errors.
+Deliver user feedback to external Google Sheets without storing state on ephemeral container filesystems.
 
 ---
 
@@ -446,19 +454,19 @@ Provide meaningful feedback for system and API errors.
 
 At the completion of v1.1:
 
-- The platform is easier to use.
-- Developer onboarding is simplified.
-- Configuration becomes more flexible.
-- Documentation is significantly improved.
+- The platform is deployed live on public cloud infrastructure.
+- Users can create isolated workspaces and test single-document and cross-document RAG.
+- Feedback is collected persistently.
+- The platform is feature-frozen and documented.
 
 ---
 
 ## Success Criteria
 
-- Improved usability.
-- Complete API documentation.
-- Better developer workflow.
-- Positive user experience improvements.
+- Secure workspace isolation verified with zero cross-tenant leakage.
+- Zero-cost deployment operational.
+- Full pytest suite passing (245/245 tests).
+- Successful public feedback persistence verified.
 
 ---
 
@@ -470,15 +478,66 @@ Requires completion of v1.0.
 
 ## Exit Criteria
 
-The platform is significantly easier to use, configure, and maintain.
+The platform operates reliably in the cloud with multi-tenant isolation, ready for community evaluation and forward-looking research.
 
 ---
 
-# Version v1.2 — Retrieval Optimization
+# Current Milestone — Documentation Reconciliation & Project History Audit 🚧 In Progress
 
 ## Objective
 
-Improve retrieval quality through advanced information retrieval techniques, resulting in more relevant context and higher-quality AI responses.
+Ensure the entire repository tells one coherent, technically accurate, chronological story from inception to frozen v1.1 state, eliminating historical blanks, synchronizing architecture diagrams, and aligning documentation with live code.
+
+---
+
+## Key Deliverables
+
+- Comprehensive chronological engineering history in [PROJECT_HISTORY.md](PROJECT_HISTORY.md).
+- Canonical current status document in [CURRENT_STATUS.md](CURRENT_STATUS.md).
+- Additive synchronization of [Product-Roadmap.md](Product-Roadmap.md), [Changelog.md](Changelog.md), [Architecture.md](Architecture.md), [API-Reference.md](API-Reference.md), and [deployment.md](deployment.md).
+- Global audit and removal of obsolete claims (e.g. old POST webhook references).
+
+---
+
+# Active Community Phase — Public Testing & Feedback Collection ⚡ Active
+
+## Objective
+
+Gather qualitative and quantitative user feedback from public community testing of KIP v1.1 to identify retrieval failure modes, cross-document challenges, and UX friction points to inform v1.2 research priorities.
+
+---
+
+# Version v1.2 — Retrieval Intelligence & Evaluation 🚧 Next Engineering / Research Milestone
+
+## Objective
+
+Improve retrieval quality through advanced information retrieval techniques, systematic experimentation, and reproducible benchmarking, resulting in more relevant context, reduced noise, and higher-quality AI responses.
+
+v1.2 transitions KIP into an empirical research-driven phase. Rather than assuming which retrieval strategy works best, every architectural addition will be validated through an evidence-based research progression.
+
+---
+
+## Research Methodology & Experiment Progression
+
+Every candidate technique evaluated in v1.2 will progress through a disciplined 14-step lifecycle:
+
+1. **Literature Review**: Survey existing research on dense retrieval failure modes, semantic chunking, and lexical-dense fusion.
+2. **Gap Identification**: Characterize specific retrieval failures observed during v1.1 public testing.
+3. **Research Question Selection**: Formulate precise, falsifiable research questions.  
+   *(Note: Document chunking and semantic segmentation is currently the leading research candidate, but the final question depends on literature review findings).*
+4. **Benchmark & Test-Set Definition**: Construct a multi-document evaluation dataset with ground-truth citations.
+5. **Dense Retrieval Baseline**: Execute and record quantitative baseline metrics using KIP v1.1's fixed-size chunking and dense similarity search.
+6. **Chunking / Segmentation Experiment**: Test candidate chunking strategies (e.g., recursive character, semantic markdown header-aware segmentation, hierarchical chunking).
+7. **Hybrid Retrieval Experiment**: Evaluate combining sparse lexical search (e.g., BM25) with dense vector embeddings.
+8. **Reranking Experiment**: Evaluate cross-encoder reranking models on top retrieved candidate chunks.
+9. **Context Optimization Experiment**: Evaluate dynamic context trimming and compression to maximize signal-to-noise ratio in LLM prompts.
+10. **Measured Comparison**: Compare experimental variants against the established baseline across precision, recall, MRR, faithfulness, and latency.
+11. **Analysis**: Perform quantitative and error analysis on experimental outcomes.
+12. **Evidence-Based Decision**: Select only strategies that demonstrate statistically meaningful improvements.
+13. **Integration of Winning Approach**: Merge winning methods into KIP's production service layer.
+14. **Research Documentation**: Publish reproducible experiment reports and update benchmark baselines.
+
+> **Research Integrity Principle**: No experimental claims (e.g., "chunking improved retrieval by X%") will be published until experiments are executed and data is recorded.
 
 ---
 
@@ -1317,10 +1376,10 @@ Future releases will continue to follow the project's engineering principles of 
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 1.0 |
-| Project Version | v0.1 |
-| Status | Active |
-| Last Reviewed | YYYY-MM-DD |
+| Document Version | 2.0 |
+| Project Version | v1.1.0 (Feature Frozen) |
+| Status | Active Forward-Looking Roadmap |
+| Last Reviewed | 2026-10-08 |
 
 ## Review Policy
 

@@ -14,20 +14,26 @@ KIP v1.1.0 is architected for zero-cost ($0 / ₹0) public deployment across fre
 ┌────────────────────────────────┐
 │        FastAPI on Render       │  (Stateless API Backend)
 │         Render Free Tier       │
-└───────────────┬────────────────┘
-                │
-        ┌───────┴───────┐
+└───────┬───────────────┬────────┘
+        │               │ HTTPS GET
         ▼               ▼
-┌───────────────┐ ┌────────────────┐
-│  Qdrant Free  │ │  Gemini API    │
-│  Vector Store │ │  Free Tier     │
-└───────────────┘ └────────────────┘
+┌───────────────┐ ┌────────────────────────┐
+│  Qdrant Free  │ │  Google Apps Script    │
+│  Vector Store │ │  Web App (doGet)       │
+└───────┬───────┘ └───────────┬────────────┘
+        │                     ▼
+        ▼             ┌────────────────┐
+┌───────────────┐     │  Google Sheet  │
+│  Gemini API   │     │  (Feedback DB) │
+│  Free Tier    │     └────────────────┘
+└───────────────┘
 ```
 
 - **Frontend:** Streamlit Community Cloud (runs `frontend/app.py`). Contains NO database or LLM secrets; only knows `KIP_API_BASE_URL`.
 - **Backend:** FastAPI Web Service hosted on Render Free tier. Binds `0.0.0.0` and `$PORT`. Holds credentials securely in backend environment variables.
 - **Vector Database:** Qdrant Cloud Free tier cluster. Uses a single collection (`knowledge_base`) with indexed payload-based multitenancy.
-- **Embeddings & LLM:** Google Gemini Free Tier (`gemini-embedding-2` with 768 dimensions and `gemini-2.5-flash`).
+- **Embeddings & LLM:** Google Gemini Free Tier (`gemini-embedding-2` / `text-embedding-004` with 768 dimensions and `gemini-2.5-flash`).
+- **Feedback Persistence:** Google Apps Script Web App receiving authenticated HTTPS GET query parameters and appending to a Google Sheet (`Sheet1`).
 
 ---
 
@@ -48,6 +54,7 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
 - **Documents & Metadata:** Document IDs, filenames, chunk counts, media types, and sizes persist in Qdrant payloads.
 - **Embeddings & Chunks:** Text chunks and their normalized embedding vectors persist across Render backend restarts and sleeping instances.
 - **Resumed Sessions:** Entering an existing workspace token connects immediately to that workspace's knowledge base.
+- **User Feedback:** Submitted feedback entries (rating category, text, workspace ID, timestamp) persist in Google Sheets via the Apps Script GET webhook.
 
 ### What Does NOT Persist Yet:
 - User accounts / passwords (authentication is token-based bearer access in v1.1.0).
@@ -67,6 +74,8 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
    - `MAX_DOCUMENTS_PER_WORKSPACE=50`
    - `MAX_CHUNKS_PER_WORKSPACE=1000`
    - Prevents quota exhaustion on free clusters.
+4. **Google Apps Script Execution Limits:**
+   - Free Google accounts support up to 20,000 URL fetch / web app invocations daily, far exceeding expected testing volume.
 
 ---
 
@@ -78,7 +87,17 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
 3. Copy the **Cluster URL** (e.g., `https://xxxxxx.us-east4-0.gcp.cloud.qdrant.io:6333`).
 4. Generate an **API Key** from the Qdrant Cloud console.
 
-### Step 2: Deploy Backend to Render
+### Step 2: Configure Feedback Persistence Webhook (Google Apps Script + Google Sheet)
+1. Create a new Google Sheet named `KIP User Feedback`.
+2. Open **Extensions** -> **Apps Script**.
+3. Implement a `doGet(e)` handler that extracts query parameters (`token`, `category`, `message`, `workspace_id`, `timestamp`), verifies the token against a shared secret, and appends the row to `Sheet1`.
+   *(Note: Earlier v1.1 implementation used an HTTP POST webhook. During production validation, Google Apps Script returned HTTP 404 on POST requests before runtime invocation. Commit `ce1c42a` migrated transport to authenticated HTTPS GET query parameters, verified end-to-end).*
+4. Click **Deploy** -> **New deployment**.
+5. Select **Web app**, set **Execute as: Me**, and set **Who has access: Anyone**.
+6. Copy the Web App URL (ending in `/exec`).
+7. Note your shared secret token (e.g., generated with `python -c "import secrets; print(secrets.token_urlsafe(32))"`).
+
+### Step 3: Deploy Backend to Render
 1. Sign up at [render.com](https://render.com).
 2. Click **New +** -> **Web Service**.
 3. Connect your GitHub repository (`ArnavLegends/knowledge-intelligence-platform`).
@@ -100,9 +119,13 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
    - `EMBEDDING_MODEL`: `gemini-embedding-2`
    - `EMBEDDING_DIMENSIONS`: `768`
    - `LLM_API_KEY`: `<your-gemini-api-key>`
+   - `FEEDBACK_WEBHOOK_URL`: `https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec`
+   - `FEEDBACK_WEBHOOK_TOKEN`: `<your-shared-secret-token>`
+   - `MAX_DOCUMENTS_PER_WORKSPACE`: `50`
+   - `MAX_CHUNKS_PER_WORKSPACE`: `1000`
 7. Deploy the service. Note your Render URL (e.g. `https://kip-api.onrender.com`). Verify `https://kip-api.onrender.com/health` returns `{"status":"healthy"}`.
 
-### Step 3: Deploy Frontend to Streamlit Community Cloud
+### Step 4: Deploy Frontend to Streamlit Community Cloud
 1. Sign up at [share.streamlit.io](https://share.streamlit.io).
 2. Click **Create app**.
 3. Select the repository, branch `main`, and main file path: `frontend/app.py`.
@@ -111,3 +134,25 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
    KIP_API_BASE_URL = "https://kip-api.onrender.com"
    ```
 5. Deploy. Streamlit will use the repository's root `.streamlit/config.toml` and `requirements.txt`.
+
+---
+
+## 6. Verification and Smoke Testing
+
+Once all components are deployed:
+1. **Health Probe:**
+   ```bash
+   curl -s https://kip-api.onrender.com/health
+   # Expected: {"status":"healthy"}
+   ```
+2. **Frontend Availability:**
+   - Navigate to your Streamlit Community Cloud URL.
+   - Confirm the "Welcome to KIP" banner, workspace connection bar, and zero initial error toasts.
+3. **Workspace Ingestion & Qdrant Verification:**
+   - Click "Create New Workspace" or use the default.
+   - Upload a sample Markdown or PDF file.
+   - Verify indexing succeeds and appears in the Document Inventory with chunk count.
+   - Run a query and inspect the answer and provenance attribution card.
+4. **Feedback Persistence Verification:**
+   - Submit a test feedback entry ("Great retrieval speed").
+   - Confirm success toast in Streamlit and verify a new row appears in the linked Google Sheet.

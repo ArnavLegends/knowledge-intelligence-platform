@@ -1,18 +1,21 @@
 # Benchmarking & Evaluation
 
-**Document Version:** 1.1
-**Project Version:** v0.3 (Core Foundation)
-**Status:** Active — Methodology Document (No benchmarks executed yet)
+**Document Version:** 2.0
+**Project Version:** v1.1.0 (Feature Frozen)
+**Status:** Complete / Frozen — Mechanical Harness Implemented, Comparative Sweeps Scheduled for v1.2
 
 ---
 
 # Purpose
 
-This document defines the benchmarking methodology planned for the Knowledge Intelligence Platform.
+This document defines the benchmarking and evaluation methodology for the Knowledge Intelligence Platform.
 
-> **Current Status:** No benchmark experiments have been executed yet. The backend RAG engine is implemented and tested (116 unit/integration tests). Benchmark infrastructure — including evaluation datasets, metrics harnesses, and experiment runners — is planned for development alongside the v1.0 milestone. This document serves as the forward-looking methodology specification.
+> **Evaluation Status (v1.1.0):**  
+> The full test suite contains 245 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, and evaluation).  
+> The core evaluation subsystem was implemented in v1.0.0 (`evaluation/models.py` and `evaluation/runner.py`), coupled with a mechanical ground-truth baseline dataset (`benchmarks/kip_v1_baseline.json`, containing 5 grounded test cases). This harness deterministically measures Hit Rate, Exact Match, and Provenance Accuracy against mock or live providers without external dependencies.  
+> High-volume empirical sweeps across multiple retrieval algorithms (BM25 vs. dense vectors, chunk sizes, cross-encoder rerankers) are scheduled for v1.2 under the 14-step research lifecycle.
 
-Once implemented, benchmarking will provide objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
+Once fully scaled, benchmarking will provide objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
 
 The evaluation framework ensures that architectural and implementation decisions are supported by measurable data rather than subjective observations.
 
@@ -130,18 +133,21 @@ Metrics include:
 
 # Benchmark Metrics
 
-| Metric | Description |
-|---------|-------------|
-| Retrieval Precision | Percentage of retrieved documents that are relevant |
-| Retrieval Recall | Percentage of relevant documents successfully retrieved |
-| Faithfulness | Degree to which responses are supported by retrieved context |
-| Answer Relevancy | Alignment between the answer and the user's query |
-| Hallucination Rate | Frequency of unsupported information |
-| Latency | Time required to complete processing |
-| Throughput | Requests processed per second |
-| Memory Usage | Runtime memory consumption |
-| CPU Utilization | Processor usage during execution |
-| Storage Usage | Disk space consumed by datasets and indexes |
+| Metric | Description | Current Harness Support |
+|---------|-------------|-------------------------|
+| Hit Rate | Whether at least one expected context chunk was retrieved | Implemented (`evaluation/runner.py`) |
+| Exact Match | Whether generated answer matches ground-truth reference | Implemented (`evaluation/runner.py`) |
+| Provenance Accuracy | Whether returned source citations contain ground truth document IDs | Implemented (`evaluation/runner.py`) |
+| Retrieval Precision | Percentage of retrieved documents that are relevant | Planned (v1.2) |
+| Retrieval Recall | Percentage of relevant documents successfully retrieved | Planned (v1.2) |
+| Faithfulness | Degree to which responses are supported by retrieved context | Planned (v1.2) |
+| Answer Relevancy | Alignment between the answer and the user's query | Planned (v1.2) |
+| Hallucination Rate | Frequency of unsupported information | Planned (v1.2) |
+| Latency | Time required to complete processing | Planned (v1.2) |
+| Throughput | Requests processed per second | Planned (v1.2) |
+| Memory Usage | Runtime memory consumption | Planned (v1.3) |
+| CPU Utilization | Processor usage during execution | Planned (v1.3) |
+| Storage Usage | Disk space consumed by datasets and indexes | Planned (v1.3) |
 
 Whenever practical, benchmark results should include averages, standard deviations, confidence intervals, and sample sizes.
 
@@ -306,13 +312,13 @@ Recommended follow-up experiments.
 
 Every release should include benchmark comparisons against previous versions.
 
-> **Note:** No benchmark runs have been executed yet. The table below tracks planned benchmark targets. Results will be recorded here as the evaluation harness is implemented during v1.0.
-
-| Version | Retrieval | Latency | Faithfulness | Status |
-|----------|-----------|----------|--------------|--------|
-| v0.3 | — | — | — | Baseline / Not Yet Evaluated |
-| v1.0 | TBD | TBD | TBD | Planned |
-| v2.0 | TBD | TBD | TBD | Planned |
+| Version | Retrieval Strategy | Latency | Faithfulness / Accuracy | Status |
+|----------|-------------------|----------|-------------------------|--------|
+| v0.3 | Dense (ChromaDB + OpenAI) | — | — | Baseline Foundation |
+| v1.0 | Dense (ChromaDB + OpenAI) | Baseline | 100% Mechanical Pass (5 cases) | ✅ Verified (`evaluation/runner.py`) |
+| v1.1 | Dense (Qdrant Cloud + Gemini) | Baseline | Multi-Tenant Isolation Verified | ✅ Verified (Cloud & Local) |
+| v1.2 | Hybrid (BM25 + Qdrant) + Reranking | Comparative | Target: Improved NDCG/MRR | 🔬 Planned Candidate |
+| v2.0 | Memory-Augmented Retrieval | TBD | TBD | 📅 Planned → Deferred |
 
 Historical benchmark data should never be deleted. Once established, newer results should be appended to preserve longitudinal comparisons.
 
@@ -320,18 +326,19 @@ Historical benchmark data should never be deleted. Once established, newer resul
 
 # Evaluation Tools
 
-The following tools are planned for evaluation once the benchmark infrastructure is built during v1.0.
+### Current Implementation (v1.0.0 / v1.1.0)
 
-No external evaluation frameworks are currently integrated.
+- **Custom Evaluation Harness (`evaluation/runner.py`, `evaluation/models.py`):** Self-contained, lightweight evaluation engine capable of evaluating RAG retrieval hit rates, exact match answer generation, and provenance tracking without requiring heavy external evaluation dependencies.
+- **Automated Pytest Suite:** 245 unit and integration tests asserting component-level correctness across ingestion, embeddings, vector stores, API routes, and multitenancy.
 
-Planned tools include:
+### Planned Evaluation Tools (v1.2+)
 
-- RAGAS (planned)
-- DeepEval (planned)
-- LangSmith (planned)
-- MLflow (planned)
-- Weights & Biases (planned)
-- Custom evaluation scripts (planned)
+The following external tools are planned for comparative evaluation during v1.2:
+
+- RAGAS (planned for automated LLM-as-a-judge faithfulness and answer relevance)
+- DeepEval (planned for unit-test style evaluation assertions)
+- LangSmith / Weights & Biases (planned for experiment tracking and latency profiling)
+- MLflow (planned for version-to-version metric tracking)
 
 The evaluation framework should remain modular so that tools may be replaced without affecting the overall benchmarking methodology.
 
@@ -359,10 +366,11 @@ Whenever practical, benchmark reports should include tables, charts, and reprodu
 | Item | Value |
 |------|-------|
 | Document Owner | Project Maintainer |
-| Document Version | 1.1 |
-| Project Version | v0.3 (Core Foundation) |
-| Status | Active |
-| Last Reviewed | 2026-09-17 |
+| Project | Knowledge Intelligence Platform |
+| Document Version | 2.0 |
+| Project Version | v1.1.0 (Feature Frozen) |
+| Status | Complete / Frozen |
+| Last Reviewed | 2026-10-08 |
 
 ## Review Policy
 

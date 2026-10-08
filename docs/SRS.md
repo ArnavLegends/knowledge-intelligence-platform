@@ -1,8 +1,8 @@
 # Software Requirements Specification (SRS)
 
-**Document Version:** 1.0  
-**Project Version:** v0.1  
-**Status:** Active
+**Document Version:** 2.0  
+**Project Version:** v1.1.0 (Feature Frozen)  
+**Status:** Complete / Frozen
 
 ---
 
@@ -610,10 +610,10 @@ Requirement identifiers shall remain stable across future versions to preserve i
 | Item | Value |
 |------|-------|
 | Document Owner | Project Maintainer |
-| Document Version | 1.0 |
-| Project Version | v0.1 |
-| Status | Active |
-| Last Reviewed | YYYY-MM-DD |
+| Document Version | 2.0 |
+| Project Version | v1.1.0 (Feature Frozen) |
+| Status | Complete / Frozen |
+| Last Reviewed | 2026-10-08 |
 
 ## Review Policy
 
@@ -815,10 +815,10 @@ External references may include:
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 1.0 |
-| Project Version | v0.1 |
-| Status | Active |
-| Last Reviewed | YYYY-MM-DD |
+| Document Version | 2.0 |
+| Project Version | v1.1.0 (Feature Frozen) |
+| Status | Complete / Frozen |
+| Last Reviewed | 2026-10-08 |
 
 ## Review Policy
 
