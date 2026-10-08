@@ -62,6 +62,8 @@ if "uploader_key_version" not in st.session_state:
     st.session_state.uploader_key_version = 0
 if "last_index_result" not in st.session_state:
     st.session_state.last_index_result = None
+if "last_index_results" not in st.session_state:
+    st.session_state.last_index_results = []
 
 
 # ---------------------------------------------------------------------------
@@ -233,6 +235,7 @@ with st.sidebar:
         st.session_state.last_query = ""
         st.session_state.docs_loaded_for_ws = st.session_state.workspace_id
         st.session_state.last_index_result = None
+        st.session_state.last_index_results = []
         st.rerun()
 
     st.divider()
@@ -254,6 +257,7 @@ with st.sidebar:
             st.session_state.last_sources = []
             st.session_state.last_query = ""
             st.session_state.last_index_result = None
+            st.session_state.last_index_results = []
             st.rerun()
         else:
             st.error("Please enter a valid workspace token (minimum 8 characters).")
@@ -311,10 +315,11 @@ with col_left:
     st.subheader("Upload Documents")
 
     uploader_key = f"file_uploader_{st.session_state.uploader_key_version}"
-    uploaded_file = st.file_uploader(
-        "Select a document to index into this workspace",
+    uploaded_files = st.file_uploader(
+        "Select documents to index into this workspace",
         type=SUPPORTED_TYPES,
-        help=f"Supported: {', '.join(f'.{t}' for t in SUPPORTED_TYPES)}. Max {MAX_UPLOAD_MB} MB.",
+        accept_multiple_files=True,
+        help=f"Supported: {', '.join(f'.{t}' for t in SUPPORTED_TYPES)}. Max {MAX_UPLOAD_MB} MB per file.",
         key=uploader_key,
     )
 
@@ -327,53 +332,123 @@ with col_left:
         help="Number of chunks to retrieve for answering questions.",
     )
 
-    if uploaded_file is not None:
-        file_bytes = uploaded_file.getvalue()
-        file_size_mb = len(file_bytes) / (1024 * 1024)
-        ext = (
-            uploaded_file.name.rsplit(".", 1)[-1].upper()
-            if "." in uploaded_file.name
-            else "FILE"
-        )
+    if uploaded_files:
+        count = len(uploaded_files)
+        doc_word = "Document" if count == 1 else "Documents"
+        st.markdown(f"**Selected {count} {doc_word}:**")
 
-        st.markdown(
-            f"**Selected:** `{uploaded_file.name}`  \n"
-            f"*{file_size_mb:.2f} MB · {ext}*"
-        )
+        oversized_files = []
+        for uf in uploaded_files:
+            file_bytes = uf.getvalue()
+            file_size_mb = len(file_bytes) / (1024 * 1024)
+            ext = (
+                uf.name.rsplit(".", 1)[-1].upper()
+                if "." in uf.name
+                else "FILE"
+            )
+            if file_size_mb > MAX_UPLOAD_MB:
+                oversized_files.append((uf.name, file_size_mb))
+                st.markdown(
+                    f"- ⚠️ `{uf.name}` *({file_size_mb:.2f} MB · {ext})* — **Exceeds {MAX_UPLOAD_MB} MB limit**"
+                )
+            else:
+                st.markdown(
+                    f"- 📄 `{uf.name}` *({file_size_mb:.2f} MB · {ext})*"
+                )
 
-        if file_size_mb > MAX_UPLOAD_MB:
+        if oversized_files:
+            oversized_names = ", ".join(f"'{name}'" for name, _ in oversized_files)
             st.error(
-                f"File size ({file_size_mb:.1f} MB) exceeds maximum allowed {MAX_UPLOAD_MB} MB."
+                f"File size exceeds maximum allowed {MAX_UPLOAD_MB} MB: {oversized_names}. "
+                "Please remove oversized files to proceed."
             )
         else:
-            if st.button("Index Document", type="primary", use_container_width=True):
-                with st.spinner(f"Indexing '{uploaded_file.name}'…"):
-                    try:
-                        result = _upload_document(
-                            file_bytes,
-                            uploaded_file.name,
-                            uploaded_file.type or "application/octet-stream",
-                        )
-                        chunks_indexed = result.get("chunks_indexed", 0)
-                        st.session_state.last_index_result = {
-                            "success": True,
-                            "filename": result.get("filename", uploaded_file.name),
-                            "chunks": chunks_indexed,
-                        }
-                        # Synchronize documents list
-                        st.session_state.uploaded_docs = _fetch_workspace_documents()
-                        # Reset file uploader widget
-                        st.session_state.uploader_key_version += 1
-                        st.rerun()
-                    except requests.HTTPError as e:
-                        st.error(f"Upload failed: {_api_error_message(e)}")
-                    except requests.ConnectionError:
-                        st.error("Cannot reach the backend. Is it running?")
-                    except Exception as e:
-                        st.error(f"Unexpected error during upload: {e}")
+            button_label = f"Index {count} {doc_word}"
+            if st.button(button_label, type="primary", use_container_width=True):
+                results = []
+                for uf in uploaded_files:
+                    file_bytes = uf.getvalue()
+                    file_size_mb = len(file_bytes) / (1024 * 1024)
+                    if file_size_mb > MAX_UPLOAD_MB:
+                        results.append({
+                            "status": "FAILED",
+                            "filename": uf.name,
+                            "error": f"File size ({file_size_mb:.1f} MB) exceeds maximum allowed {MAX_UPLOAD_MB} MB.",
+                        })
+                        continue
+
+                    with st.spinner(f"Indexing '{uf.name}'…"):
+                        try:
+                            result = _upload_document(
+                                file_bytes,
+                                uf.name,
+                                uf.type or "application/octet-stream",
+                            )
+                            chunks_indexed = result.get("chunks_indexed", 0)
+                            if chunks_indexed > 0:
+                                results.append({
+                                    "status": "SUCCESS",
+                                    "filename": result.get("filename", uf.name),
+                                    "chunks": chunks_indexed,
+                                })
+                            else:
+                                results.append({
+                                    "status": "ALREADY INDEXED",
+                                    "filename": result.get("filename", uf.name),
+                                    "chunks": 0,
+                                })
+                        except requests.HTTPError as e:
+                            results.append({
+                                "status": "FAILED",
+                                "filename": uf.name,
+                                "error": _api_error_message(e),
+                            })
+                        except requests.ConnectionError:
+                            results.append({
+                                "status": "FAILED",
+                                "filename": uf.name,
+                                "error": "Cannot reach the backend. Is it running?",
+                            })
+                        except Exception as e:
+                            results.append({
+                                "status": "FAILED",
+                                "filename": uf.name,
+                                "error": str(e),
+                            })
+
+                st.session_state.last_index_results = results
+                if results:
+                    st.session_state.last_index_result = {
+                        "success": any(r["status"] == "SUCCESS" for r in results),
+                        "filename": results[0].get("filename", ""),
+                        "chunks": results[0].get("chunks", 0),
+                    }
+                # Synchronize documents list
+                st.session_state.uploaded_docs = _fetch_workspace_documents()
+                # Reset file uploader widget safely
+                st.session_state.uploader_key_version += 1
+                st.rerun()
 
     # Display indexing feedback if present
-    if st.session_state.last_index_result:
+    if st.session_state.last_index_results:
+        for res in st.session_state.last_index_results:
+            status = res.get("status")
+            filename = res.get("filename", "Document")
+            if status == "SUCCESS":
+                chunks = res.get("chunks", 0)
+                st.success(
+                    f"✅ **{filename}** newly indexed successfully — {chunks} chunks stored."
+                )
+            elif status == "ALREADY INDEXED":
+                st.info(
+                    f"ℹ️ **{filename}** was already indexed in this workspace."
+                )
+            elif status == "FAILED":
+                err = res.get("error", "Indexing failed")
+                st.error(
+                    f"❌ **{filename}** failed: {err}"
+                )
+    elif st.session_state.last_index_result:
         idx_res = st.session_state.last_index_result
         if idx_res.get("chunks", 0) > 0:
             st.success(
@@ -389,8 +464,12 @@ with col_left:
     st.divider()
     if st.session_state.uploaded_docs:
         st.markdown("#### Workspace Documents")
+        seen_doc_ids = set()
         for doc in st.session_state.uploaded_docs:
             doc_id = doc.get("document_id", doc.get("id", "unknown"))
+            if doc_id in seen_doc_ids:
+                continue
+            seen_doc_ids.add(doc_id)
             chunks = doc.get("chunks_indexed", 0)
             filename = doc.get("filename", "document")
             with st.expander(
@@ -409,7 +488,7 @@ with col_left:
     else:
         st.info(
             "No documents indexed in this workspace yet. "
-            "Select a file above and click Index Document."
+            "Select documents above and click Index."
         )
 
 # ---------------------------------------------------------------------------

@@ -32,10 +32,13 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
 
     def embed(self, request: EmbeddingRequest) -> list[Embedding]:
         model = request.model or self._default_model
-        texts = [inp.text for inp in request.inputs]
-
-        if not texts:
+        if not request.inputs:
             return []
+
+        contents = [
+            types.Content(parts=[types.Part.from_text(text=inp.text)])
+            for inp in request.inputs
+        ]
 
         embed_config = None
         if self._output_dimensionality:
@@ -47,7 +50,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
                 embed_config = {"output_dimensionality": self._output_dimensionality}
 
         try:
-            kwargs = {"model": model, "contents": texts}
+            kwargs = {"model": model, "contents": contents}
             if embed_config is not None:
                 kwargs["config"] = embed_config
 
@@ -55,11 +58,11 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         except Exception as e:
             raise EmbeddingProviderError(f"Gemini embedding failed: {e}") from e
 
-        if not response.embeddings or len(response.embeddings) != len(texts):
+        if not response.embeddings or len(response.embeddings) != len(request.inputs):
             num_embeds = len(response.embeddings) if response.embeddings else 0
             raise EmbeddingProviderError(
                 f"Gemini embedding returned incorrect number of results. "
-                f"Expected {len(texts)}, got {num_embeds}."
+                f"Expected {len(request.inputs)}, got {num_embeds}."
             )
 
         embeddings = []

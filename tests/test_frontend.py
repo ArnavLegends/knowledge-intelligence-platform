@@ -224,9 +224,9 @@ class TestFrontendInteractionFlows:
 
         # Selection alone must not trigger POST
         mock_post.assert_not_called()
-        # Verify 'Index Document' button is now available
+        # Verify 'Index 1 Document' button is now available
         button_labels = [b.label for b in at.button]
-        assert "Index Document" in button_labels
+        assert "Index 1 Document" in button_labels
 
     @patch("frontend.app.requests.get")
     @patch("frontend.app.requests.post")
@@ -243,7 +243,7 @@ class TestFrontendInteractionFlows:
         at.file_uploader[0].upload("research.pdf", b"Test PDF contents")
         at.run()
 
-        index_btn = [b for b in at.button if b.label == "Index Document"][0]
+        index_btn = [b for b in at.button if b.label == "Index 1 Document"][0]
         index_btn.click().run()
 
         assert mock_post.call_count == 1
@@ -345,7 +345,7 @@ class TestFrontendInteractionFlows:
         at.file_uploader[0].upload("doc.txt", b"Content")
         at.run()
 
-        idx_btn = [b for b in at.button if b.label == "Index Document"][0]
+        idx_btn = [b for b in at.button if b.label == "Index 1 Document"][0]
         idx_btn.click().run()
 
         # Success banner should be visible
@@ -356,9 +356,128 @@ class TestFrontendInteractionFlows:
 
         # File uploader key incremented and file cleared
         assert at.file_uploader[0].value is None or at.file_uploader[0].value == []
-        # Index Document button should no longer be present
+        # Index button should no longer be present
         button_labels = [b.label for b in at.button]
-        assert "Index Document" not in button_labels
+        assert not any(b.startswith("Index ") for b in button_labels)
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_multi_file_selection_and_button_label(self, mock_post, mock_get):
+        """Verify selecting multiple files displays count and does not upload prematurely."""
+        self._mock_get_healthy(mock_get)
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+        at.file_uploader[0].upload("doc1.pdf", b"Doc 1 content")
+        at.file_uploader[0].upload("doc2.docx", b"Doc 2 content")
+        at.file_uploader[0].upload("doc3.txt", b"Doc 3 content")
+        at.run()
+
+        # No automatic upload
+        mock_post.assert_not_called()
+
+        # Button indicates exact document count
+        button_labels = [b.label for b in at.button]
+        assert "Index 3 Documents" in button_labels
+
+        # UI displays selected files
+        markdown_texts = [m.value for m in at.markdown]
+        assert any("doc1.pdf" in m for m in markdown_texts)
+        assert any("doc2.docx" in m for m in markdown_texts)
+        assert any("doc3.txt" in m for m in markdown_texts)
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_multi_file_indexing_sent_independently(self, mock_post, mock_get):
+        """Verify multiple files are sent sequentially to existing single-doc endpoint."""
+        self._mock_get_healthy(mock_get)
+        mock_post.side_effect = [
+            MagicMock(status_code=200, json=lambda: {"filename": "alpha.pdf", "chunks_indexed": 6}),
+            MagicMock(status_code=200, json=lambda: {"filename": "beta.docx", "chunks_indexed": 4}),
+        ]
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+        at.file_uploader[0].upload("alpha.pdf", b"Alpha content")
+        at.file_uploader[0].upload("beta.docx", b"Beta content")
+        at.run()
+
+        index_btn = [b for b in at.button if b.label == "Index 2 Documents"][0]
+        index_btn.click().run()
+
+        # Both documents sent independently
+        assert mock_post.call_count == 2
+        call_ws_headers = [
+            c[1].get("headers", {}).get("X-KIP-Workspace-ID")
+            for c in mock_post.call_args_list
+        ]
+        # Both must share the same workspace
+        assert call_ws_headers[0] == call_ws_headers[1]
+        assert len(call_ws_headers[0]) >= 8
+
+        # Feedback displays per-document success
+        success_texts = [s.value for s in at.success]
+        assert any("alpha.pdf" in s and "6 chunks" in s for s in success_texts)
+        assert any("beta.docx" in s and "4 chunks" in s for s in success_texts)
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_multi_file_failure_resilience(self, mock_post, mock_get):
+        """Verify failure of one document does NOT stop remaining documents."""
+        self._mock_get_healthy(mock_get)
+        err_resp = MagicMock(status_code=500)
+        err_resp.json.return_value = {"detail": "Parser crashed"}
+        http_err = requests.HTTPError("500 Server Error", response=err_resp)
+
+        mock_post.side_effect = [
+            MagicMock(status_code=200, json=lambda: {"filename": "good1.txt", "chunks_indexed": 2}),
+            http_err,
+            MagicMock(status_code=200, json=lambda: {"filename": "good2.txt", "chunks_indexed": 5}),
+        ]
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+        at.file_uploader[0].upload("good1.txt", b"Good 1")
+        at.file_uploader[0].upload("bad.docx", b"Corrupt")
+        at.file_uploader[0].upload("good2.txt", b"Good 2")
+        at.run()
+
+        index_btn = [b for b in at.button if b.label == "Index 3 Documents"][0]
+        index_btn.click().run()
+
+        # All 3 files attempted despite failure of the second
+        assert mock_post.call_count == 3
+
+        # Successes reported
+        success_texts = [s.value for s in at.success]
+        assert any("good1.txt" in s for s in success_texts)
+        assert any("good2.txt" in s for s in success_texts)
+
+        # Failure reported for bad.docx
+        error_texts = [e.value for e in at.error]
+        assert any("bad.docx" in e and "Parser crashed" in e for e in error_texts)
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_multi_file_duplicate_idempotency_feedback(self, mock_post, mock_get):
+        """Verify already indexed document produces ALREADY INDEXED info message."""
+        self._mock_get_healthy(mock_get)
+        mock_post.return_value = MagicMock(
+            status_code=200,
+            json=lambda: {"filename": "existing.pdf", "chunks_indexed": 0},
+        )
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+        at.file_uploader[0].upload("existing.pdf", b"Content")
+        at.run()
+
+        index_btn = [b for b in at.button if b.label == "Index 1 Document"][0]
+        index_btn.click().run()
+
+        info_texts = [i.value for i in at.info]
+        assert any("existing.pdf" in i and "already indexed" in i for i in info_texts)
+
 
     @patch("frontend.app.requests.get")
     def test_workspace_switching_fetches_new_documents(self, mock_get):
