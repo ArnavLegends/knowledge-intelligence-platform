@@ -46,6 +46,7 @@ class Settings(BaseSettings):
         "base to answer your question."
     )
     feedback_webhook_url: str | None = None
+    feedback_webhook_token: str | None = None
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:
