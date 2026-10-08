@@ -160,3 +160,129 @@ def test_rag_service_propagates_llm_failure():
 
     with pytest.raises(RAGError):
         service.answer(RAGRequest(query="test"))
+
+
+def test_rag_service_top_k_5():
+    """Verify Top-K=5 retrieval and generation flow."""
+    mock_retrieval = Mock()
+    mock_llm = Mock()
+    chunks = [
+        RetrievedChunk(id=f"c{i}", text=f"chunk {i}", score=1.0 - i * 0.1, metadata={})
+        for i in range(1, 6)
+    ]
+    mock_retrieval.search.return_value = chunks
+    mock_llm.generate.return_value = LLMResponse(
+        content="Answer for top-k=5", model="model", provider="fake"
+    )
+
+    service = RAGService(retrieval_service=mock_retrieval, llm_service=mock_llm)
+    resp = service.answer(RAGRequest(query="test top 5", top_k=5))
+
+    assert resp.answer == "Answer for top-k=5"
+    assert len(resp.sources) == 5
+    call_query = mock_retrieval.search.call_args[0][0]
+    assert call_query.top_k == 5
+
+
+def test_rag_service_top_k_10_returns_up_to_10_ranked_chunks():
+    """Verify Top-K=10 returns up to 10 ranked chunks across separate retrieval and LLM stages."""
+    mock_retrieval = Mock()
+    mock_llm = Mock()
+    chunks = [
+        RetrievedChunk(
+            id=f"c{i}",
+            document_id=f"doc_{i % 3}",
+            text=f"chunk text {i}",
+            score=1.0 - i * 0.05,
+            metadata={"workspace_id": "ws-test"},
+        )
+        for i in range(1, 11)
+    ]
+    mock_retrieval.search.return_value = chunks
+    mock_llm.generate.return_value = LLMResponse(
+        content="Answer using 10 chunks", model="model", provider="fake"
+    )
+
+    service = RAGService(retrieval_service=mock_retrieval, llm_service=mock_llm)
+    resp = service.answer(RAGRequest(query="multi-doc query", top_k=10, workspace_id="ws-test"))
+
+    # Separate stages: retrieval called with top_k=10
+    mock_retrieval.search.assert_called_once()
+    retrieval_arg = mock_retrieval.search.call_args[0][0]
+    assert retrieval_arg.top_k == 10
+
+    # Context contains all 10 sources
+    mock_llm.generate.assert_called_once()
+    llm_arg = mock_llm.generate.call_args[0][0]
+    user_prompt = llm_arg.messages[1].content
+    for i in range(1, 11):
+        assert f"Source {i}" in user_prompt
+        assert f"chunk text {i}" in user_prompt
+
+    # Sources returned in response match all 10 chunks in rank order
+    assert len(resp.sources) == 10
+    for i, src in enumerate(resp.sources, start=1):
+        assert src.rank == i
+        assert src.chunk_id == f"c{i}"
+    assert resp.answer == "Answer using 10 chunks"
+
+
+def test_rag_service_surfaces_provider_failure_without_fake_answer():
+    """Verify LLM provider failure is surfaced cleanly rather than converted to fake answer."""
+    mock_retrieval = Mock()
+    mock_llm = Mock()
+    chunks = [
+        RetrievedChunk(id=f"c{i}", text=f"chunk {i}", score=0.9, metadata={})
+        for i in range(1, 11)
+    ]
+    mock_retrieval.search.return_value = chunks
+    mock_llm.generate.side_effect = Exception("Language model provider quota or rate limit exceeded.")
+
+    service = RAGService(retrieval_service=mock_retrieval, llm_service=mock_llm)
+
+    with pytest.raises(RAGError) as exc_info:
+        service.answer(RAGRequest(query="test", top_k=10))
+
+    assert "quota or rate limit exceeded" in str(exc_info.value)
+
+
+@pytest.mark.parametrize("k", [1, 2, 5, 10, 15, 20])
+def test_rag_service_top_k_range_robust(k: int):
+    """Verify Top-K range works across full slider range 1..20 without silent capping."""
+    mock_retrieval = Mock()
+    mock_llm = Mock()
+    chunks = [
+        RetrievedChunk(
+            id=f"c{i}",
+            document_id=f"doc_{i % 4}",
+            text=f"knowledge content {i}",
+            score=1.0 - i * 0.02,
+            metadata={"workspace_id": "ws-k"},
+        )
+        for i in range(1, k + 1)
+    ]
+    mock_retrieval.search.return_value = chunks
+    mock_llm.generate.return_value = LLMResponse(
+        content=f"Answer for K={k}", model="gemini-2.5-flash", provider="gemini"
+    )
+
+    service = RAGService(retrieval_service=mock_retrieval, llm_service=mock_llm)
+    resp = service.answer(RAGRequest(query="test query", top_k=k, workspace_id="ws-k"))
+
+    # Selected K is passed accurately to retrieval without alteration
+    mock_retrieval.search.assert_called_once()
+    retrieval_arg = mock_retrieval.search.call_args[0][0]
+    assert retrieval_arg.top_k == k
+
+    # Context assembly included all k sources
+    mock_llm.generate.assert_called_once()
+    llm_arg = mock_llm.generate.call_args[0][0]
+    user_prompt = llm_arg.messages[1].content
+    for i in range(1, k + 1):
+        assert f"Source {i}" in user_prompt
+        assert f"knowledge content {i}" in user_prompt
+
+    # Response sources contain all k items in order
+    assert len(resp.sources) == k
+    assert resp.sources[-1].rank == k
+    assert resp.answer == f"Answer for K={k}"

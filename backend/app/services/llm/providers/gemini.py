@@ -34,8 +34,47 @@ class GeminiProvider(LLMProvider):
                 contents=contents,
                 config=config,
             )
-        except Exception:
-            logger.exception("Gemini provider request failed")
+        except Exception as exc:
+            logger.exception("Gemini provider request failed: %s", exc)
+            exc_str = str(exc).lower()
+            code_attr = getattr(exc, "code", None)
+
+            # Check for rate limit / quota exhaustion
+            if (
+                code_attr == 429
+                or "429" in exc_str
+                or "resource_exhausted" in exc_str
+                or "quota" in exc_str
+                or "rate limit" in exc_str
+            ):
+                raise LLMProviderError(
+                    "Language model provider quota or rate limit exceeded. Please wait a moment and try again."
+                ) from None
+
+            # Check for context length / request size constraints
+            if (
+                "context length" in exc_str
+                or ("token" in exc_str and "exceed" in exc_str)
+                or "request payload size" in exc_str
+                or "too large" in exc_str
+            ):
+                raise LLMProviderError(
+                    "Language model provider request rejected due to request size or context constraints."
+                ) from None
+
+            # Check for temporary service unavailability / timeout
+            if (
+                code_attr in (503, 504)
+                or "503" in exc_str
+                or "504" in exc_str
+                or "unavailable" in exc_str
+                or "deadline_exceeded" in exc_str
+                or "timeout" in exc_str
+            ):
+                raise LLMProviderError(
+                    "Language model provider is temporarily unavailable or timed out. Please try again shortly."
+                ) from None
+
             raise LLMProviderError("Language model provider request failed.") from None
 
         try:

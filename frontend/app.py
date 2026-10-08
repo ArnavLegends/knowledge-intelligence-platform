@@ -31,6 +31,7 @@ API_BASE = os.getenv("KIP_API_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 API_DOCS = f"{API_BASE}/docs"
 DOCUMENTS_ENDPOINT = f"{API_BASE}/api/v1/documents"
 RAG_ENDPOINT = f"{API_BASE}/api/v1/rag/answer"
+FEEDBACK_ENDPOINT = f"{API_BASE}/api/v1/feedback"
 HEALTH_ENDPOINT = f"{API_BASE}/health"
 
 SUPPORTED_TYPES = ["txt", "md", "markdown", "pdf", "docx"]
@@ -56,6 +57,10 @@ if "last_sources" not in st.session_state:
     st.session_state.last_sources = []
 if "last_query" not in st.session_state:
     st.session_state.last_query = ""
+if "last_query_error" not in st.session_state:
+    st.session_state.last_query_error = None
+if "query_key_version" not in st.session_state:
+    st.session_state.query_key_version = 0
 if "docs_loaded_for_ws" not in st.session_state:
     st.session_state.docs_loaded_for_ws = None
 if "uploader_key_version" not in st.session_state:
@@ -64,6 +69,10 @@ if "last_index_result" not in st.session_state:
     st.session_state.last_index_result = None
 if "last_index_results" not in st.session_state:
     st.session_state.last_index_results = []
+if "feedback_status" not in st.session_state:
+    st.session_state.feedback_status = None
+if "feedback_key_version" not in st.session_state:
+    st.session_state.feedback_key_version = 0
 
 
 # ---------------------------------------------------------------------------
@@ -209,6 +218,12 @@ if (
     and st.runtime.exists()
     and st.session_state.docs_loaded_for_ws != st.session_state.workspace_id
 ):
+    if st.session_state.docs_loaded_for_ws is not None:
+        st.session_state.last_query = ""
+        st.session_state.last_answer = None
+        st.session_state.last_sources = []
+        st.session_state.last_query_error = None
+        st.session_state.query_key_version += 1
     st.session_state.uploaded_docs = _fetch_workspace_documents()
     st.session_state.docs_loaded_for_ws = st.session_state.workspace_id
 
@@ -233,6 +248,8 @@ with st.sidebar:
         st.session_state.last_answer = None
         st.session_state.last_sources = []
         st.session_state.last_query = ""
+        st.session_state.last_query_error = None
+        st.session_state.query_key_version += 1
         st.session_state.docs_loaded_for_ws = st.session_state.workspace_id
         st.session_state.last_index_result = None
         st.session_state.last_index_results = []
@@ -256,6 +273,8 @@ with st.sidebar:
             st.session_state.last_answer = None
             st.session_state.last_sources = []
             st.session_state.last_query = ""
+            st.session_state.last_query_error = None
+            st.session_state.query_key_version += 1
             st.session_state.last_index_result = None
             st.session_state.last_index_results = []
             st.rerun()
@@ -298,6 +317,35 @@ if hasattr(st, "runtime") and st.runtime.exists():
             st.rerun()
     else:
         st.error(status_msg, icon=None)
+
+# Public orientation section
+with st.expander("👋 Welcome to KIP — Start Here", expanded=False):
+    st.markdown("### Welcome to KIP")
+    st.markdown(
+        "KIP (Knowledge Intelligence Platform) is a multi-document RAG system "
+        "that lets you upload documents, retrieve relevant knowledge, and ask grounded "
+        "questions about them."
+    )
+    st.markdown("#### How to test")
+    st.markdown(
+        "1. Upload one or more TXT, Markdown, PDF, or DOCX files.\n"
+        "2. Ask a question about the uploaded documents.\n"
+        "3. Try a cross-document question.\n"
+        "4. Try a question whose answer is NOT in the documents.\n"
+        "5. Check whether the returned answer is actually supported by the sources."
+    )
+    st.markdown("#### What helps us")
+    st.markdown(
+        "We are especially looking for:\n"
+        "- incorrect or unsupported answers\n"
+        "- irrelevant retrieval\n"
+        "- missing information\n"
+        "- cross-document mistakes\n"
+        "- unexpected errors\n"
+        "- slow or confusing behavior\n"
+        "- UX problems\n"
+        "- improvement ideas"
+    )
 
 st.divider()
 
@@ -498,12 +546,13 @@ with col_left:
 with col_right:
     st.subheader("Ask a Question")
 
+    query_key = f"query_input_{st.session_state.query_key_version}"
     query = st.text_area(
         "Enter your question",
         value=st.session_state.last_query,
         height=100,
         placeholder="What is the main topic of the uploaded document?",
-        key="query_input",
+        key=query_key,
     )
 
     ask_btn = st.button("Ask", type="primary", use_container_width=True)
@@ -513,6 +562,7 @@ with col_right:
             st.warning("Please enter a question before submitting.")
         else:
             st.session_state.last_query = query
+            st.session_state.last_query_error = None
             with st.spinner("Retrieving workspace context and generating answer…"):
                 try:
                     data = _ask_question(query.strip(), top_k)
@@ -520,13 +570,22 @@ with col_right:
                     st.session_state.last_sources = data.get("sources", [])
                 except requests.HTTPError as e:
                     st.session_state.last_answer = None
-                    st.error(f"Query failed: {_api_error_message(e)}")
+                    st.session_state.last_sources = []
+                    err_msg = f"Query failed: {_api_error_message(e)}"
+                    st.session_state.last_query_error = err_msg
+                    st.error(err_msg)
                 except requests.ConnectionError:
                     st.session_state.last_answer = None
-                    st.error("Cannot reach the backend. Is it running?")
+                    st.session_state.last_sources = []
+                    err_msg = "Cannot reach the backend. Is it running?"
+                    st.session_state.last_query_error = err_msg
+                    st.error(err_msg)
                 except Exception as e:
                     st.session_state.last_answer = None
-                    st.error(f"Unexpected error: {e}")
+                    st.session_state.last_sources = []
+                    err_msg = f"Unexpected error: {e}"
+                    st.session_state.last_query_error = err_msg
+                    st.error(err_msg)
 
     # Display answer
     if st.session_state.last_answer is not None:
@@ -562,6 +621,79 @@ with col_right:
             )
 
 st.divider()
+
+# Feedback collection
+with st.expander("💬 Help Improve KIP", expanded=False):
+    st.subheader("Help Improve KIP")
+    st.caption(
+        "Found a bug, incorrect answer, retrieval problem, confusing behavior, or improvement idea?"
+    )
+    fb_category = st.selectbox(
+        "Category",
+        options=[
+            "Bug",
+            "Incorrect Answer",
+            "Retrieval",
+            "UX",
+            "Performance",
+            "Improvement Idea",
+            "Other",
+        ],
+        key="feedback_category_select",
+    )
+    fb_key = f"feedback_msg_{st.session_state.feedback_key_version}"
+    fb_message = st.text_area(
+        "Feedback (up to 30 words)",
+        height=80,
+        placeholder="Describe the issue or suggestion…",
+        key=fb_key,
+    )
+    fb_words = fb_message.strip().split() if fb_message.strip() else []
+    fb_word_count = len(fb_words)
+    st.caption(f"{fb_word_count} / 30 words")
+
+    fb_send_btn = st.button("Send Feedback", key="send_feedback_btn")
+    if fb_send_btn:
+        if fb_word_count == 0:
+            st.warning("Please enter feedback before submitting.")
+        elif fb_word_count > 30:
+            st.error(
+                f"Feedback exceeds maximum of 30 words ({fb_word_count} / 30 words). Please shorten before sending."
+            )
+        else:
+            try:
+                fb_payload = {
+                    "category": fb_category,
+                    "message": fb_message.strip(),
+                    "workspace_id": st.session_state.workspace_id,
+                }
+                res = requests.post(FEEDBACK_ENDPOINT, json=fb_payload, timeout=10)
+                res.raise_for_status()
+                st.session_state.feedback_status = (
+                    "success",
+                    "Thanks — your feedback has been recorded.",
+                )
+                st.session_state.feedback_key_version += 1
+                st.rerun()
+            except requests.HTTPError as e:
+                err_msg = _api_error_message(e)
+                st.session_state.feedback_status = (
+                    "error",
+                    f"Feedback submission failed: {_api_error_message(e)}",
+                )
+            except Exception as e:
+                st.session_state.feedback_status = (
+                    "error",
+                    f"Feedback submission failed: {e}",
+                )
+
+    if st.session_state.feedback_status:
+        kind, text = st.session_state.feedback_status
+        if kind == "success":
+            st.success(text)
+        else:
+            st.error(text)
+
 st.caption(
     "KIP v1.1.0 · Knowledge Intelligence Platform · "
     "FastAPI + ChromaDB / Qdrant multi-tenant cloud architecture."

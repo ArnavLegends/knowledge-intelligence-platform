@@ -540,3 +540,212 @@ class TestFrontendInteractionFlows:
         excerpt_expanders = [e for e in at.expander if "retrieved excerpt" in e.label]
         assert len(excerpt_expanders) == 1
         assert excerpt_expanders[0].proto.expanded is False
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_create_new_workspace_resets_question_answer_error_sources(
+        self, mock_post, mock_get
+    ):
+        """A: Creating a new workspace clears question, answer, error, and sources."""
+        self._mock_get_healthy(mock_get)
+        mock_post.return_value = MagicMock(
+            status_code=200,
+            json=lambda: {"answer": "Previous workspace answer.", "sources": [{"document_id": "d1"}]},
+        )
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        # Ask a question in the initial workspace
+        at.text_area[0].input("Question in old workspace").run()
+        ask_btn = [b for b in at.button if b.label == "Ask"][0]
+        ask_btn.click().run()
+
+        assert at.text_area[0].value == "Question in old workspace"
+        assert at.session_state["last_answer"] == "Previous workspace answer."
+
+        # Click Create New Workspace
+        create_btn = [b for b in at.button if b.label == "Create New Workspace"][0]
+        create_btn.click().run()
+
+        # Verify question input is completely cleared and not retained
+        assert at.text_area[0].value == ""
+        assert at.session_state["last_query"] == ""
+        assert at.session_state["last_answer"] is None
+        assert at.session_state["last_sources"] == []
+        assert at.session_state["last_query_error"] is None
+        assert at.session_state["uploaded_docs"] == []
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_connect_workspace_resets_question_and_preserves_documents(
+        self, mock_post, mock_get
+    ):
+        """B: Connecting to another workspace clears question/answer while preserving docs."""
+        existing_docs = [
+            {"document_id": "doc-alpha", "filename": "report.pdf", "chunks_indexed": 10}
+        ]
+        self._mock_get_healthy(mock_get, docs=existing_docs)
+        mock_post.return_value = MagicMock(
+            status_code=200,
+            json=lambda: {"answer": "Some answer", "sources": []},
+        )
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        # Enter question in current workspace
+        at.text_area[0].input("Old question before reconnect").run()
+        assert at.text_area[0].value == "Old question before reconnect"
+
+        # Reconnect to another workspace
+        at.text_input(key="resume_input").input("target-token-12345678").run()
+        connect_btn = [b for b in at.button if b.label == "Connect"][0]
+        connect_btn.click().run()
+
+        # Verify question and answer are cleared
+        assert at.text_area[0].value == ""
+        assert at.session_state["last_query"] == ""
+        assert at.session_state["last_answer"] is None
+        assert at.session_state["last_sources"] == []
+        assert at.session_state["last_query_error"] is None
+
+        # Verify connected workspace documents remain intact
+        assert len(at.session_state["uploaded_docs"]) == 1
+        assert at.session_state["uploaded_docs"][0]["filename"] == "report.pdf"
+
+
+class TestFrontendPublicOrientationAndFeedback:
+    """Test public orientation intro section and persistent feedback box."""
+
+    def _mock_get_healthy(self, mock_get, docs=None):
+        mock_resp = MagicMock(status_code=200)
+        mock_resp.json.return_value = docs or []
+        mock_get.return_value = mock_resp
+
+    @patch("frontend.app.requests.get")
+    def test_public_orientation_content_renders(self, mock_get):
+        """Orientation content renders with title, testing guide, and what helps us."""
+        self._mock_get_healthy(mock_get)
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        all_markdown = [m.value for m in at.markdown]
+        assert any("Welcome to KIP" in m for m in all_markdown)
+        assert any("How to test" in m for m in all_markdown)
+        assert any("What helps us" in m for m in all_markdown)
+        assert any("incorrect or unsupported answers" in m for m in all_markdown)
+
+    @patch("frontend.app.requests.get")
+    def test_feedback_components_render(self, mock_get):
+        """Feedback section renders with category selectbox, text area, and live word counter."""
+        self._mock_get_healthy(mock_get)
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        # Category selectbox
+        assert len(at.selectbox) >= 1
+        cat_box = [s for s in at.selectbox if s.label == "Category"][0]
+        assert "Bug" in cat_box.options
+        assert "Improvement Idea" in cat_box.options
+        assert "UX" in cat_box.options
+
+        # Feedback text area and counter
+        fb_text_areas = [t for t in at.text_area if "Feedback" in t.label]
+        assert len(fb_text_areas) == 1
+        assert any("0 / 30 words" in c.value for c in at.caption)
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_feedback_word_limit_enforced(self, mock_post, mock_get):
+        """Feedback exceeding 30 words displays error and is rejected before sending."""
+        self._mock_get_healthy(mock_get)
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        long_message = "word " * 32
+        fb_area = [t for t in at.text_area if "Feedback" in t.label][0]
+        fb_area.input(long_message.strip()).run()
+
+        # Word counter reflects 32 words
+        assert any("32 / 30 words" in c.value for c in at.caption)
+
+        # Attempt submission
+        send_btn = [b for b in at.button if b.label == "Send Feedback"][0]
+        send_btn.click().run()
+
+        # Verify POST was blocked
+        for call in mock_post.call_args_list:
+            url = call[0][0]
+            assert not url.endswith("/api/v1/feedback")
+
+        # Error displayed
+        assert any("exceeds maximum of 30 words" in e.value for e in at.error)
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_feedback_submission_success_and_workspace_state_preservation(
+        self, mock_post, mock_get
+    ):
+        """Successful feedback submission shows confirmation and preserves all workspace state."""
+        self._mock_get_healthy(mock_get, docs=[{"document_id": "d1", "filename": "doc.pdf"}])
+        mock_post.return_value = MagicMock(
+            status_code=200,
+            json=lambda: {"status": "recorded", "message": "Thanks — your feedback has been recorded."},
+        )
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        # Set up active question state
+        at.text_area[0].input("Active query about doc").run()
+        at.session_state["last_query"] = "Active query about doc"
+        at.session_state["last_answer"] = "Active answer in progress"
+        at.session_state["last_sources"] = [{"document_id": "d1"}]
+        ws_id_before = at.session_state["workspace_id"]
+
+        # Submit valid feedback
+        fb_area = [t for t in at.text_area if "Feedback" in t.label][0]
+        fb_area.input("Great cross-document answers on PDF comparison.").run()
+        send_btn = [b for b in at.button if b.label == "Send Feedback"][0]
+        send_btn.click().run()
+
+        # Verify feedback POST was called
+        fb_calls = [
+            call for call in mock_post.call_args_list
+            if call[0][0].endswith("/api/v1/feedback")
+        ]
+        assert len(fb_calls) == 1
+        call_json = fb_calls[0][1]["json"]
+        assert call_json["category"] == "Bug" or call_json["category"] in ["Bug", "Other", "UX"]
+        assert "Great cross-document" in call_json["message"]
+
+        # Success message shown
+        assert any("your feedback has been recorded" in s.value for s in at.success)
+
+        # Workspace state preserved
+        assert at.session_state["workspace_id"] == ws_id_before
+        assert at.session_state["last_query"] == "Active query about doc"
+        assert at.session_state["last_answer"] == "Active answer in progress"
+        assert len(at.session_state["last_sources"]) == 1
+
+    @patch("frontend.app.requests.get")
+    @patch("frontend.app.requests.post")
+    def test_feedback_submission_failure_displays_error(self, mock_post, mock_get):
+        """Failed feedback submission surfaces backend error clearly."""
+        self._mock_get_healthy(mock_get)
+        err_resp = MagicMock(status_code=503)
+        err_resp.json.return_value = {
+            "error": {"code": "feedback_destination_unconfigured", "message": "Service unconfigured."}
+        }
+        mock_post.side_effect = requests.HTTPError("503 Service Unavailable", response=err_resp)
+
+        at = AppTest.from_file(FRONTEND_APP_PATH)
+        at.run()
+
+        fb_area = [t for t in at.text_area if "Feedback" in t.label][0]
+        fb_area.input("Feedback when unconfigured").run()
+        send_btn = [b for b in at.button if b.label == "Send Feedback"][0]
+        send_btn.click().run()
+
+        assert any("Feedback submission failed" in e.value for e in at.error)

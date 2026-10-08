@@ -45,6 +45,7 @@ class Settings(BaseSettings):
         "I could not find relevant information in the knowledge "
         "base to answer your question."
     )
+    feedback_webhook_url: str | None = None
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:

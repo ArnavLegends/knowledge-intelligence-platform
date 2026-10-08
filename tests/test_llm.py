@@ -329,6 +329,45 @@ def test_gemini_adapter_maps_provider_failures() -> None:
     assert "secret" not in exc_info.value.message
 
 
+def test_gemini_adapter_diagnoses_rate_limit_failure() -> None:
+    client = MagicMock()
+    client.models.generate_content.side_effect = APIError("RESOURCE_EXHAUSTED", 429, "RESOURCE_EXHAUSTED")
+    provider = GeminiProvider(
+        api_key="sk-test", model="gemini-2.5-flash", client=client
+    )
+
+    with pytest.raises(LLMProviderError) as exc_info:
+        provider.generate(_request())
+
+    assert "quota or rate limit exceeded" in exc_info.value.message
+
+
+def test_gemini_adapter_diagnoses_context_length_failure() -> None:
+    client = MagicMock()
+    client.models.generate_content.side_effect = Exception("Context length exceeded token limit")
+    provider = GeminiProvider(
+        api_key="sk-test", model="gemini-2.5-flash", client=client
+    )
+
+    with pytest.raises(LLMProviderError) as exc_info:
+        provider.generate(_request())
+
+    assert "request size or context constraints" in exc_info.value.message
+
+
+def test_gemini_adapter_diagnoses_unavailable_failure() -> None:
+    client = MagicMock()
+    client.models.generate_content.side_effect = APIError("UNAVAILABLE", 503, "UNAVAILABLE")
+    provider = GeminiProvider(
+        api_key="sk-test", model="gemini-2.5-flash", client=client
+    )
+
+    with pytest.raises(LLMProviderError) as exc_info:
+        provider.generate(_request())
+
+    assert "temporarily unavailable or timed out" in exc_info.value.message
+
+
 def test_gemini_adapter_requires_api_key() -> None:
     with pytest.raises(LLMProviderError):
         GeminiProvider(api_key="", model="gemini-2.5-flash")
