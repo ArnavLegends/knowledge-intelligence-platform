@@ -46,6 +46,7 @@ dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.9",
+    "streamlit>=1.38.0",
 ]
 
 [dependency-groups]
@@ -54,6 +55,7 @@ dev = [
     "pytest>=8.3",
     "pytest-cov>=6.0",
     "ruff>=0.9",
+    "streamlit>=1.38.0",
 ]
 
 [tool.hatch.build.targets.wheel]
