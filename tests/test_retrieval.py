@@ -137,7 +137,9 @@ def test_retrieval_service_handles_vector_store_failure():
 
 
 def test_retrieval_service_multi_document_contributions():
-    """Verify Document A + Document B + Document C can all contribute retrieved chunks to a single query."""
+    """Verify Document A + Document B + Document C can all contribute retrieved
+    chunks to a single query.
+    """
     mock_emb_service = create_autospec(EmbeddingService)
     mock_vs_service = create_autospec(VectorStoreService)
     settings = Settings()
@@ -150,19 +152,31 @@ def test_retrieval_service_multi_document_contributions():
     res_a = VectorSearchResult(
         id="c-a1",
         vector=[0.1, 0.2],
-        metadata={"document_id": "doc-A", "text": "Chunk from Doc A", "workspace_id": "ws-multi"},
+        metadata={
+            "document_id": "doc-A",
+            "text": "Chunk from Doc A",
+            "workspace_id": "ws-multi",
+        },
         distance=0.95,
     )
     res_b = VectorSearchResult(
         id="c-b1",
         vector=[0.11, 0.21],
-        metadata={"document_id": "doc-B", "text": "Chunk from Doc B", "workspace_id": "ws-multi"},
+        metadata={
+            "document_id": "doc-B",
+            "text": "Chunk from Doc B",
+            "workspace_id": "ws-multi",
+        },
         distance=0.88,
     )
     res_c = VectorSearchResult(
         id="c-c1",
         vector=[0.12, 0.22],
-        metadata={"document_id": "doc-C", "text": "Chunk from Doc C", "workspace_id": "ws-multi"},
+        metadata={
+            "document_id": "doc-C",
+            "text": "Chunk from Doc C",
+            "workspace_id": "ws-multi",
+        },
         distance=0.82,
     )
     mock_vs_service.search.return_value = [res_a, res_b, res_c]
@@ -173,7 +187,9 @@ def test_retrieval_service_multi_document_contributions():
         settings=settings,
     )
 
-    query = RetrievalQuery(text="cross-document query", top_k=3, workspace_id="ws-multi")
+    query = RetrievalQuery(
+        text="cross-document query", top_k=3, workspace_id="ws-multi"
+    )
     results = service.search(query)
 
     assert len(results) == 3
@@ -182,4 +198,3 @@ def test_retrieval_service_multi_document_contributions():
     assert results[0].text == "Chunk from Doc A"
     assert results[1].text == "Chunk from Doc B"
     assert results[2].text == "Chunk from Doc C"
-

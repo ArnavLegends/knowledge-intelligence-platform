@@ -331,7 +331,9 @@ def test_gemini_adapter_maps_provider_failures() -> None:
 
 def test_gemini_adapter_diagnoses_rate_limit_failure() -> None:
     client = MagicMock()
-    client.models.generate_content.side_effect = APIError("RESOURCE_EXHAUSTED", 429, "RESOURCE_EXHAUSTED")
+    client.models.generate_content.side_effect = APIError(
+        "RESOURCE_EXHAUSTED", 429, "RESOURCE_EXHAUSTED"
+    )
     provider = GeminiProvider(
         api_key="sk-test", model="gemini-2.5-flash", client=client
     )
@@ -344,7 +346,9 @@ def test_gemini_adapter_diagnoses_rate_limit_failure() -> None:
 
 def test_gemini_adapter_diagnoses_context_length_failure() -> None:
     client = MagicMock()
-    client.models.generate_content.side_effect = Exception("Context length exceeded token limit")
+    client.models.generate_content.side_effect = Exception(
+        "Context length exceeded token limit"
+    )
     provider = GeminiProvider(
         api_key="sk-test", model="gemini-2.5-flash", client=client
     )
@@ -357,7 +361,9 @@ def test_gemini_adapter_diagnoses_context_length_failure() -> None:
 
 def test_gemini_adapter_diagnoses_unavailable_failure() -> None:
     client = MagicMock()
-    client.models.generate_content.side_effect = APIError("UNAVAILABLE", 503, "UNAVAILABLE")
+    client.models.generate_content.side_effect = APIError(
+        "UNAVAILABLE", 503, "UNAVAILABLE"
+    )
     provider = GeminiProvider(
         api_key="sk-test", model="gemini-2.5-flash", client=client
     )

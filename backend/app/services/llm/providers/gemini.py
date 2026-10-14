@@ -48,7 +48,8 @@ class GeminiProvider(LLMProvider):
                 or "rate limit" in exc_str
             ):
                 raise LLMProviderError(
-                    "Language model provider quota or rate limit exceeded. Please wait a moment and try again."
+                    "Language model provider quota or rate limit exceeded. "
+                    "Please wait a moment and try again."
                 ) from None
 
             # Check for context length / request size constraints
@@ -59,7 +60,8 @@ class GeminiProvider(LLMProvider):
                 or "too large" in exc_str
             ):
                 raise LLMProviderError(
-                    "Language model provider request rejected due to request size or context constraints."
+                    "Language model provider request rejected due to request "
+                    "size or context constraints."
                 ) from None
 
             # Check for temporary service unavailability / timeout
@@ -72,7 +74,8 @@ class GeminiProvider(LLMProvider):
                 or "timeout" in exc_str
             ):
                 raise LLMProviderError(
-                    "Language model provider is temporarily unavailable or timed out. Please try again shortly."
+                    "Language model provider is temporarily unavailable or timed "
+                    "out. Please try again shortly."
                 ) from None
 
             raise LLMProviderError("Language model provider request failed.") from None

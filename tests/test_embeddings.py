@@ -182,7 +182,9 @@ def test_embedding_service_empty():
 
 
 def test_gemini_adapter_success():
-    """Test Gemini adapter translates request and response correctly with Content objects."""
+    """Test Gemini adapter translates request and response correctly with
+    Content objects.
+    """
     mock_client = Mock()
 
     # Setup mock response
@@ -206,7 +208,8 @@ def test_gemini_adapter_success():
 
     embeddings = provider.embed(req)
 
-    # Assert request formatting: each input is its own Content object with Part.from_text
+    # Assert request formatting: each input is its own Content object with
+    # Part.from_text
     mock_client.models.embed_content.assert_called_once()
     call_kwargs = mock_client.models.embed_content.call_args[1]
     assert call_kwargs["model"] == "custom-model"
@@ -243,7 +246,11 @@ def test_gemini_adapter_single_input():
 
     req = EmbeddingRequest(
         inputs=[
-            EmbeddingInput(source_id="query", text="what is knowledge?", metadata={"type": "query"}),
+            EmbeddingInput(
+                source_id="query",
+                text="what is knowledge?",
+                metadata={"type": "query"},
+            ),
         ]
     )
 
@@ -262,7 +269,9 @@ def test_gemini_adapter_single_input():
 
 
 def test_gemini_adapter_multiple_inputs_ordering_and_provenance():
-    """Test multiple inputs produce multiple embeddings with exact ordering and provenance."""
+    """Test multiple inputs produce multiple embeddings with exact ordering
+    and provenance.
+    """
     mock_client = Mock()
     mock_response = Mock()
     item1 = Mock(values=[0.1, 0.2])
@@ -274,9 +283,21 @@ def test_gemini_adapter_multiple_inputs_ordering_and_provenance():
     provider = GeminiEmbeddingProvider(api_key="fake", client=mock_client)
 
     inputs = [
-        EmbeddingInput(source_id="docA-c1", text="Chunk A1", metadata={"doc": "A", "chunk": 0}),
-        EmbeddingInput(source_id="docA-c2", text="Chunk A2", metadata={"doc": "A", "chunk": 1}),
-        EmbeddingInput(source_id="docB-c1", text="Chunk B1", metadata={"doc": "B", "chunk": 0}),
+        EmbeddingInput(
+            source_id="docA-c1",
+            text="Chunk A1",
+            metadata={"doc": "A", "chunk": 0},
+        ),
+        EmbeddingInput(
+            source_id="docA-c2",
+            text="Chunk A2",
+            metadata={"doc": "A", "chunk": 1},
+        ),
+        EmbeddingInput(
+            source_id="docB-c1",
+            text="Chunk B1",
+            metadata={"doc": "B", "chunk": 0},
+        ),
     ]
     req = EmbeddingRequest(inputs=inputs)
 
@@ -312,9 +333,7 @@ def test_gemini_adapter_dimension_validation():
         client=mock_client,
         output_dimensionality=768,
     )
-    req = EmbeddingRequest(
-        inputs=[EmbeddingInput(source_id="c1", text="hello")]
-    )
+    req = EmbeddingRequest(inputs=[EmbeddingInput(source_id="c1", text="hello")])
 
     with pytest.raises(EmbeddingProviderError) as exc_info:
         provider.embed(req)
@@ -323,7 +342,9 @@ def test_gemini_adapter_dimension_validation():
 
 
 def test_gemini_adapter_count_mismatch():
-    """Test that aggregated single embedding response for multi-input raises an error."""
+    """Test that aggregated single embedding response for multi-input
+    raises an error.
+    """
     mock_client = Mock()
     mock_response = Mock()
     # Return only 1 embedding when 3 were requested (the bug behavior)
@@ -365,4 +386,3 @@ def test_gemini_adapter_failure():
 
     with pytest.raises(EmbeddingProviderError):
         provider.embed(req)
-

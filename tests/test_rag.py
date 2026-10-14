@@ -185,7 +185,9 @@ def test_rag_service_top_k_5():
 
 
 def test_rag_service_top_k_10_returns_up_to_10_ranked_chunks():
-    """Verify Top-K=10 returns up to 10 ranked chunks across separate retrieval and LLM stages."""
+    """Verify Top-K=10 returns up to 10 ranked chunks across separate retrieval
+    and LLM stages.
+    """
     mock_retrieval = Mock()
     mock_llm = Mock()
     chunks = [
@@ -204,7 +206,9 @@ def test_rag_service_top_k_10_returns_up_to_10_ranked_chunks():
     )
 
     service = RAGService(retrieval_service=mock_retrieval, llm_service=mock_llm)
-    resp = service.answer(RAGRequest(query="multi-doc query", top_k=10, workspace_id="ws-test"))
+    resp = service.answer(
+        RAGRequest(query="multi-doc query", top_k=10, workspace_id="ws-test")
+    )
 
     # Separate stages: retrieval called with top_k=10
     mock_retrieval.search.assert_called_once()
@@ -228,7 +232,9 @@ def test_rag_service_top_k_10_returns_up_to_10_ranked_chunks():
 
 
 def test_rag_service_surfaces_provider_failure_without_fake_answer():
-    """Verify LLM provider failure is surfaced cleanly rather than converted to fake answer."""
+    """Verify LLM provider failure is surfaced cleanly rather than converted to
+    fake answer.
+    """
     mock_retrieval = Mock()
     mock_llm = Mock()
     chunks = [
@@ -236,7 +242,9 @@ def test_rag_service_surfaces_provider_failure_without_fake_answer():
         for i in range(1, 11)
     ]
     mock_retrieval.search.return_value = chunks
-    mock_llm.generate.side_effect = Exception("Language model provider quota or rate limit exceeded.")
+    mock_llm.generate.side_effect = Exception(
+        "Language model provider quota or rate limit exceeded."
+    )
 
     service = RAGService(retrieval_service=mock_retrieval, llm_service=mock_llm)
 
@@ -248,7 +256,9 @@ def test_rag_service_surfaces_provider_failure_without_fake_answer():
 
 @pytest.mark.parametrize("k", [1, 2, 5, 10, 15, 20])
 def test_rag_service_top_k_range_robust(k: int):
-    """Verify Top-K range works across full slider range 1..20 without silent capping."""
+    """Verify Top-K range works across full slider range 1..20 without silent
+    capping.
+    """
     mock_retrieval = Mock()
     mock_llm = Mock()
     chunks = [

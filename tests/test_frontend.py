@@ -363,7 +363,9 @@ class TestFrontendInteractionFlows:
     @patch("frontend.app.requests.get")
     @patch("frontend.app.requests.post")
     def test_multi_file_selection_and_button_label(self, mock_post, mock_get):
-        """Verify selecting multiple files displays count and does not upload prematurely."""
+        """Verify selecting multiple files displays count and does not upload
+        prematurely.
+        """
         self._mock_get_healthy(mock_get)
 
         at = AppTest.from_file(FRONTEND_APP_PATH)
@@ -389,11 +391,19 @@ class TestFrontendInteractionFlows:
     @patch("frontend.app.requests.get")
     @patch("frontend.app.requests.post")
     def test_multi_file_indexing_sent_independently(self, mock_post, mock_get):
-        """Verify multiple files are sent sequentially to existing single-doc endpoint."""
+        """Verify multiple files are sent sequentially to existing single-doc
+        endpoint.
+        """
         self._mock_get_healthy(mock_get)
         mock_post.side_effect = [
-            MagicMock(status_code=200, json=lambda: {"filename": "alpha.pdf", "chunks_indexed": 6}),
-            MagicMock(status_code=200, json=lambda: {"filename": "beta.docx", "chunks_indexed": 4}),
+            MagicMock(
+                status_code=200,
+                json=lambda: {"filename": "alpha.pdf", "chunks_indexed": 6},
+            ),
+            MagicMock(
+                status_code=200,
+                json=lambda: {"filename": "beta.docx", "chunks_indexed": 4},
+            ),
         ]
 
         at = AppTest.from_file(FRONTEND_APP_PATH)
@@ -430,9 +440,15 @@ class TestFrontendInteractionFlows:
         http_err = requests.HTTPError("500 Server Error", response=err_resp)
 
         mock_post.side_effect = [
-            MagicMock(status_code=200, json=lambda: {"filename": "good1.txt", "chunks_indexed": 2}),
+            MagicMock(
+                status_code=200,
+                json=lambda: {"filename": "good1.txt", "chunks_indexed": 2},
+            ),
             http_err,
-            MagicMock(status_code=200, json=lambda: {"filename": "good2.txt", "chunks_indexed": 5}),
+            MagicMock(
+                status_code=200,
+                json=lambda: {"filename": "good2.txt", "chunks_indexed": 5},
+            ),
         ]
 
         at = AppTest.from_file(FRONTEND_APP_PATH)
@@ -477,7 +493,6 @@ class TestFrontendInteractionFlows:
 
         info_texts = [i.value for i in at.info]
         assert any("existing.pdf" in i and "already indexed" in i for i in info_texts)
-
 
     @patch("frontend.app.requests.get")
     def test_workspace_switching_fetches_new_documents(self, mock_get):
@@ -550,7 +565,10 @@ class TestFrontendInteractionFlows:
         self._mock_get_healthy(mock_get)
         mock_post.return_value = MagicMock(
             status_code=200,
-            json=lambda: {"answer": "Previous workspace answer.", "sources": [{"document_id": "d1"}]},
+            json=lambda: {
+                "answer": "Previous workspace answer.",
+                "sources": [{"document_id": "d1"}],
+            },
         )
 
         at = AppTest.from_file(FRONTEND_APP_PATH)
@@ -581,7 +599,9 @@ class TestFrontendInteractionFlows:
     def test_connect_workspace_resets_question_and_preserves_documents(
         self, mock_post, mock_get
     ):
-        """B: Connecting to another workspace clears question/answer while preserving docs."""
+        """B: Connecting to another workspace clears question/answer while
+        preserving docs.
+        """
         existing_docs = [
             {"document_id": "doc-alpha", "filename": "report.pdf", "chunks_indexed": 10}
         ]
@@ -638,7 +658,9 @@ class TestFrontendPublicOrientationAndFeedback:
 
     @patch("frontend.app.requests.get")
     def test_feedback_components_render(self, mock_get):
-        """Feedback section renders with category selectbox, text area, and live word counter."""
+        """Feedback section renders with category selectbox, text area, and live
+        word counter.
+        """
         self._mock_get_healthy(mock_get)
         at = AppTest.from_file(FRONTEND_APP_PATH)
         at.run()
@@ -687,11 +709,18 @@ class TestFrontendPublicOrientationAndFeedback:
     def test_feedback_submission_success_and_workspace_state_preservation(
         self, mock_post, mock_get
     ):
-        """Successful feedback submission shows confirmation and preserves all workspace state."""
-        self._mock_get_healthy(mock_get, docs=[{"document_id": "d1", "filename": "doc.pdf"}])
+        """Successful feedback submission shows confirmation and preserves all
+        workspace state.
+        """
+        self._mock_get_healthy(
+            mock_get, docs=[{"document_id": "d1", "filename": "doc.pdf"}]
+        )
         mock_post.return_value = MagicMock(
             status_code=200,
-            json=lambda: {"status": "recorded", "message": "Thanks — your feedback has been recorded."},
+            json=lambda: {
+                "status": "recorded",
+                "message": "Thanks — your feedback has been recorded.",
+            },
         )
 
         at = AppTest.from_file(FRONTEND_APP_PATH)
@@ -712,12 +741,17 @@ class TestFrontendPublicOrientationAndFeedback:
 
         # Verify feedback POST was called
         fb_calls = [
-            call for call in mock_post.call_args_list
+            call
+            for call in mock_post.call_args_list
             if call[0][0].endswith("/api/v1/feedback")
         ]
         assert len(fb_calls) == 1
         call_json = fb_calls[0][1]["json"]
-        assert call_json["category"] == "Bug" or call_json["category"] in ["Bug", "Other", "UX"]
+        assert call_json["category"] == "Bug" or call_json["category"] in [
+            "Bug",
+            "Other",
+            "UX",
+        ]
         assert "Great cross-document" in call_json["message"]
 
         # Success message shown
@@ -736,9 +770,14 @@ class TestFrontendPublicOrientationAndFeedback:
         self._mock_get_healthy(mock_get)
         err_resp = MagicMock(status_code=503)
         err_resp.json.return_value = {
-            "error": {"code": "feedback_destination_unconfigured", "message": "Service unconfigured."}
+            "error": {
+                "code": "feedback_destination_unconfigured",
+                "message": "Service unconfigured.",
+            }
         }
-        mock_post.side_effect = requests.HTTPError("503 Service Unavailable", response=err_resp)
+        mock_post.side_effect = requests.HTTPError(
+            "503 Service Unavailable", response=err_resp
+        )
 
         at = AppTest.from_file(FRONTEND_APP_PATH)
         at.run()
