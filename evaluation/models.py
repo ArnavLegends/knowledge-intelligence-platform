@@ -13,6 +13,8 @@ class BenchmarkCase(BaseModel):
         question: The natural-language question to ask the RAG system.
         reference_answer: Optional ground-truth answer for comparison.
         expected_document_ids: IDs of documents whose chunks should be retrieved.
+            An empty list means the case is unlabelled for retrieval and is
+            excluded from Hit Rate and MRR aggregation.
         expected_keywords: Keywords that should appear in the retrieved
             context or answer.
         metadata: Arbitrary per-case metadata (e.g. difficulty, topic).
@@ -45,6 +47,10 @@ class RetrievalMetrics(BaseModel):
     retrieved_doc_ids: list[str]
     expected_doc_ids: list[str]
     retrieval_latency_ms: float
+    # Set when a retrieval infrastructure failure occurred (not a genuine miss).
+    # When non-None the hit/reciprocal_rank values are 0 due to the failure,
+    # not because retrieval returned no results.
+    retrieval_error: str | None = None
 
 
 class AnswerMetrics(BaseModel):
@@ -79,6 +85,7 @@ class BenchmarkRunConfig(BaseModel):
     """Records the configuration under which a benchmark run was executed."""
 
     benchmark_version: str
+    evaluation_workspace_id: str = "kip-eval-workspace"
     llm_provider: str
     llm_model: str
     embedding_provider: str
@@ -87,6 +94,7 @@ class BenchmarkRunConfig(BaseModel):
     chunk_size: int
     chunk_overlap: int
     live_llm_available: bool = False
+    inter_case_delay_seconds: float = 0.0
 
 
 class BenchmarkResult(BaseModel):
@@ -97,10 +105,18 @@ class BenchmarkResult(BaseModel):
     config: BenchmarkRunConfig
     case_results: list[CaseResult]
 
-    # Aggregate metrics
+    # Case counts
     total_cases: int
-    hit_rate: float  # Fraction of cases where at least one expected doc was retrieved
-    mean_reciprocal_rank: float
+    # Cases with expected_document_ids populated (scored for retrieval)
+    labelled_cases: int
+
+    # Retrieval metrics — computed only over labelled cases.
+    # None when no labelled cases exist.
+    # Fraction of labelled cases with at least one expected doc retrieved.
+    hit_rate: float | None
+    mean_reciprocal_rank: float | None
+
+    # Answer metrics — computed over all cases.
     keyword_coverage: float  # Mean keyword coverage across all cases
     mean_retrieval_latency_ms: float
     mean_total_latency_ms: float
@@ -121,23 +137,42 @@ class BenchmarkResult(BaseModel):
                 config=config,
                 case_results=[],
                 total_cases=0,
-                hit_rate=0.0,
-                mean_reciprocal_rank=0.0,
+                labelled_cases=0,
+                hit_rate=None,
+                mean_reciprocal_rank=None,
                 keyword_coverage=0.0,
                 mean_retrieval_latency_ms=0.0,
                 mean_total_latency_ms=0.0,
             )
-        hit_rate = sum(1 for r in results if r.retrieval.hit) / n
-        mrr = sum(r.retrieval.reciprocal_rank for r in results) / n
+
+        # Retrieval metrics: only cases with populated expected_document_ids.
+        # Cases without ground-truth labels are excluded so that unlabelled
+        # cases cannot inflate Hit Rate to 1.0.
+        labelled = [r for r in results if r.retrieval.expected_count > 0]
+        n_labelled = len(labelled)
+
+        if n_labelled > 0:
+            hit_rate: float | None = (
+                sum(1 for r in labelled if r.retrieval.hit) / n_labelled
+            )
+            mrr: float | None = (
+                sum(r.retrieval.reciprocal_rank for r in labelled) / n_labelled
+            )
+        else:
+            hit_rate = None
+            mrr = None
+
         kw_cov = sum(r.answer_metrics.keyword_coverage for r in results) / n
         mean_ret_lat = sum(r.retrieval.retrieval_latency_ms for r in results) / n
         mean_total_lat = sum(r.total_latency_ms for r in results) / n
+
         return cls(
             run_id=run_id,
             timestamp=timestamp,
             config=config,
             case_results=results,
             total_cases=n,
+            labelled_cases=n_labelled,
             hit_rate=hit_rate,
             mean_reciprocal_rank=mrr,
             keyword_coverage=kw_cov,

@@ -15,8 +15,18 @@ It does NOT perform:
 
 LLM-as-judge evaluation is marked as optional and is only performed when
 explicitly configured with available credentials.
+
+Retrieval metrics (Hit Rate, MRR) are computed ONLY over cases that have
+populated expected_document_ids. Cases with empty expected_document_ids are
+labelled as unlabelled and are excluded from retrieval metric aggregation.
+This prevents empty ground-truth lists from silently inflating Hit Rate to 1.0.
+
+Infrastructure failures (e.g. missing workspace, embedding errors) are
+recorded in RetrievalMetrics.retrieval_error and are distinguishable from
+genuine retrieval misses.
 """
 
+import logging
 import time
 from datetime import UTC, datetime
 from uuid import uuid4
@@ -31,6 +41,8 @@ from evaluation.models import (
     RetrievalMetrics,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class EvaluationRunner:
     """Runs a benchmark dataset against the KIP RAG pipeline.
@@ -38,6 +50,13 @@ class EvaluationRunner:
     The runner calls the KIP services directly (not via HTTP) for speed
     and to isolate evaluation from networking concerns. It is designed to
     work with the same dependency injection used in the rest of the system.
+
+    Args:
+        rag_service: A configured RAGService instance.
+        retrieval_service: A configured RetrievalService instance.
+        config: Run configuration including workspace_id and parameters.
+            The evaluation_workspace_id in config is used for all retrieval
+            and RAG calls, keeping evaluation isolated from user workspaces.
     """
 
     def __init__(
@@ -46,23 +65,46 @@ class EvaluationRunner:
         self._rag_service = rag_service
         self._retrieval_service = retrieval_service
         self._config = config
+        self._workspace_id = config.evaluation_workspace_id
 
     def evaluate_dataset(self, dataset: BenchmarkDataset) -> BenchmarkResult:
         """Run all cases in the dataset and return a full BenchmarkResult."""
         run_id = uuid4().hex
         timestamp = datetime.now(UTC).isoformat()
 
+        logger.info(
+            "Evaluation run started: run_id=%s dataset=%s cases=%d workspace=%s",
+            run_id,
+            dataset.version,
+            len(dataset.cases),
+            self._workspace_id,
+        )
+
         case_results = []
-        for case in dataset.cases:
+        for i, case in enumerate(dataset.cases):
+            if i > 0 and self._config.inter_case_delay_seconds > 0:
+                time.sleep(self._config.inter_case_delay_seconds)
             result = self._evaluate_case(case)
             case_results.append(result)
 
-        return BenchmarkResult.from_case_results(
+        benchmark_result = BenchmarkResult.from_case_results(
             run_id=run_id,
             timestamp=timestamp,
             config=self._config,
             results=case_results,
         )
+
+        logger.info(
+            "Evaluation run complete: run_id=%s total=%d labelled=%d "
+            "hit_rate=%s mrr=%s",
+            run_id,
+            benchmark_result.total_cases,
+            benchmark_result.labelled_cases,
+            benchmark_result.hit_rate,
+            benchmark_result.mean_reciprocal_rank,
+        )
+
+        return benchmark_result
 
     def _evaluate_case(self, case: BenchmarkCase) -> CaseResult:
         """Evaluate a single benchmark case."""
@@ -72,34 +114,52 @@ class EvaluationRunner:
         t_start = time.perf_counter()
 
         # --- Retrieval phase ---
+        # workspace_id is explicitly propagated from config to keep evaluation
+        # isolated from user workspaces and to avoid the 'workspace_id required'
+        # error in RetrievalService.search().
         t_ret_start = time.perf_counter()
+        retrieval_error: str | None = None
+        chunks = []
+        retrieved_doc_ids: list[str] = []
+
         try:
             retrieval_query = RetrievalQuery(
                 text=case.question,
                 top_k=self._config.retrieval_top_k,
+                workspace_id=self._workspace_id,
             )
             chunks = self._retrieval_service.search(retrieval_query)
             retrieved_doc_ids = list({c.document_id for c in chunks if c.document_id})
-        except Exception:
-            chunks = []
-            retrieved_doc_ids = []
+        except Exception as exc:
+            # Record the infrastructure failure visibly. This is NOT treated as
+            # a retrieval miss; it is an error distinct from genuine zero-retrieval.
+            retrieval_error = f"{type(exc).__name__}: {exc}"
+            logger.warning(
+                "Retrieval infrastructure failure for case %s: %s",
+                case.id,
+                retrieval_error,
+            )
+
         t_ret_end = time.perf_counter()
         retrieval_latency_ms = (t_ret_end - t_ret_start) * 1000
 
-        # Compute retrieval metrics
-        hit = bool(
-            case.expected_document_ids
-            and any(d in retrieved_doc_ids for d in case.expected_document_ids)
-        )
-        if not case.expected_document_ids:
-            hit = True  # No expectation = not a miss
-
-        reciprocal_rank = 0.0
-        if case.expected_document_ids and chunks:
+        # Compute retrieval metrics.
+        # Cases with empty expected_document_ids are unlabelled: hit=False,
+        # reciprocal_rank=0. They are excluded from aggregate Hit Rate and MRR
+        # in BenchmarkResult.from_case_results() via expected_count == 0 check.
+        is_labelled = bool(case.expected_document_ids)
+        if is_labelled and retrieval_error is None:
+            hit = any(d in retrieved_doc_ids for d in case.expected_document_ids)
+            reciprocal_rank = 0.0
             for rank, chunk in enumerate(chunks, start=1):
                 if chunk.document_id in case.expected_document_ids:
                     reciprocal_rank = 1.0 / rank
                     break
+        else:
+            # Unlabelled case or infrastructure failure: mark as miss so the
+            # case does not artificially contribute to Hit Rate.
+            hit = False
+            reciprocal_rank = 0.0
 
         retrieval_metrics = RetrievalMetrics(
             case_id=case.id,
@@ -110,23 +170,32 @@ class EvaluationRunner:
             retrieved_doc_ids=retrieved_doc_ids,
             expected_doc_ids=list(case.expected_document_ids),
             retrieval_latency_ms=retrieval_latency_ms,
+            retrieval_error=retrieval_error,
         )
 
         # --- Generation phase ---
         t_gen_start = time.perf_counter()
+        answer = ""
+        sources_count = 0
+        has_context = False
+
         try:
             rag_request = RAGRequest(
                 query=case.question,
                 top_k=self._config.retrieval_top_k,
+                workspace_id=self._workspace_id,
             )
             rag_response = self._rag_service.answer(rag_request)
             answer = rag_response.answer
             sources_count = len(rag_response.sources)
             has_context = sources_count > 0
-        except Exception as e:
-            answer = f"[Evaluation Error: {e}]"
-            sources_count = 0
-            has_context = False
+        except Exception as exc:
+            # Generation failures are recorded in the answer string so that
+            # they appear in output without crashing the run.
+            gen_error = f"{type(exc).__name__}: {exc}"
+            answer = f"[Evaluation Error: {gen_error}]"
+            logger.warning("Generation failure for case %s: %s", case.id, gen_error)
+
         t_gen_end = time.perf_counter()
         generation_latency_ms = (t_gen_end - t_gen_start) * 1000
 

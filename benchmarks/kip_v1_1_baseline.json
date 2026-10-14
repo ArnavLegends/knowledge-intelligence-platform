@@ -1,0 +1,62 @@
+{
+  "version": "v1.1-baseline",
+  "description": "KIP v1.1 retrieval baseline dataset. Each case has populated expected_document_ids derived from the reference corpus in benchmarks/corpus/ using SHA-256(raw_file_bytes), matching KIP's DocumentIngestionService identity mechanism. These IDs are stable across platforms (corpus files use LF line endings only). Cases are designed for dense retrieval evaluation; document IDs point to the corpus document(s) containing the answer. See benchmarks/corpus/README.md for corpus documentation and ID derivation instructions.",
+  "cases": [
+    {
+      "id": "v11-001",
+      "question": "What document formats does KIP support for ingestion?",
+      "reference_answer": "KIP supports PDF, DOCX, TXT, and Markdown formats.",
+      "expected_document_ids": ["07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"],
+      "expected_keywords": ["PDF", "DOCX", "TXT", "Markdown"],
+      "metadata": {"difficulty": "easy", "topic": "ingestion", "corpus_doc": "kip_overview.txt"}
+    },
+    {
+      "id": "v11-002",
+      "question": "What is the default chunk size and overlap in KIP?",
+      "reference_answer": "The default chunk size is 1000 characters with 200 characters of overlap.",
+      "expected_document_ids": ["42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9"],
+      "expected_keywords": ["1000", "200", "overlap"],
+      "metadata": {"difficulty": "easy", "topic": "chunking", "corpus_doc": "kip_chunking_and_embeddings.txt"}
+    },
+    {
+      "id": "v11-003",
+      "question": "How are KIP document IDs generated?",
+      "reference_answer": "Document IDs are computed as SHA-256 of the raw file bytes, making them content-addressed.",
+      "expected_document_ids": ["42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9"],
+      "expected_keywords": ["SHA-256", "raw file bytes", "content-addressed"],
+      "metadata": {"difficulty": "medium", "topic": "document identity", "corpus_doc": "kip_chunking_and_embeddings.txt"}
+    },
+    {
+      "id": "v11-004",
+      "question": "What distance metric does KIP use for vector search, and how is it computed from Qdrant scores?",
+      "reference_answer": "KIP uses COSINE distance. Qdrant returns cosine similarity; KIP converts it: distance = max(0, 1 - similarity_score).",
+      "expected_document_ids": ["c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"],
+      "expected_keywords": ["COSINE", "similarity", "distance"],
+      "metadata": {"difficulty": "medium", "topic": "vector search", "corpus_doc": "kip_retrieval_and_rag.txt"}
+    },
+    {
+      "id": "v11-005",
+      "question": "What happens when KIP retrieval finds no relevant context for a query?",
+      "reference_answer": "The system returns a predefined empty-context message without calling the LLM.",
+      "expected_document_ids": ["c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"],
+      "expected_keywords": ["empty-context", "predefined"],
+      "metadata": {"difficulty": "medium", "topic": "empty context handling", "corpus_doc": "kip_retrieval_and_rag.txt"}
+    },
+    {
+      "id": "v11-006",
+      "question": "What embedding model does KIP use in production and how many dimensions does it produce?",
+      "reference_answer": "KIP uses gemini-embedding-2 with 768 dimensions.",
+      "expected_document_ids": ["07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"],
+      "expected_keywords": ["gemini-embedding-2", "768"],
+      "metadata": {"difficulty": "easy", "topic": "embeddings", "corpus_doc": "kip_overview.txt"}
+    },
+    {
+      "id": "v11-007",
+      "question": "What vector store collection name does KIP use and what distance metric is configured?",
+      "reference_answer": "KIP uses a Qdrant collection named knowledge_base with COSINE distance.",
+      "expected_document_ids": ["c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"],
+      "expected_keywords": ["knowledge_base", "COSINE"],
+      "metadata": {"difficulty": "easy", "topic": "vector store", "corpus_doc": "kip_retrieval_and_rag.txt"}
+    }
+  ]
+}

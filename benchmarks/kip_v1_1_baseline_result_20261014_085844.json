@@ -1,0 +1,297 @@
+{
+  "run_id": "9ea34b3c129844f7af7c8cf16dbbc067",
+  "timestamp": "2026-10-14T08:57:03.213268+00:00",
+  "config": {
+    "benchmark_version": "v1.1-baseline",
+    "evaluation_workspace_id": "kip-eval-workspace",
+    "llm_provider": "gemini",
+    "llm_model": "gemini-2.5-flash",
+    "embedding_provider": "gemini",
+    "embedding_model": "gemini-embedding-2",
+    "retrieval_top_k": 5,
+    "chunk_size": 1000,
+    "chunk_overlap": 200,
+    "live_llm_available": true,
+    "inter_case_delay_seconds": 13.0
+  },
+  "case_results": [
+    {
+      "case_id": "v11-001",
+      "question": "What document formats does KIP support for ingestion?",
+      "answer": "KIP supports document ingestion in PDF, DOCX, TXT, and Markdown formats.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-001",
+        "hit": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+        ],
+        "retrieval_latency_ms": 549.1520000214223,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-001",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "PDF",
+          "DOCX",
+          "TXT",
+          "Markdown"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 3115.2027000207454
+      },
+      "total_latency_ms": 3664.4241000176407
+    },
+    {
+      "case_id": "v11-002",
+      "question": "What is the default chunk size and overlap in KIP?",
+      "answer": "The default chunk size in KIP is 1000 characters with 200 characters of overlap.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-002",
+        "hit": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9"
+        ],
+        "retrieval_latency_ms": 545.9687999973539,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-002",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "1000",
+          "200",
+          "overlap"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 2516.2927999917883
+      },
+      "total_latency_ms": 3062.4189999944065
+    },
+    {
+      "case_id": "v11-003",
+      "question": "How are KIP document IDs generated?",
+      "answer": "KIP document IDs are computed as SHA-256 of the raw file bytes, making them content-addressed.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-003",
+        "hit": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9"
+        ],
+        "retrieval_latency_ms": 598.438899993198,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-003",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "SHA-256",
+          "raw file bytes",
+          "content-addressed"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 2741.126599983545
+      },
+      "total_latency_ms": 3339.611200004583
+    },
+    {
+      "case_id": "v11-004",
+      "question": "What distance metric does KIP use for vector search, and how is it computed from Qdrant scores?",
+      "answer": "KIP uses COSINE distance for vector search. Qdrant returns cosine similarity scores, which KIP converts to distance using the formula: `distance = max(0, 1 - similarity_score)`.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-004",
+        "hit": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "retrieval_latency_ms": 564.563799998723,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-004",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "COSINE",
+          "similarity",
+          "distance"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 3296.2274000165053
+      },
+      "total_latency_ms": 3860.836300009396
+    },
+    {
+      "case_id": "v11-005",
+      "question": "What happens when KIP retrieval finds no relevant context for a query?",
+      "answer": "When no context is retrieved, the system returns a predefined empty-context message.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-005",
+        "hit": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "retrieval_latency_ms": 558.8144999928772,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-005",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "empty-context",
+          "predefined"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 2586.5157999796793
+      },
+      "total_latency_ms": 3145.3946999972686
+    },
+    {
+      "case_id": "v11-006",
+      "question": "What embedding model does KIP use in production and how many dimensions does it produce?",
+      "answer": "KIP uses the `gemini-embedding-2` model for embeddings in production, which produces 768 dimensions.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-006",
+        "hit": true,
+        "reciprocal_rank": 0.3333333333333333,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+        ],
+        "retrieval_latency_ms": 589.5597999915481,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-006",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "gemini-embedding-2",
+          "768"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 2111.8200999917462
+      },
+      "total_latency_ms": 2701.4176000084262
+    },
+    {
+      "case_id": "v11-007",
+      "question": "What vector store collection name does KIP use and what distance metric is configured?",
+      "answer": "KIP uses a Qdrant collection named `knowledge_base`. The configured distance metric for this collection is COSINE distance.",
+      "sources_count": 3,
+      "retrieval": {
+        "case_id": "v11-007",
+        "hit": true,
+        "reciprocal_rank": 1.0,
+        "retrieved_count": 3,
+        "expected_count": 1,
+        "retrieved_doc_ids": [
+          "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9",
+          "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "expected_doc_ids": [
+          "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+        ],
+        "retrieval_latency_ms": 572.3648999992292,
+        "retrieval_error": null
+      },
+      "answer_metrics": {
+        "case_id": "v11-007",
+        "has_answer": true,
+        "has_context": true,
+        "keyword_hits": [
+          "knowledge_base",
+          "COSINE"
+        ],
+        "keyword_misses": [],
+        "keyword_coverage": 1.0,
+        "exact_match": null,
+        "llm_faithfulness": null,
+        "generation_latency_ms": 3102.504999988014
+      },
+      "total_latency_ms": 3674.906900007045
+    }
+  ],
+  "total_cases": 7,
+  "labelled_cases": 7,
+  "hit_rate": 1.0,
+  "mean_reciprocal_rank": 0.9047619047619048,
+  "keyword_coverage": 1.0,
+  "mean_retrieval_latency_ms": 568.4089571420502,
+  "mean_total_latency_ms": 3349.8585428626807
+}

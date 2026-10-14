@@ -52,12 +52,12 @@ def test_benchmark_dataset_empty_cases():
 
 
 # ---------------------------------------------------------------------------
-# Benchmark dataset loading
+# Benchmark dataset loading — v1.0 historical dataset
 # ---------------------------------------------------------------------------
 
 
 def test_baseline_dataset_loads():
-    """The committed baseline dataset must be loadable and well-formed."""
+    """The committed v1.0 baseline dataset must be loadable and well-formed."""
     import pathlib
 
     path = pathlib.Path("benchmarks/kip_v1_baseline.json")
@@ -81,20 +81,103 @@ def test_baseline_dataset_case_ids_unique():
 
 
 # ---------------------------------------------------------------------------
+# v1.1 benchmark dataset loading and ground-truth validation
+# ---------------------------------------------------------------------------
+
+
+def test_v11_baseline_dataset_loads():
+    """The v1.1 baseline dataset must be loadable and well-formed."""
+    import pathlib
+
+    path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+    assert path.exists(), "v1.1 baseline benchmark file must exist"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+    assert ds.version == "v1.1-baseline"
+    assert len(ds.cases) >= 1
+
+
+def test_v11_baseline_all_cases_have_expected_document_ids():
+    """All v1.1 cases must have populated expected_document_ids."""
+    import pathlib
+
+    path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+    for case in ds.cases:
+        assert case.expected_document_ids, (
+            f"Case {case.id!r} has empty expected_document_ids — "
+            "all v1.1 cases must be labelled for retrieval evaluation"
+        )
+
+
+def test_v11_baseline_case_ids_unique():
+    """v1.1 case IDs must be unique."""
+    import pathlib
+
+    path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+    ids = [c.id for c in ds.cases]
+    assert len(ids) == len(set(ids)), "v1.1 case IDs must be unique"
+
+
+def test_v11_baseline_document_ids_match_corpus():
+    """Document IDs in v1.1 dataset must match SHA-256 of corpus file bytes."""
+    import hashlib
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+
+    # Derive actual IDs from the corpus files
+    actual_ids = {
+        hashlib.sha256(f.read_bytes()).hexdigest() for f in corpus_dir.glob("*.txt")
+    }
+
+    data = json.loads(dataset_path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+
+    for case in ds.cases:
+        for doc_id in case.expected_document_ids:
+            assert doc_id in actual_ids, (
+                f"Case {case.id!r} references document_id {doc_id!r} "
+                "which does not match any file in benchmarks/corpus/"
+            )
+
+
+def test_corpus_files_have_lf_line_endings_only():
+    """Corpus files must use LF line endings to ensure stable SHA-256 IDs."""
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus")
+    for txt_file in corpus_dir.glob("*.txt"):
+        raw = txt_file.read_bytes()
+        assert b"\r" not in raw, (
+            f"{txt_file.name} contains CR bytes (CRLF line endings). "
+            "This would change the SHA-256 document ID. "
+            "Corpus files must use LF line endings only."
+        )
+
+
+# ---------------------------------------------------------------------------
 # Retrieval metric computation
 # ---------------------------------------------------------------------------
 
 
-def _make_retrieval_metrics(hit=True, rr=1.0, latency=5.0):
+def _make_retrieval_metrics(
+    hit=True, rr=1.0, latency=5.0, expected_count=1, retrieval_error=None
+):
     return RetrievalMetrics(
         case_id="c1",
         hit=hit,
         reciprocal_rank=rr,
         retrieved_count=3,
-        expected_count=1,
+        expected_count=expected_count,
         retrieved_doc_ids=["doc-a"],
         expected_doc_ids=["doc-a"],
         retrieval_latency_ms=latency,
+        retrieval_error=retrieval_error,
     )
 
 
@@ -109,20 +192,33 @@ def _make_answer_metrics(coverage=1.0):
     )
 
 
-def _make_case_result(case_id="c1", hit=True, rr=1.0, coverage=1.0, total_ms=50.0):
+def _make_case_result(
+    case_id="c1",
+    hit=True,
+    rr=1.0,
+    coverage=1.0,
+    total_ms=50.0,
+    expected_count=1,
+    retrieval_error=None,
+):
     return CaseResult(
         case_id=case_id,
         question="Q?",
         answer="The answer.",
         sources_count=1,
-        retrieval=_make_retrieval_metrics(hit=hit, rr=rr),
+        retrieval=_make_retrieval_metrics(
+            hit=hit,
+            rr=rr,
+            expected_count=expected_count,
+            retrieval_error=retrieval_error,
+        ),
         answer_metrics=_make_answer_metrics(coverage=coverage),
         total_latency_ms=total_ms,
     )
 
 
-def test_benchmark_result_hit_rate():
-    config = BenchmarkRunConfig(
+def _make_config():
+    return BenchmarkRunConfig(
         benchmark_version="v1",
         llm_provider="openai",
         llm_model="gpt-4o-mini",
@@ -132,6 +228,9 @@ def test_benchmark_result_hit_rate():
         chunk_size=1000,
         chunk_overlap=200,
     )
+
+
+def test_benchmark_result_hit_rate():
     results = [
         _make_case_result("c1", hit=True),
         _make_case_result("c2", hit=False),
@@ -140,24 +239,15 @@ def test_benchmark_result_hit_rate():
     run_result = BenchmarkResult.from_case_results(
         run_id="test-run",
         timestamp="2026-01-01T00:00:00Z",
-        config=config,
+        config=_make_config(),
         results=results,
     )
     assert run_result.total_cases == 3
+    assert run_result.labelled_cases == 3
     assert abs(run_result.hit_rate - 2 / 3) < 1e-9
 
 
 def test_benchmark_result_mrr():
-    config = BenchmarkRunConfig(
-        benchmark_version="v1",
-        llm_provider="openai",
-        llm_model="gpt-4o-mini",
-        embedding_provider="openai",
-        embedding_model="text-embedding-3-small",
-        retrieval_top_k=5,
-        chunk_size=1000,
-        chunk_overlap=200,
-    )
     results = [
         _make_case_result("c1", rr=1.0),
         _make_case_result("c2", rr=0.5),
@@ -165,31 +255,73 @@ def test_benchmark_result_mrr():
     run_result = BenchmarkResult.from_case_results(
         run_id="test-run",
         timestamp="2026-01-01T00:00:00Z",
-        config=config,
+        config=_make_config(),
         results=results,
     )
     assert abs(run_result.mean_reciprocal_rank - 0.75) < 1e-9
 
 
 def test_benchmark_result_empty():
-    config = BenchmarkRunConfig(
-        benchmark_version="v1",
-        llm_provider="openai",
-        llm_model="gpt-4o-mini",
-        embedding_provider="openai",
-        embedding_model="text-embedding-3-small",
-        retrieval_top_k=5,
-        chunk_size=1000,
-        chunk_overlap=200,
-    )
     run_result = BenchmarkResult.from_case_results(
         run_id="test-run",
         timestamp="2026-01-01T00:00:00Z",
-        config=config,
+        config=_make_config(),
         results=[],
     )
     assert run_result.total_cases == 0
-    assert run_result.hit_rate == 0.0
+    assert run_result.hit_rate is None
+    assert run_result.mean_reciprocal_rank is None
+
+
+def test_unlabelled_cases_excluded_from_retrieval_metrics():
+    """Cases with empty expected_document_ids must not contribute to Hit Rate or MRR."""
+    results = [
+        _make_case_result("c1", hit=True, rr=1.0, expected_count=1),  # labelled, hit
+        _make_case_result("c2", hit=False, rr=0.0, expected_count=0),  # unlabelled
+        _make_case_result("c3", hit=False, rr=0.0, expected_count=0),  # unlabelled
+    ]
+    run_result = BenchmarkResult.from_case_results(
+        run_id="test-run",
+        timestamp="2026-01-01T00:00:00Z",
+        config=_make_config(),
+        results=results,
+    )
+    assert run_result.total_cases == 3
+    assert run_result.labelled_cases == 1
+    # Only 1 labelled case, which is a hit → hit_rate = 1.0
+    assert run_result.hit_rate == 1.0
+    assert run_result.mean_reciprocal_rank == 1.0
+
+
+def test_all_unlabelled_produces_none_retrieval_metrics():
+    """With zero labelled cases, hit_rate and MRR must be None."""
+    results = [
+        _make_case_result("c1", expected_count=0),
+        _make_case_result("c2", expected_count=0),
+    ]
+    run_result = BenchmarkResult.from_case_results(
+        run_id="test-run",
+        timestamp="2026-01-01T00:00:00Z",
+        config=_make_config(),
+        results=results,
+    )
+    assert run_result.labelled_cases == 0
+    assert run_result.hit_rate is None
+    assert run_result.mean_reciprocal_rank is None
+
+
+def test_retrieval_error_is_visible_not_silent_miss():
+    """Infrastructure failures must be recorded in retrieval_error,
+    not silently zeroed."""
+    result = _make_case_result(
+        "c1",
+        hit=False,
+        rr=0.0,
+        expected_count=1,
+        retrieval_error="RetrievalError: workspace_id is required",
+    )
+    assert result.retrieval.retrieval_error is not None
+    assert "workspace_id" in result.retrieval.retrieval_error
 
 
 # ---------------------------------------------------------------------------
@@ -198,21 +330,11 @@ def test_benchmark_result_empty():
 
 
 def test_benchmark_result_serializable():
-    config = BenchmarkRunConfig(
-        benchmark_version="v1",
-        llm_provider="openai",
-        llm_model="gpt-4o-mini",
-        embedding_provider="openai",
-        embedding_model="text-embedding-3-small",
-        retrieval_top_k=5,
-        chunk_size=1000,
-        chunk_overlap=200,
-    )
     results = [_make_case_result()]
     run_result = BenchmarkResult.from_case_results(
         run_id="test-run",
         timestamp="2026-01-01T00:00:00Z",
-        config=config,
+        config=_make_config(),
         results=results,
     )
     serialized = run_result.model_dump_json()
@@ -220,6 +342,7 @@ def test_benchmark_result_serializable():
     assert parsed["total_cases"] == 1
     assert "hit_rate" in parsed
     assert "mean_reciprocal_rank" in parsed
+    assert "labelled_cases" in parsed
 
 
 # ---------------------------------------------------------------------------
@@ -247,6 +370,7 @@ def test_evaluation_runner_deterministic(e2e_pipeline):
     # Build an isolated pipeline using the same deterministic fakes as conftest.
     from conftest import DeterministicEmbeddingProvider, DeterministicLLMProvider
 
+    eval_workspace = "kip-eval-workspace"
     collection_name = f"eval_test_{uuid.uuid4().hex[:12]}"
     emb_provider = DeterministicEmbeddingProvider()
     emb_service = EmbeddingService(manager=EmbeddingManager(provider=emb_provider))
@@ -266,6 +390,7 @@ def test_evaluation_runner_deterministic(e2e_pipeline):
 
     config = BenchmarkRunConfig(
         benchmark_version="v1-test",
+        evaluation_workspace_id=eval_workspace,
         llm_provider="fake",
         llm_model="fake-model",
         embedding_provider="fake",
@@ -298,9 +423,110 @@ def test_evaluation_runner_deterministic(e2e_pipeline):
     assert result.run_id
     assert result.timestamp
     # Results must be JSON-serializable
-    import json
-
     json.loads(result.model_dump_json())
+
+
+def test_evaluation_runner_workspace_propagated(e2e_pipeline):
+    """Runner must pass evaluation_workspace_id to both retrieval and generation."""
+    from unittest.mock import MagicMock
+
+    from evaluation.models import BenchmarkRunConfig
+    from evaluation.runner import EvaluationRunner
+
+    eval_workspace = "kip-eval-ws-propagation-test"
+
+    mock_retrieval = MagicMock()
+    mock_retrieval.search.return_value = []
+    mock_rag = MagicMock()
+    from app.services.rag.models import RAGResponse
+
+    mock_rag.answer.return_value = RAGResponse(answer="test answer", sources=[])
+
+    config = BenchmarkRunConfig(
+        benchmark_version="v1-test",
+        evaluation_workspace_id=eval_workspace,
+        llm_provider="fake",
+        llm_model="fake-model",
+        embedding_provider="fake",
+        embedding_model="fake-embed",
+        retrieval_top_k=5,
+        chunk_size=1000,
+        chunk_overlap=200,
+    )
+
+    dataset = BenchmarkDataset(
+        version="v1-test",
+        cases=[BenchmarkCase(id="p-001", question="Q?")],
+    )
+
+    runner = EvaluationRunner(
+        rag_service=mock_rag,
+        retrieval_service=mock_retrieval,
+        config=config,
+    )
+    runner.evaluate_dataset(dataset)
+
+    # Verify workspace_id was passed to retrieval
+    retrieval_call_args = mock_retrieval.search.call_args
+    assert retrieval_call_args is not None
+    retrieval_query = retrieval_call_args[0][0]
+    assert retrieval_query.workspace_id == eval_workspace
+
+    # Verify workspace_id was passed to RAG
+    rag_call_args = mock_rag.answer.call_args
+    assert rag_call_args is not None
+    rag_request = rag_call_args[0][0]
+    assert rag_request.workspace_id == eval_workspace
+
+
+def test_evaluation_runner_retrieval_failure_recorded():
+    """Retrieval infrastructure failures must be recorded, not silently zeroed."""
+    from unittest.mock import MagicMock
+
+    from evaluation.models import BenchmarkRunConfig
+    from evaluation.runner import EvaluationRunner
+
+    mock_retrieval = MagicMock()
+    mock_retrieval.search.side_effect = Exception("embedding service unavailable")
+    mock_rag = MagicMock()
+    from app.services.rag.models import RAGResponse
+
+    mock_rag.answer.return_value = RAGResponse(answer="fallback answer", sources=[])
+
+    config = BenchmarkRunConfig(
+        benchmark_version="v1",
+        evaluation_workspace_id="kip-eval-workspace",
+        llm_provider="fake",
+        llm_model="fake-model",
+        embedding_provider="fake",
+        embedding_model="fake-embed",
+        retrieval_top_k=5,
+        chunk_size=1000,
+        chunk_overlap=200,
+    )
+    dataset = BenchmarkDataset(
+        version="v1",
+        cases=[
+            BenchmarkCase(
+                id="e-001",
+                question="Q?",
+                expected_document_ids=["abc123"],
+            )
+        ],
+    )
+    runner = EvaluationRunner(
+        rag_service=mock_rag,
+        retrieval_service=mock_retrieval,
+        config=config,
+    )
+    result = runner.evaluate_dataset(dataset)
+
+    case = result.case_results[0]
+    # retrieval_error must be set — failure is not a silent miss
+    assert case.retrieval.retrieval_error is not None
+    assert "embedding service unavailable" in case.retrieval.retrieval_error
+    # hit must be False (not True from the old degenerate logic)
+    assert case.retrieval.hit is False
 
 
 def test_evaluation_runner_no_llm_credentials():
@@ -317,6 +543,7 @@ def test_evaluation_runner_no_llm_credentials():
 
     config = BenchmarkRunConfig(
         benchmark_version="v1",
+        evaluation_workspace_id="kip-eval-workspace",
         llm_provider="openai",
         llm_model="gpt-4o-mini",
         embedding_provider="openai",
@@ -339,3 +566,204 @@ def test_evaluation_runner_no_llm_credentials():
     assert result.total_cases == 1
     # Answer should contain error note, not crash
     assert "Evaluation Error" in result.case_results[0].answer
+
+
+def test_evaluation_runner_end_to_end_with_indexed_corpus(e2e_pipeline):
+    """Runner correctly retrieves from indexed corpus using fake embedding provider."""
+    import hashlib
+    import uuid
+
+    from evaluation.models import BenchmarkRunConfig
+    from evaluation.runner import EvaluationRunner
+
+    from app.services.chunking.chunkers.fixed_size import FixedSizeChunker
+    from app.services.chunking.service import ChunkingService
+    from app.services.documents.models import Document
+    from app.services.embeddings.manager import EmbeddingManager
+    from app.services.embeddings.service import EmbeddingService
+    from app.services.indexing.service import DocumentIndexingService
+    from app.services.llm.manager import LLMManager
+    from app.services.llm.service import LLMService
+    from app.services.rag.service import RAGService
+    from app.services.retrieval.service import RetrievalService
+    from app.services.vector_store.manager import VectorStoreManager
+    from app.services.vector_store.providers.chroma import ChromaVectorStoreProvider
+    from app.services.vector_store.service import VectorStoreService
+    from conftest import DeterministicEmbeddingProvider, DeterministicLLMProvider
+
+    eval_workspace = f"kip-eval-e2e-{uuid.uuid4().hex[:8]}"
+    collection_name = f"eval_e2e_{uuid.uuid4().hex[:12]}"
+
+    emb_provider = DeterministicEmbeddingProvider()
+    emb_service = EmbeddingService(manager=EmbeddingManager(provider=emb_provider))
+    vs_provider = ChromaVectorStoreProvider(
+        collection_name=collection_name, persist_directory=None
+    )
+    vs_service = VectorStoreService(manager=VectorStoreManager(provider=vs_provider))
+    indexing_service = DocumentIndexingService(
+        chunking_service=ChunkingService(
+            chunker=FixedSizeChunker(chunk_size=500, chunk_overlap=50)
+        ),
+        embedding_service=emb_service,
+        vector_store_service=vs_service,
+    )
+
+    # Index a document whose content matches a known keyword
+    doc_content = b"The default chunk size in KIP is 1000 characters with 200 overlap."
+    doc_id = hashlib.sha256(doc_content).hexdigest()
+    document = Document.create(
+        document_id=doc_id,
+        filename="test_corpus.txt",
+        media_type="text/plain",
+        text=doc_content.decode("utf-8"),
+    )
+    indexing_service.index_document(document, workspace_id=eval_workspace)
+
+    retrieval_service = RetrievalService(
+        embedding_service=emb_service,
+        vector_store_service=vs_service,
+    )
+    llm_service = LLMService(manager=LLMManager(provider=DeterministicLLMProvider()))
+    rag_service = RAGService(
+        retrieval_service=retrieval_service,
+        llm_service=llm_service,
+    )
+
+    config = BenchmarkRunConfig(
+        benchmark_version="v1-e2e-test",
+        evaluation_workspace_id=eval_workspace,
+        llm_provider="fake",
+        llm_model="fake-model",
+        embedding_provider="fake",
+        embedding_model="fake-embed",
+        retrieval_top_k=3,
+        chunk_size=500,
+        chunk_overlap=50,
+    )
+    dataset = BenchmarkDataset(
+        version="v1-e2e",
+        cases=[
+            BenchmarkCase(
+                id="e2e-001",
+                question="What is the default chunk size?",
+                expected_document_ids=[doc_id],
+                expected_keywords=["1000"],
+            )
+        ],
+    )
+
+    runner = EvaluationRunner(
+        rag_service=rag_service,
+        retrieval_service=retrieval_service,
+        config=config,
+    )
+    result = runner.evaluate_dataset(dataset)
+
+    assert result.total_cases == 1
+    assert result.labelled_cases == 1
+    # The document was indexed and should be retrieved (fake embeddings are
+    # deterministic; same text → same vector → cosine similarity = 1.0)
+    assert result.hit_rate == 1.0
+    assert result.mean_reciprocal_rank == 1.0
+
+
+# ---------------------------------------------------------------------------
+# Runner preflight validation tests
+# ---------------------------------------------------------------------------
+
+
+def test_preflight_check_valid():
+    """preflight_check succeeds with the real corpus and v1.1 dataset."""
+    import pathlib
+
+    from evaluation.run_v1_1_baseline import preflight_check
+
+    corpus_dir = pathlib.Path("benchmarks/corpus")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+    corpus_ids, dataset = preflight_check(corpus_dir, dataset_path, "test_api_key")
+
+    assert len(corpus_ids) == 3
+    assert len(dataset["cases"]) == 7
+
+
+def test_preflight_check_missing_api_key():
+    """preflight_check raises ValueError when api_key is missing."""
+    import pathlib
+
+    import pytest
+    from evaluation.run_v1_1_baseline import preflight_check
+
+    corpus_dir = pathlib.Path("benchmarks/corpus")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+    with pytest.raises(ValueError, match="LLM_API_KEY is not configured"):
+        preflight_check(corpus_dir, dataset_path, "")
+
+
+def test_preflight_check_missing_corpus(tmp_path):
+    """preflight_check raises ValueError when corpus dir does not exist."""
+    import pathlib
+
+    import pytest
+    from evaluation.run_v1_1_baseline import preflight_check
+
+    non_existent = tmp_path / "missing_corpus"
+    dataset_path = pathlib.Path("benchmarks/kip_v1_1_baseline.json")
+    with pytest.raises(ValueError, match="Corpus directory not found"):
+        preflight_check(non_existent, dataset_path, "dummy_key")
+
+
+def test_preflight_check_mismatched_doc_id(tmp_path):
+    """preflight_check raises ValueError if a dataset case expects an unindexed ID."""
+    import pytest
+    from evaluation.run_v1_1_baseline import preflight_check
+
+    corpus_dir = tmp_path / "corpus"
+    corpus_dir.mkdir()
+    (corpus_dir / "doc1.txt").write_bytes(b"Sample document text\n")
+
+    dataset_path = tmp_path / "dataset.json"
+    dataset_path.write_text(
+        json.dumps(
+            {
+                "version": "v1.1",
+                "cases": [
+                    {
+                        "id": "c1",
+                        "question": "Q?",
+                        "expected_document_ids": ["unknown_hash_12345"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="which does not match any indexed corpus"):
+        preflight_check(corpus_dir, dataset_path, "dummy_key")
+
+
+def test_baseline_result_file_integrity():
+    """Verify that the genuine v1.1 baseline result file is valid and complete."""
+    import pathlib
+
+    result_path = pathlib.Path("benchmarks/kip_v1_1_baseline_result.json")
+    assert result_path.exists(), "v1.1 baseline result file must exist"
+
+    raw_data = json.loads(result_path.read_text(encoding="utf-8"))
+    res = BenchmarkResult(**raw_data)
+
+    assert res.total_cases == 7
+    assert res.labelled_cases == 7
+    assert res.hit_rate == 1.0
+    assert res.mean_reciprocal_rank is not None and res.mean_reciprocal_rank > 0.0
+    assert res.config.benchmark_version == "v1.1-baseline"
+    assert res.config.embedding_provider == "gemini"
+    assert res.config.embedding_model == "gemini-embedding-2"
+    assert res.config.llm_provider == "gemini"
+    assert res.config.llm_model == "gemini-2.5-flash"
+    assert res.config.evaluation_workspace_id == "kip-eval-workspace"
+
+    for cr in res.case_results:
+        assert cr.retrieval.retrieval_error is None
+        assert cr.retrieval.hit is True
+        assert len(cr.retrieval.retrieved_doc_ids) > 0
