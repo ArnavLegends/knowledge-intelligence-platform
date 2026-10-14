@@ -1,0 +1,7 @@
+In earlier KIP prototype versions (v0.2 and v0.3), vector storage relied on local embedded Chroma instances.
+Chroma configuration utilized CHROMA_PERSIST_DIRECTORY pointing to local disk paths like data/chroma.
+The embedded client used DuckDB and Parquet files for persistence with collection name 'knowledge_base'.
+In v1.1, KIP migrated its production cloud architecture to Qdrant Cloud to support multi-tenant isolation.
+Legacy Chroma persistence settings remain in the codebase strictly for offline unit testing in tests/.
+Chroma settings must not be used in cloud deployment configurations on Render or Streamlit Cloud.
+Production environments require QDRANT_URL and QDRANT_API_KEY environment variables instead.

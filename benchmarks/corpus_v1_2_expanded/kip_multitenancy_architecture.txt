@@ -1,0 +1,9 @@
+KIP enforces multi-tenant workspace isolation at every tier of the ingestion and retrieval stack.
+Tenants operate in isolated logical namespaces identified by an opaque workspace_id.
+All incoming REST API requests must supply the X-KIP-Workspace-ID HTTP header.
+The backend workspace dependency validates the presence and non-emptiness of the workspace header.
+In the vector database layer, tenant isolation is maintained through Qdrant payload filters.
+Every chunk indexed in Qdrant contains a payload field named workspace_id matching the active tenant.
+During vector similarity search, a strict Filter condition matching workspace_id is appended to queries.
+Qdrant evaluates payload filters before returning top-k nearest neighbors, preventing cross-tenant leakage.
+Document deletion and retrieval endpoints reject requests lacking workspace authorization.

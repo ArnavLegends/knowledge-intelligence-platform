@@ -1,0 +1,8 @@
+GeminiEmbeddingProvider integrates Google Gemini embedding models into KIP using the official google-genai SDK.
+The production embedding model is gemini-embedding-2, which produces 768-dimensional dense vectors.
+The provider submits texts using the batchEmbedContents API endpoint to maximize batch throughput.
+Each input text is packaged into a Content object containing a single text Part.
+In accordance with official Google Gemini documentation, task_type is unsupported for gemini-embedding-2.
+Input texts are passed directly as content without task-type parameters to prevent API validation errors.
+Output vector values are extracted from the Embedding.values array and verified to contain 768 float elements.
+HTTP timeouts and network disconnects are caught and wrapped into standardized KIP EmbeddingError exceptions.

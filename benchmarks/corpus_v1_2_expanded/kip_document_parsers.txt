@@ -1,0 +1,8 @@
+KIP document ingestion supports four distinct file formats: PDF, DOCX, TXT, and Markdown.
+Each incoming file upload is routed to a specialized parser based on its MIME type and file extension.
+PDF files are parsed using PyPDF, which extracts text streams across all document pages sequentially.
+DOCX files are processed using python-docx to iterate over body paragraphs and table text blocks.
+TXT and Markdown files are decoded directly as UTF-8 character sequences without specialized extraction.
+All parsers enforce a strict maximum upload boundary: files exceeding 2097152 bytes (2 MB) are rejected.
+Files with unsupported media types or corrupted headers trigger an IngestionError with HTTP 415 or 400.
+Extracted text undergoes whitespace normalization while preserving logical paragraph and heading breaks.

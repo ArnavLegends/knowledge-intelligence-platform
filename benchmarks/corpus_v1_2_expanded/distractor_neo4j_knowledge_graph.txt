@@ -1,0 +1,7 @@
+GraphRAG combines vector search with graph databases like Neo4j to capture multi-hop entity relationships.
+During document indexing, an information extraction pipeline extracts entities, relations, and claims.
+Extracted nodes and edges are stored in Neo4j using labeled property graph models and Cypher query schemas.
+When a user asks a multi-hop question, the system queries the graph using Cypher to traverse connected nodes.
+Graph context is merged with dense vector chunks to provide comprehensive structural context to the LLM.
+KIP currently relies strictly on dense vector search in Qdrant; Neo4j integration is deferred to v2.4.
+Knowledge graphs require significant computational overhead for entity extraction and ontology alignment.

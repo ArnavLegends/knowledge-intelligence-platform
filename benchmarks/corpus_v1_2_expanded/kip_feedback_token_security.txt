@@ -1,0 +1,8 @@
+Feedback webhook transport in KIP is protected by shared secret token validation.
+The environment variable FEEDBACK_WEBHOOK_TOKEN defines a high-entropy secret string.
+When FastAPI dispatches feedback to Google Apps Script, the token is included as an HTTPS query parameter.
+The Apps Script doGet() handler verifies that parameter e.parameter.token matches ScriptProperties.token.
+If the token is missing or invalid, Apps Script rejects the request with HTTP 401 Unauthorized.
+If FEEDBACK_WEBHOOK_URL is unconfigured, the backend returns HTTP 503 feedback_destination_unconfigured.
+Logs and error handlers automatically mask token values using regex redaction before output.
+This shared-secret mechanism prevents unauthorized external actors from writing spam into feedback sheets.

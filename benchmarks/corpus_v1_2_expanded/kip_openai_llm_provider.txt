@@ -1,0 +1,8 @@
+OpenAILLMProvider offers an alternative generative adapter for OpenAI language models in KIP.
+When LLM_PROVIDER is configured as openai, KIP instantiates OpenAILLMProvider with OPENAI_API_KEY.
+The provider uses the openai.OpenAI client to send chat completion requests to the gpt-4o-mini model.
+System instructions are transmitted in the developer or system message role for prompt grounding.
+Temperature is pinned to 0.0 to enforce deterministic generation during benchmark evaluations.
+The provider extracts generated message content and token usage counts from ChatCompletion choices.
+Rate-limiting HTTP 429 errors from OpenAI are caught and transformed into KIP LLMRateLimitError.
+This modular provider architecture enables seamless multi-vendor benchmarking without code rewrites.

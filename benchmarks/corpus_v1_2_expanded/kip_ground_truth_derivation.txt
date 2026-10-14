@@ -1,0 +1,8 @@
+Ground truth document and chunk IDs in KIP benchmarks are derived using the platform's actual hashing logic.
+Document IDs are derived as document_id = hashlib.sha256(raw_file_bytes).hexdigest() from corpus files.
+Chunk IDs are derived as chunk_id = hashlib.sha256(f'{document_id}:{chunk_index}'.encode()).hexdigest().
+To ensure hash stability across operating systems, all corpus text files must use Unix LF line endings.
+A carriage return byte (CRLF) alters raw file bytes, changing the SHA-256 hash and invalidating ground truth.
+The derive_corpus_ids.py utility script inspects corpus files, verifies LF endings, and outputs hashes.
+Benchmark cases reference these exact SHA-256 hashes in expected_document_ids and expected_chunk_ids.
+This deterministic protocol eliminates guesswork and ensures 100% reproducible retrieval evaluation.

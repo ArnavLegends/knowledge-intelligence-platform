@@ -1,0 +1,8 @@
+ChromaVectorStoreProvider implements vector storage in KIP using the chromadb embedded library.
+It is designed primarily for local development, automated CI workflows, and fast unit test suites.
+When persist_directory is None, Chroma initializes an ephemeral in-memory client without filesystem writes.
+Collections are created with metadata={'hnsw:space': 'cosine'} to enforce cosine distance metric calculations.
+Tenant isolation is applied using Chroma's where={'workspace_id': workspace_id} metadata query filter.
+Vectors and metadata are inserted via collection.upsert() with chunk IDs matching SHA-256 derivations.
+SearchResults returned by Chroma are transformed into KIP RetrievedChunk models with cosine scores.
+Chroma enables 100% offline test execution without requiring network access to cloud vector databases.

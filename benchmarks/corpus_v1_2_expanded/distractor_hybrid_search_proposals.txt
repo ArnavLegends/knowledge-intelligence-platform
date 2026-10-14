@@ -1,0 +1,8 @@
+Hybrid search combines dense semantic vector retrieval with sparse lexical keyword matching.
+Sparse retrieval algorithms such as BM25 and SPLADE excel at exact keyword lookups and acronym matching.
+Dense vector retrieval excels at semantic similarity, paraphrase matching, and conceptual understanding.
+Hybrid search merges candidate results using Reciprocal Rank Fusion (RRF) or convex score combination.
+Qdrant supports hybrid search by storing both dense vector embeddings and sparse lexical vector representations.
+Cross-encoder rerankers can be applied after hybrid fusion to score candidate passages against queries.
+KIP currently uses pure dense vector search; hybrid search is a proposed research direction for v1.2+.
+Evaluating hybrid search requires comparing Hit Rate, MRR, and retrieval latency against pure dense retrieval.

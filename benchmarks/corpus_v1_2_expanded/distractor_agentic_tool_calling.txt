@@ -1,0 +1,7 @@
+Agentic AI workflows utilize autonomous multi-step reasoning architectures such as LangGraph and CrewAI.
+Agents break down complex questions into sub-tasks and execute external tool calls sequentially.
+Common tools include mathematical calculators, live web search scrapers, Python code sandboxes, and SQL query engines.
+The agent inspects intermediate tool outputs and adjusts its execution trajectory using ReAct loops.
+Tool-augmented architectures handle questions that cannot be answered from private documents alone.
+KIP v1.1 is a direct single-step RAG platform; autonomous agent workflows are deferred to v2.2 milestones.
+Agentic loops introduce latency overhead and risk non-terminating reasoning cycles if unconstrained.

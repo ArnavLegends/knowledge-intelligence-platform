@@ -1,0 +1,8 @@
+KIP is packaged for containerized cloud deployment using lightweight Docker images.
+The production Dockerfile is based on python:3.11-slim to minimize container image footprint.
+The container installs dependencies via pip with no-cache-dir flags and runs as a non-root user.
+Uvicorn serves the FastAPI backend application on host 0.0.0.0 and port 8000.
+Render Free Web Service hosts the container with automatic git-push trigger deployments.
+Health checks are exposed at GET /api/v1/health returning status ok and version information.
+Container environment variables are injected securely via Render dashboard secret management.
+Render instances receive HTTP traffic through automatic TLS termination with Let's Encrypt certificates.

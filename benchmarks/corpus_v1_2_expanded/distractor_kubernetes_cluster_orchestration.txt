@@ -1,0 +1,7 @@
+Enterprise-grade Kubernetes deployment architectures deploy KIP across distributed cloud container clusters.
+Helm charts define Kubernetes Deployment manifests, Horizontal Pod Autoscalers (HPA), and Service topologies.
+Ingress controllers manage TLS termination, rate-limiting annotations, and path-based routing to pods.
+Worker pods scale horizontally based on CPU utilization and incoming HTTP request queue depths.
+Stateful workloads such as Qdrant clusters run on dedicated node pools backed by persistent SSD volumes.
+KIP v1.1 is deployed as a single-instance container on Render Free Tier rather than a Kubernetes cluster.
+Kubernetes orchestration is deferred to enterprise milestone v3.0+ to maintain zero deployment cost.

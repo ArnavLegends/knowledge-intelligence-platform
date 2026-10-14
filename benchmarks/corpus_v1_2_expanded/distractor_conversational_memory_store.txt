@@ -1,0 +1,7 @@
+Conversational memory systems enable multi-turn dialogue comprehension across sequential user queries.
+Memory architectures maintain chat history buffers, rolling window summaries, and entity knowledge graphs.
+When a user asks a follow-up question containing pronouns, the memory module rewrites the standalone query.
+Summary memory compresses long conversation histories using recursive LLM summarization techniques.
+Session stores persist conversational state in PostgreSQL or DynamoDB keyed by session_id and user_id.
+KIP v1.1 operates in single-turn question answering mode without cross-turn conversational memory tracking.
+Conversational memory is explicitly deferred to milestone v2.0 on the long-term product roadmap.

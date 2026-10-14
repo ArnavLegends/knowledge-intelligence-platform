@@ -1,0 +1,9 @@
+The KIP security threat model defends against tenant cross-contamination and unauthorized data access.
+Workspaces are decoupled by cryptographically random tokens generated with python secrets module.
+Workspace tokens use the wksp_ prefix and have a minimum entropy of 256 bits to prevent enumeration.
+Tenant boundary validation occurs prior to document parsing to prevent malicious file injection.
+Uploaded files are inspected in-memory with strict MIME-type and extension validation.
+Payloads are checked against maximum size boundaries (2097152 bytes) to mitigate denial of service.
+Vector search queries strictly constrain candidate points to the caller's authorized workspace.
+Feedback submissions enforce rate limits and string sanitization before dispatching to Google Sheets.
+All internal exceptions are caught and sanitized to ensure database connection strings remain hidden.

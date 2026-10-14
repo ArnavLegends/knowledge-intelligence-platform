@@ -1,0 +1,8 @@
+Benchmark datasets in KIP are strictly typed using Pydantic domain models in evaluation/models.py.
+BenchmarkCase encapsulates id, question, reference_answer, expected_document_ids, and expected_keywords.
+BenchmarkDataset packages a dataset version string, description, and list of BenchmarkCase instances.
+RetrievalMetrics captures case_id, hit, reciprocal_rank, retrieved_doc_ids, and retrieval_latency_ms.
+Retrieval infrastructure failures are recorded in retrieval_error, distinguishing errors from misses.
+AnswerMetrics captures keyword_hits, keyword_misses, keyword_coverage, and generation_latency_ms.
+BenchmarkResult aggregates run_id, timestamp, config, case_results, hit_rate, and mean_reciprocal_rank.
+All benchmark and result models serialize cleanly to JSON for persistent version-controlled records.

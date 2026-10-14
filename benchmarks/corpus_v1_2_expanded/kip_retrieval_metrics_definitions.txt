@@ -1,0 +1,8 @@
+KIP evaluation calculates mathematical retrieval metrics based on standard information retrieval formulas.
+Hit Rate@k measures the fraction of labelled queries where at least one target document appears in top-k.
+Reciprocal Rank (RR) is defined as 1 / rank of the first relevant document, and 0.0 if no target is in top-k.
+Mean Reciprocal Rank (MRR) is the average of Reciprocal Rank values across all labelled benchmark cases.
+Precision@k calculates the number of relevant retrieved documents in top-k divided by k.
+Average Precision (AP) averages Precision@k values at each rank where a relevant document is retrieved.
+Mean Average Precision (MAP) calculates the mean of AP values across all multi-document benchmark queries.
+Unlabelled cases (empty expected_document_ids) are strictly excluded to prevent artificial metric inflation.

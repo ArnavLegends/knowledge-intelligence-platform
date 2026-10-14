@@ -1,0 +1,10 @@
+KIP (Knowledge Intelligence Platform) is a zero-cost, multi-tenant RAG platform.
+It supports document ingestion in PDF, DOCX, TXT, and Markdown formats.
+Documents are chunked using a fixed-size character chunker with configurable size and overlap.
+Each chunk is assigned a deterministic SHA-256 ID derived from the document ID and chunk index.
+The platform uses Gemini dense embeddings (gemini-embedding-2, 768 dimensions) for semantic search.
+Vector storage uses Qdrant Cloud with cosine similarity and workspace_id payload filtering.
+Retrieval is scoped strictly to the active workspace; cross-tenant access is rejected at multiple layers.
+The frontend is a Streamlit application hosted on Streamlit Community Cloud.
+User feedback is collected via a category and free-text message with a 30-word limit.
+Feedback is forwarded to Google Sheets via an authenticated Google Apps Script webhook.

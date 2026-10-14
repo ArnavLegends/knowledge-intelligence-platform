@@ -1,0 +1,8 @@
+The Streamlit UI organizes KIP capabilities into four primary visual interaction components.
+Component 1: The Workspace Sidebar enables token creation, workspace switching, and connection health display.
+Component 2: The Document Manager provides drag-and-drop file upload and displays active indexed documents.
+Component 3: The Query & RAG View renders chat history, response streams, and expandable provenance cards.
+Component 4: The Feedback Dialog renders a category dropdown and a free-text text area with word counting.
+The provenance component visually renders chunk text, document filename, chunk index, and similarity scores.
+Error banners display user-friendly troubleshooting guidance when backend services encounter timeouts.
+The layout uses responsive columns to ensure readability across mobile and desktop browser viewports.

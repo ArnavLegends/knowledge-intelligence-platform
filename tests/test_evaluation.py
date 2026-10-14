@@ -938,3 +938,172 @@ def test_v12_preflight_check_valid():
 
     assert len(corpus_ids) == 18
     assert len(dataset["cases"]) == 25
+
+
+# ---------------------------------------------------------------------------
+# v1.2 expanded benchmark — 50-document, 80-case dataset validation
+# ---------------------------------------------------------------------------
+
+
+def test_v12_expanded_benchmark_loads():
+    """The expanded benchmark must be loadable and well-formed."""
+    import pathlib
+
+    path = pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json")
+    assert path.exists(), "Expanded benchmark file must exist"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+    assert ds.version == "v1.2-expanded-benchmark"
+    assert len(ds.cases) == 80
+
+
+def test_v12_expanded_benchmark_case_ids_unique():
+    """All 80 expanded case IDs must be unique."""
+    import pathlib
+
+    data = json.loads(
+        pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ds = BenchmarkDataset(**data)
+    ids = [c.id for c in ds.cases]
+    assert len(ids) == len(set(ids)), "Expanded benchmark case IDs must be unique"
+
+
+def test_v12_expanded_benchmark_all_cases_labelled():
+    """Every expanded case must have at least one expected_document_id."""
+    import pathlib
+
+    data = json.loads(
+        pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ds = BenchmarkDataset(**data)
+    for case in ds.cases:
+        assert case.expected_document_ids, (
+            f"Case {case.id!r} has no expected_document_ids — "
+            "all expanded cases must be fully labelled"
+        )
+
+
+def test_v12_expanded_benchmark_category_counts():
+    """Category distribution must match the design spec: 16/16/16/16/8/8."""
+    import pathlib
+
+    data = json.loads(
+        pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ds = BenchmarkDataset(**data)
+    counts: dict[str, int] = {}
+    for case in ds.cases:
+        cat = case.metadata.get("category", "unknown")
+        counts[cat] = counts.get(cat, 0) + 1
+
+    assert counts.get("exact_terminology") == 16
+    assert counts.get("paraphrase") == 16
+    assert counts.get("multi_concept") == 16
+    assert counts.get("hard_negative") == 16
+    assert counts.get("cross_document") == 8
+    assert counts.get("boundary_handling") == 8
+
+
+def test_v12_expanded_benchmark_document_ids_match_corpus():
+    """All expected doc IDs must match SHA-256 of files in corpus_v1_2_expanded."""
+    import hashlib
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
+    actual_ids = {
+        hashlib.sha256(f.read_bytes()).hexdigest()
+        for f in corpus_dir.glob("*.txt")
+    }
+    data = json.loads(
+        pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ds = BenchmarkDataset(**data)
+    for case in ds.cases:
+        for doc_id in case.expected_document_ids:
+            assert doc_id in actual_ids, (
+                f"Case {case.id!r} references document_id {doc_id!r} "
+                "which does not match any file in benchmarks/corpus_v1_2_expanded/"
+            )
+
+
+def test_v12_expanded_corpus_lf_line_endings():
+    """Expanded corpus files must use LF-only line endings for stable SHA-256 IDs."""
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
+    for txt_file in corpus_dir.glob("*.txt"):
+        raw = txt_file.read_bytes()
+        assert b"\r" not in raw, (
+            f"{txt_file.name} contains CR bytes (CRLF line endings). "
+            "This would change the SHA-256 document ID. "
+            "Corpus files must use LF line endings only."
+        )
+
+
+def test_v12_expanded_benchmark_chunk_ids_format():
+    """All expected_chunk_ids must be 64-char lowercase hex strings."""
+    import pathlib
+    import re
+
+    hex64 = re.compile(r"^[0-9a-f]{64}$")
+    data = json.loads(
+        pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ds = BenchmarkDataset(**data)
+    for case in ds.cases:
+        for chunk_id in case.expected_chunk_ids:
+            assert hex64.match(chunk_id), (
+                f"Case {case.id!r} has malformed chunk_id {chunk_id!r}"
+            )
+
+
+def test_v12_expanded_benchmark_corpus_size():
+    """Expanded corpus must contain exactly 50 source documents."""
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
+    txt_files = list(corpus_dir.glob("*.txt"))
+    assert len(txt_files) == 50, (
+        f"Expected 50 corpus documents, found {len(txt_files)}"
+    )
+
+
+def test_v12_expanded_ids_json_consistency():
+    """corpus_v1_2_expanded_ids.json must cover all 50 corpus files with valid SHA-256 doc IDs."""
+    import hashlib
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
+    mapping_path = pathlib.Path("benchmarks/corpus_v1_2_expanded_ids.json")
+    assert mapping_path.exists(), "ID mapping file must exist"
+
+    mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
+    doc_ids = mapping["doc_ids"]
+    chunk_ids = mapping["chunk_ids"]
+
+    assert len(doc_ids) == 50
+    assert len(chunk_ids) == 50
+    assert set(doc_ids.keys()) == set(chunk_ids.keys()), (
+        "doc_ids and chunk_ids must cover the same set of filenames"
+    )
+
+    # Verify every doc ID matches actual corpus file bytes
+    for filename, doc_id in doc_ids.items():
+        corpus_file = corpus_dir / filename
+        assert corpus_file.exists(), f"Corpus file {filename} missing"
+        expected_id = hashlib.sha256(corpus_file.read_bytes()).hexdigest()
+        assert doc_id == expected_id, (
+            f"doc_id mismatch for {filename}: "
+            f"mapping has {doc_id!r}, derived {expected_id!r}"
+        )

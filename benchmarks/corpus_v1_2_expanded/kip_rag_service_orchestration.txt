@@ -1,0 +1,8 @@
+RAGService coordinates the end-to-end question answering pipeline across KIP subsystem components.
+Upon receiving a RAGRequest, RAGService extracts query text, workspace_id, and retrieval top_k.
+Step 1: It invokes RetrievalService.search() with a workspace-scoped RetrievalQuery entity.
+Step 2: If chunks are retrieved, it formats the context block into ordered [Source X] XML sections.
+Step 3: It constructs the grounded RAG prompt and passes it to LLMService for generative completion.
+Step 4: It parses the LLM output, pairs source references with retrieved chunks, and records latencies.
+Step 5: It packages the final output into a RAGResponse entity containing answer, sources, and metadata.
+Any unexpected exception during retrieval or generation is caught and wrapped into a RAGError entity.

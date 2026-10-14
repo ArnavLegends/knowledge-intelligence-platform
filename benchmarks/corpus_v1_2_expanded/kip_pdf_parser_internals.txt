@@ -1,0 +1,8 @@
+The PDF parser implementation in KIP wraps the PyPDF PdfReader library within a protected execution block.
+Upon file upload, raw bytes are wrapped in an io.BytesIO stream to avoid writing temporary files to disk.
+The parser loops through reader.pages, calling extract_text with visitor functions to assemble page strings.
+Pages that contain only scanned images or produce zero extractable characters generate an informative warning.
+Extracted text from each page is annotated with page_number metadata to preserve provenance for citations.
+If a PDF is encrypted with a password, the parser catches PdfReadError and raises IngestionError immediately.
+Total extracted characters are validated against a minimum length threshold to ensure document substance.
+The resulting text stream is packaged into a Document domain entity alongside document_id and filename.

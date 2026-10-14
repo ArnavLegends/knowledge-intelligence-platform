@@ -1,0 +1,8 @@
+KIP provides deterministic, content-addressed document identity to guarantee idempotency during ingestion.
+When a document is uploaded, DocumentIngestionService computes document_id = SHA-256(raw_file_bytes).
+Because document identity depends strictly on raw file bytes, identical files always produce identical IDs.
+During chunking, each chunk is assigned an ID computed as SHA-256(document_id + ':' + str(chunk_index)).
+In Qdrant, point IDs are derived as UUID5(NAMESPACE_URL, 'kip://' + workspace_id + '/' + chunk_id).
+Re-uploading the same document into the same workspace generates the identical point IDs in Qdrant.
+Qdrant upsert semantics overwrite existing points with identical IDs rather than creating duplicate entries.
+Idempotent indexing eliminates redundant vector allocations and ensures reproducible benchmark evaluations.

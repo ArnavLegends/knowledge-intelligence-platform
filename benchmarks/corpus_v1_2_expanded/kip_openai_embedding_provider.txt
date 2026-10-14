@@ -1,0 +1,8 @@
+OpenAIEmbeddingProvider provides an alternative embedding adapter in KIP for OpenAI vector models.
+When EMBEDDING_PROVIDER is set to openai, KIP routes embedding requests through openai.OpenAI client.
+The default OpenAI embedding model is text-embedding-3-small configured with 1536 output dimensions.
+Input batches are submitted to client.embeddings.create using the input text list parameter.
+OpenAI returns normalized embedding vectors directly suitable for cosine similarity search.
+The adapter extracts vectors in source order and constructs KIP Embedding domain entities.
+If the OPENAI_API_KEY environment variable is missing, provider initialization raises a ConfigurationError.
+The provider is fully tested using deterministic fakes to ensure test isolation without live API costs.

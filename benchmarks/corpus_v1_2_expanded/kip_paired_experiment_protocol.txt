@@ -1,0 +1,8 @@
+KIP evaluates retrieval optimizations using a rigorous paired comparative experimentation protocol.
+Every experiment defines a Control condition (existing baseline) and a Treatment condition (optimization candidate).
+Both conditions are evaluated against the exact same corpus snapshot, query set, and ground-truth labels.
+To prevent vector contamination, Control and Treatment are indexed into separate dedicated Qdrant collections.
+The runner evaluates queries in identical order and computes paired differences (delta RR, delta latency).
+Results record per-query rank shifts to determine whether aggregate gains mask individual case regressions.
+Timestamped result JSON files are persisted in benchmarks/ for verifiable, peer-reviewable research records.
+Optimizations are adopted into production only when empirical paired improvements outweigh regressions.

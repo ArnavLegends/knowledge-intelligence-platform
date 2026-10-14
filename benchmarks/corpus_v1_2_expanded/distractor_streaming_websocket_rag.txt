@@ -1,0 +1,7 @@
+Streaming response generation streams LLM output tokens to the user interface in real-time as they generate.
+Implementations utilize Server-Sent Events (SSE) or bidirectional WebSocket channels over HTTP/2.
+As the language model produces token deltas, the backend flushes chunked HTTP packets to client listeners.
+Streaming significantly improves perceived user latency by displaying words before generation completes.
+KIP v1.1 processes RAG queries synchronously: the full answer is generated before returning the response JSON.
+Synchronous responses simplify deterministic evaluation, latency profiling, and feedback attribution.
+Streaming WebSocket and SSE token delivery are deferred to future frontend optimization cycles.

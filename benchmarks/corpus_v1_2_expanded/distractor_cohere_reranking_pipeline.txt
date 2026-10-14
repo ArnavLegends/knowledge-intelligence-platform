@@ -1,0 +1,7 @@
+Neural reranking utilizes cross-encoder models such as Cohere Rerank or BGE-Reranker to re-order candidates.
+Unlike bi-encoder dense embeddings that encode query and document independently into vector space,
+cross-encoders process query and candidate chunk simultaneously through multi-head self-attention layers.
+Cross-encoders capture fine-grained token-level cross-interactions, significantly improving rank precision.
+A typical two-stage pipeline retrieves 20 candidate chunks with dense search, then reranks top-5 for the LLM.
+KIP v1.1 performs single-stage retrieval directly from Qdrant without secondary cross-encoder reranking.
+Cohere Rerank and local cross-encoder models are primary candidates for v1.2 retrieval research experiments.

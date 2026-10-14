@@ -1,0 +1,8 @@
+KIP collects user feedback through an in-app modal and forwards it to Google Sheets.
+The feedback submission requires a category (UI/UX, Performance, Accuracy, Feature Request, Other) and message.
+Messages are limited to 30 words to encourage concise, actionable user input.
+Feedback transport uses an authenticated HTTPS GET request with query parameters to Google Apps Script.
+The Google Apps Script web app implements doGet(e) to receive parameters and append a row to Google Sheets.
+Requests are authenticated via a shared secret token passed in the token query parameter.
+The backend uses python requests.get() which automatically follows HTTP 302 redirects from Apps Script.
+Secrets and destination URLs are strictly redacted from application logs to prevent credential leakage.

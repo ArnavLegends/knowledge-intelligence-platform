@@ -1,0 +1,8 @@
+KIP decouples vector storage through an abstract VectorStoreProvider interface.
+Concrete implementations must implement index_chunks, search, delete_by_document, and delete_by_workspace.
+VectorStoreService coordinates vector operations through the active provider selected via settings.
+The production provider is QdrantVectorStoreProvider, which connects to Qdrant Cloud via HTTP client.
+The fallback and local testing provider is ChromaVectorStoreProvider, supporting in-memory vector storage.
+All vector search operations require an explicit workspace_id argument to prevent cross-tenant queries.
+Vector operations translate domain Chunk and RetrievalQuery models into provider-native query structures.
+Provider errors such as connection timeouts or missing collections are mapped to VectorStoreError exceptions.

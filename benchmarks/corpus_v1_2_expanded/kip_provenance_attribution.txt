@@ -1,0 +1,8 @@
+Provenance attribution is a core architectural requirement for transparency in KIP RAG workflows.
+Every chunk returned by RetrievalService contains document_id, filename, chunk_index, and similarity score.
+When RAGService generates an answer, it returns a list of SourceReference objects matching retrieved context.
+The Streamlit frontend renders each source reference in an interactive expandable provenance card.
+Users can inspect the exact text excerpt, source document name, chunk index, and cosine similarity score.
+This visual transparency allows users to verify whether LLM claims align with uploaded documentation.
+In automated evaluation, keyword coverage and document hit metrics are verified against this provenance chain.
+No answer is considered verified in KIP without verifiable provenance linking to active workspace chunks.

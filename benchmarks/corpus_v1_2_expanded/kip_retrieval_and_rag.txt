@@ -1,0 +1,10 @@
+KIP retrieval uses dense vector search over a Qdrant collection named knowledge_base.
+The vector distance metric is COSINE; similarity scores are in [-1, 1], where 1 is identical.
+Qdrant converts cosine distance to a score: score = 1 - distance.
+During search, the query text is embedded using the configured Gemini embedding model.
+The top_k parameter defaults to 5 results per retrieval query.
+All searches apply a must match filter on payload.workspace_id to enforce multi-tenant isolation.
+Retrieved chunks are passed to the RAG pipeline which constructs a prompt with strict grounding rules.
+The generation model is Gemini 2.5 Flash via the GeminiLLMProvider.
+If no chunks match the query or if the similarity score is below the threshold, retrieval returns empty.
+When context is empty, the RAG service returns a predefined message without calling the generation LLM.

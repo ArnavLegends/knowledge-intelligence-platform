@@ -1,0 +1,8 @@
+LLMManager acts as the unified gateway for generative language model interactions in KIP.
+It abstracts provider implementations behind the LLMProvider protocol to enable model swapping.
+The production provider is GeminiLLMProvider, which communicates with the gemini-2.5-flash model.
+A secondary provider is OpenAILLMProvider, which interfaces with gpt-4o-mini for fallback testing.
+The gateway exposes generate_response(prompt, system_instruction, temperature) with strict typing.
+Temperature defaults to 0.0 to ensure deterministic, reproducible generation for RAG evaluations.
+The gateway enforces request timeouts and handles transient provider rate-limit errors gracefully.
+Responses are returned as LLMResponse entities containing text, finish_reason, and usage metrics.

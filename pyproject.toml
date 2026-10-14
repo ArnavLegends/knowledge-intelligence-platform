@@ -90,6 +90,13 @@ select = [
 ]
 ignore = []
 
+[tool.ruff.lint.per-file-ignores]
+# Benchmark data-generation scripts contain long question/answer string literals
+# that cannot be wrapped without breaking readability.
+"benchmarks/*.py" = ["E501"]
+# Test docstrings may contain long file paths for clarity.
+"tests/test_evaluation.py" = ["E501"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
 

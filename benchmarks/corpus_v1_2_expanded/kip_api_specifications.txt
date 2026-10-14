@@ -1,0 +1,9 @@
+KIP exposes a RESTful API built on FastAPI with OpenAPI documentation at /docs.
+Health check: GET /api/v1/health returns status ok, platform version, and uptime.
+Document upload: POST /api/v1/documents accepts multipart file uploads (PDF, DOCX, TXT, MD).
+Upload requests require an X-KIP-Workspace-ID header and return document_id, filename, chunks_indexed.
+Document listing: GET /api/v1/documents returns all indexed documents in the active workspace.
+Retrieval query: POST /api/v1/retrieval/search accepts query text, top_k, returns retrieved chunks.
+RAG question: POST /api/v1/rag/query accepts query text, top_k, returns answer and source references.
+Feedback: POST /api/v1/feedback accepts category and message, returns delivery status.
+Error responses follow RFC 7807 with detail, error_code, and HTTP status codes (400, 404, 422, 500).

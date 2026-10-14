@@ -6,12 +6,12 @@ This directory contains the lightweight, self-contained AI evaluation harness fo
 measuring retrieval hit rates, Mean Reciprocal Rank (MRR), keyword coverage, and
 stage latencies across the Knowledge Intelligence Platform.
 
-## Current Status (v1.1.0)
+## Current Status (v1.2.0)
 
-The evaluation harness is fully implemented and structurally validated by the
-automated test suite (245+ tests). A genuine provider-backed retrieval quality
-baseline (requiring live Gemini embedding API access) has not yet been run; see
-**Remaining Limitations** below.
+The evaluation harness is fully implemented, provider-backed baselines have been
+executed (v1.1 and v1.2 experiments), and a 50-document / 80-case expanded
+benchmark has been constructed to eliminate top-k saturation. All tests pass
+(276+ tests). See **Benchmark Datasets** for the full dataset inventory.
 
 ### Implemented Components
 
@@ -43,13 +43,15 @@ reserved for external judge configurations in v1.2+.
 | v1.0 historical | `benchmarks/kip_v1_baseline.json` | No `expected_document_ids` (unlabelled) | Keyword coverage only; preserved as historical artifact |
 | **v1.1 baseline** | `benchmarks/kip_v1_1_baseline.json` | 7 cases, all with `expected_document_ids` | Hit Rate, MRR, Keyword Coverage |
 | **v1.2 experiment** | `benchmarks/kip_v1_2_benchmark.json` | 25 cases, all with `expected_document_ids` and `expected_chunk_ids` | Hit Rate@1/3/5, MRR, Input-Formatting Comparison |
+| **v1.2 expanded** | `benchmarks/kip_v1_2_expanded_benchmark.json` | 80 cases, all labelled, 6 categories, with `expected_document_ids` and `expected_chunk_ids` | Discriminative Hit@1/3/5, MRR, hard negatives, cross-document, paraphrase |
 
 ## Reference Corpora
 
 - **v1.1 Baseline Corpus (`benchmarks/corpus/`):** 3 version-controlled text files (LF line endings only) covering overview, chunking, and retrieval topics. See [`benchmarks/corpus/README.md`](../benchmarks/corpus/README.md).
-- **v1.2 Expanded Corpus (`benchmarks/corpus_v1_2/`):** 18 version-controlled text files (14 KIP architecture documents + 4 adversarial distractors). Designed so top-5 retrieval covers ~28% of corpus candidates (18 chunks), eliminating the v1.1 Hit Rate@5 saturation. See [`benchmarks/corpus_v1_2/README.md`](../benchmarks/corpus_v1_2/README.md).
+- **v1.2 Formatting Corpus (`benchmarks/corpus_v1_2/`):** 18 version-controlled text files (14 KIP architecture documents + 4 adversarial distractors). Designed so top-5 retrieval covers ~28% of corpus candidates (18 chunks), eliminating the v1.1 Hit Rate@5 saturation. See [`benchmarks/corpus_v1_2/README.md`](../benchmarks/corpus_v1_2/README.md).
+- **v1.2 Expanded Corpus (`benchmarks/corpus_v1_2_expanded/`):** 50 version-controlled text files (38 KIP architecture documents + 12 hard-negative distractors). Top-5 retrieval covers 10% of corpus; top-10 covers 20%. Eliminates saturation on both Hit@3 and Hit@5. See [`benchmarks/corpus_v1_2_expanded/README.md`](../benchmarks/corpus_v1_2_expanded/README.md).
 
-Document IDs in both corpora are derived as `SHA-256(raw_file_bytes)`, matching KIP's `DocumentIngestionService`.
+Document IDs in all corpora are derived as `SHA-256(raw_file_bytes)`, matching KIP's `DocumentIngestionService`. Chunk IDs are derived as `SHA-256(document_id + ':' + str(chunk_index))`.
 
 ## Evaluation Workspace
 
@@ -184,6 +186,48 @@ A controlled empirical experiment was executed comparing KIP's baseline raw-text
 4. **Extension Hooks:** Provider-neutral `doc_formatter` in `EmbeddingService` and `query_formatter` in `RetrievalService` remain in the codebase as optional extension hooks for future research.
 5. **Future Research Need:** Larger, more diverse benchmark evaluation (more documents, distractor-heavy environments, cross-domain corpora) is identified as a necessary next step for future retrieval investigations (e.g. hybrid search, reranking).
 
+### 6. KIP v1.2 Expanded Benchmark
+
+A 50-document, 80-case benchmark was constructed to provide discriminative retrieval evaluation without the saturation observed in the 18-document pilot.
+
+#### Corpus Construction (`benchmarks/corpus_v1_2_expanded/`)
+
+| Category | Count | Purpose |
+|---|---|---|
+| KIP architecture documents | 38 | Genuine factual content covering API, chunking, embeddings, security, evaluation, etc. |
+| Hard-negative distractors | 12 | Semantically adjacent but off-topic documents (Kubernetes, Redis, OAuth2, etc.) |
+| **Total** | **50** | 1 chunk/doc at 1000/200 sizing → 50 chunk candidates |
+
+- Top-5 retrieval = 10% of corpus (vs. 28% for the 18-doc pilot)
+- Top-10 retrieval = 20% of corpus
+- Hit@3 and Hit@5 saturation effectively eliminated for strong distractors
+
+#### Benchmark Case Categories
+
+| Category | Cases | Design Goal |
+|---|---|---|
+| `exact_terminology` | 16 | Named entities, exact config values, header names |
+| `paraphrase` | 16 | Same semantics, different surface form |
+| `multi_concept` | 16 | Queries requiring synthesis across multiple facts |
+| `hard_negative` | 16 | Queries where distractor documents share terminology |
+| `cross_document` | 8 | Queries whose answers span two source documents |
+| `boundary_handling` | 8 | Edge-case queries (empty results, ambiguous scope, LF/CRLF stability) |
+| **Total** | **80** | |
+
+#### Generation
+
+```bash
+# Regenerate corpus document IDs (if corpus files change)
+python benchmarks/build_expanded_corpus_and_dataset.py
+
+# Regenerate the 80-case benchmark JSON
+python benchmarks/generate_80_cases.py
+```
+
+Output: `benchmarks/kip_v1_2_expanded_benchmark.json`
+
+All document IDs are verified offline against `benchmarks/corpus_v1_2_expanded_ids.json` and by the automated test suite (`test_v12_expanded_ids_json_consistency`).
+
 ## Remaining Limitations
 
 1. **Keyword coverage is substring match.** `kw.lower() in answer.lower()` does
@@ -194,9 +238,10 @@ A controlled empirical experiment was executed comparing KIP's baseline raw-text
 3. **Single-node latency.** Latency measurements are wall-clock and include
    embedding API network round-trips; not suitable for throughput profiling.
 
-4. **Corpus scale.** The v1.1 reference corpus contains 3 documents (~2.5 KB);
-   the v1.2 pilot corpus contains 18 documents (~14 KB). Larger multi-topic
-   corpora are needed to avoid saturation on top-k retrieval metrics.
+4. **Corpus scale.** The v1.1 reference corpus contains 3 documents; the v1.2 pilot
+   corpus contains 18 documents. The v1.2 expanded corpus contains 50 documents and
+   eliminates Hit@3/Hit@5 saturation. A live provider-backed run against the 80-case
+   expanded benchmark is the recommended next step.
 
 ## Planned Role (v1.2+)
 
@@ -214,4 +259,5 @@ Planned enhancements for future versions:
 - [Research Roadmap](../docs/Research-Roadmap.md)
 - [Product Roadmap](../docs/Product-Roadmap.md)
 - [Corpus v1.1 README](../benchmarks/corpus/README.md)
-- [Corpus v1.2 README](../benchmarks/corpus_v1_2/README.md)
+- [Corpus v1.2 Formatting README](../benchmarks/corpus_v1_2/README.md)
+- [Corpus v1.2 Expanded README](../benchmarks/corpus_v1_2_expanded/README.md)

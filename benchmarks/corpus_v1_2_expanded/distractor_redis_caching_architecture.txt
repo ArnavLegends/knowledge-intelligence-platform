@@ -1,0 +1,8 @@
+Redis semantic caching accelerates RAG query execution by storing vector embeddings and generated answers.
+When an incoming query matches a previously cached query vector within a cosine threshold (e.g. 0.98),
+the system returns the cached answer instantly without invoking Qdrant search or generative LLMs.
+Redis Enterprise supports RediSearch with HNSW vector indexing for low-latency similarity lookups.
+Cache keys are partitioned by workspace_id to guarantee multi-tenant privacy across cached responses.
+TTL eviction policies ensure stale knowledge entries expire automatically after twenty-four hours.
+KIP v1.1 does not incorporate Redis semantic caching; this optimization is scheduled for v1.3 performance.
+Caching introduces cache invalidation challenges when tenant documents are updated or deleted.

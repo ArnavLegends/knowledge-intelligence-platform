@@ -1,0 +1,8 @@
+QdrantVectorStoreProvider manages high-performance vector search in KIP using the qdrant-client library.
+It connects to Qdrant Cloud or local Docker instances via HTTP or gRPC using QDRANT_URL and QDRANT_API_KEY.
+During collection initialization, it creates the knowledge_base collection with Distance.COSINE and size 768.
+A payload index is created on the workspace_id field with FieldType.KEYWORD to optimize tenant filtering.
+Vector search executes client.search() with a strict Filter containing a FieldCondition for workspace_id.
+Candidate points returned by Qdrant include payload text, document_id, chunk_index, and distance scores.
+Distance values are mapped to similarity scores using score = 1 - distance, bounded between 0.0 and 1.0.
+Document deletion calls client.delete() with a combined filter on document_id and workspace_id.

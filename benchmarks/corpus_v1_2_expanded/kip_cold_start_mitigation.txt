@@ -1,0 +1,8 @@
+Free cloud hosting tiers on Render spin down backend containers after fifteen minutes of inactivity.
+To mitigate user friction during spin-up, the Streamlit frontend implements cold-start resilience.
+On initial browser page load, the frontend issues a non-blocking ping to the GET /api/v1/health endpoint.
+If the container is dormant, the frontend catches HTTP connection timeouts and displays a wake-up banner.
+An exponential backoff retry loop polls the health endpoint up to ten attempts with a two-second interval.
+User interactions are buffered while the backend completes initialization and establishes Qdrant connectivity.
+Once the health probe returns status 200, the wake-up banner clears and normal UI controls are unlocked.
+This architectural handshake prevents abrupt 502 Bad Gateway errors from reaching public users.

@@ -1,0 +1,8 @@
+EmbeddingManager serves as the central orchestration component for vector embedding operations in KIP.
+It maintains an extensible registry of embedding providers and maps settings.embedding_provider to adapters.
+Supported providers include GeminiEmbeddingProvider (primary default) and OpenAIEmbeddingProvider (fallback).
+The embed() method validates input batch sizes and delegates text transformation to the active provider.
+Vectors returned by the underlying provider are verified for dimensionality matching settings.embedding_dimensions.
+EmbeddingManager ensures vectors are normalized for cosine distance calculations in Qdrant.
+If an external provider returns an error or quota exhaustion, EmbeddingManager raises an EmbeddingError.
+This decoupling isolates upper-level indexing and retrieval services from third-party SDK dependencies.

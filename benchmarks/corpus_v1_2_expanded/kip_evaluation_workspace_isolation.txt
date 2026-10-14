@@ -1,0 +1,8 @@
+Evaluation operations in KIP must never contaminate or interact with user tenant workspaces.
+The EvaluationRunner explicitly injects config.evaluation_workspace_id into all queries and RAG requests.
+The standard evaluation workspace identifier is 'kip-eval-workspace' (or versioned variants).
+During benchmark preflight, reference corpus documents are indexed strictly into the evaluation workspace.
+Qdrant payload filters ensure vector searches retrieve points belonging solely to the evaluation workspace.
+After evaluation concludes, automated test fixtures delete all points matching the evaluation workspace ID.
+This isolation invariant ensures that evaluation tests can run safely alongside active production traffic.
+Runner tests verify that omitting workspace_id raises a RetrievalError rather than falling back to defaults.

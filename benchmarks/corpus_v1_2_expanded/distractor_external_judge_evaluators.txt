@@ -1,0 +1,8 @@
+Automated RAG evaluation frameworks such as Ragas, DeepEval, and TruLens use LLMs as evaluative judges.
+These frameworks measure semantic metrics: faithfulness, answer relevance, context precision, and recall.
+Faithfulness measures whether all claims in a generated answer are grounded in the retrieved context.
+Context precision evaluates whether retrieved chunks are sorted with the most relevant passages first.
+LLM-as-judge evaluation introduces non-determinism, cost, and reliance on powerful judge models like GPT-4.
+KIP v1.1 deliberately avoids external LLM judge frameworks, relying on mechanical evaluation in runner.py.
+Mechanical metrics (Hit Rate, MRR, keyword coverage) are deterministic, fast, and require no judge API quota.
+Integration with Ragas or DeepEval is planned as an optional evaluation mode for future research versions.

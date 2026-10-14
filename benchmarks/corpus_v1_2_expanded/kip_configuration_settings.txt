@@ -1,0 +1,8 @@
+KIP utilizes Pydantic BaseSettings in app.core.config for centralized environment configuration.
+Configuration variables are loaded from environment variables and local .env files with fallback defaults.
+Key vector store variables include VECTOR_STORE_PROVIDER (default: qdrant) and QDRANT_COLLECTION (knowledge_base).
+Embedding settings specify EMBEDDING_PROVIDER (gemini), EMBEDDING_MODEL (gemini-embedding-2), and dimensions (768).
+LLM gateway settings define LLM_PROVIDER (gemini), LLM_MODEL (gemini-2.5-flash), and LLM_API_KEY credentials.
+Ingestion chunking parameters default to CHUNK_SIZE=1000 characters and CHUNK_OVERLAP=200 characters.
+Feedback settings include FEEDBACK_WEBHOOK_URL and FEEDBACK_WEBHOOK_TOKEN for authenticated delivery.
+Workspace limits are bounded by MAX_DOCUMENTS_PER_WORKSPACE=50 and MAX_CHUNKS_PER_WORKSPACE=1000.

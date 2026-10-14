@@ -1,0 +1,8 @@
+The KIP frontend is built with Streamlit and manages state through st.session_state.
+Session keys include active_workspace_id, chat_history, uploaded_documents, and backend_status.
+When a user connects, the application generates a default workspace access token or loads an existing one.
+Switching workspaces clears chat_history and cached document listings to maintain strict tenant privacy.
+Network calls to the FastAPI backend use requests.Session with default connection timeouts (10 seconds).
+To ensure responsiveness, document upload triggers a spinner widget while chunks are indexed in Qdrant.
+The UI automatically persists the current workspace_id in the browser session until the tab is closed.
+State resets are idempotent, preventing residual cross-tenant context from persisting across sessions.

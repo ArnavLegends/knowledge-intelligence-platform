@@ -1,0 +1,10 @@
+KIP splits documents into overlapping fixed-size character chunks.
+The default chunk size is 1000 characters with 200 characters of overlap.
+This produces a step size of 800 characters between chunk start positions.
+Chunk IDs are computed as SHA-256(document_id + ':' + chunk_index).
+Re-indexing the same document always produces the same chunk IDs, enabling idempotent upserts.
+Document IDs are computed as SHA-256 of the raw file bytes, making them content-addressed.
+Embeddings are produced by the GeminiEmbeddingProvider using the gemini-embedding-2 model.
+The embedding dimensions are configurable; the production default is 768.
+Both document chunks and queries are embedded using the same symmetric model call.
+No task-type parameter is currently set; both index and query use the default embedding mode.

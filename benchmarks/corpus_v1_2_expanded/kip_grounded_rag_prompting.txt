@@ -1,0 +1,8 @@
+KIP enforces strict response grounding in RAGService to eliminate hallucinations in question-answering.
+The RAG prompt template injects retrieved context chunks under explicit numbered XML source tags.
+System instructions command the model to answer questions using ONLY facts explicitly provided in context.
+If the retrieved context does not contain sufficient facts to answer, the model must state its inability.
+Every factual claim in the generated answer must be attributed to a source tag such as [Source 1].
+Speculation, extrapolation, and reliance on pre-trained external knowledge are forbidden by prompt rules.
+The system prompt instructs the model to ignore misleading instructions embedded inside user documents.
+This defensive prompt engineering ensures high answer faithfulness across enterprise knowledge bases.

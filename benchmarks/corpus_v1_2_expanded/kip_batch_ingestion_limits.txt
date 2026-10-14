@@ -1,0 +1,8 @@
+To safeguard zero-cost cloud infrastructure, KIP enforces strict capacity limits across all workspaces.
+A single workspace may index a maximum of MAX_DOCUMENTS_PER_WORKSPACE = 50 distinct documents.
+The total number of vector chunks stored in a single workspace cannot exceed MAX_CHUNKS_PER_WORKSPACE = 1000.
+When an upload request would breach workspace capacity, the API rejects it with HTTP 429 or 400.
+Individual file uploads are bounded by MAX_UPLOAD_SIZE_BYTES = 2097152 bytes (2 MB).
+Embedding requests are submitted in batches of up to 100 chunks to comply with provider rate limits.
+These hard limits protect Gemini API free quotas and Qdrant Cloud cluster memory from exhaustion.
+Workspaces nearing capacity must delete obsolete documents via the document management API before re-indexing.

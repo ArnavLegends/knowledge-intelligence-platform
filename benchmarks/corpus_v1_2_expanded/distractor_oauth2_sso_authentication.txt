@@ -1,0 +1,7 @@
+Enterprise single sign-on (SSO) systems manage user authentication through OpenID Connect (OIDC) and SAML 2.0.
+Identity providers such as Keycloak, Okta, and Azure Active Directory issue cryptographically signed JWTs.
+Role-Based Access Control (RBAC) maps user identity claims to granular workspace and document permissions.
+API gateways validate JWT signatures, expiration timestamps, and audience claims on every HTTP request.
+KIP v1.1 uses lightweight, bearer-token workspace identifiers rather than full OAuth2 SSO authentication.
+Bearer tokens provide multi-tenant isolation without requiring external identity provider infrastructure.
+Full enterprise OAuth2 and RBAC integrations are scheduled for milestone v3.0 on the product roadmap.

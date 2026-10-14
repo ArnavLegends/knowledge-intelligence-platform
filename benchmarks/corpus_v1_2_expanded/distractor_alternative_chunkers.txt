@@ -1,0 +1,8 @@
+Alternative document chunking strategies include semantic chunking and recursive character splitting.
+Semantic chunkers analyze sentence embeddings to detect natural topic transitions before splitting text.
+Recursive chunkers split text hierarchically using double newlines, single newlines, and spaces.
+Sentence-window chunking attaches surrounding sentences as contextual metadata around small central chunks.
+Document-specific chunkers parse markdown headers (#, ##) or HTML tags to preserve section boundaries.
+These methods aim to preserve semantic cohesion at the cost of non-deterministic chunk boundaries.
+KIP currently uses a fixed character chunker; alternative chunkers are candidates for v1.2 research.
+Evaluating chunking strategies requires measuring Hit Rate and MRR across varying chunk sizes and overlaps.

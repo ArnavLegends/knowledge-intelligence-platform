@@ -1,0 +1,8 @@
+KIP RAGService incorporates an empty-context short-circuit guard to conserve LLM API costs and quota.
+When RetrievalService returns zero chunks, the system bypasses the generation LLM entirely.
+Similarly, if all retrieved chunks have similarity scores falling below the relevance threshold, context is empty.
+Under empty-context conditions, RAGService immediately returns a deterministic refusal message:
+'I do not have sufficient information in the provided knowledge base to answer this question.'
+The response sources list is set to empty and total generation latency is recorded as 0.0 milliseconds.
+This optimization prevents wasteful LLM inference roundtrips on unanswerable or out-of-domain queries.
+Automated evaluation suites verify that empty-context paths never trigger external generative API calls.

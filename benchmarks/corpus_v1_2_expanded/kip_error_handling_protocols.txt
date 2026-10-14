@@ -1,0 +1,8 @@
+KIP enforces centralized, structured exception handling across all FastAPI routes and backend services.
+Custom exception classes derive from KIPBaseException: IngestionError, RetrievalError, LLMError, VectorStoreError.
+Each custom exception defines a machine-readable error_code and human-readable detail description.
+FastAPI exception handlers map IngestionError to HTTP 400 or 415 depending on the parser failure mode.
+RetrievalError without an active workspace maps to HTTP 400 with detail 'workspace_id is required'.
+VectorStoreError and LLMError map to HTTP 502 Bad Gateway or 503 Service Unavailable.
+Uncaught internal exceptions return HTTP 500 while masking raw stack traces from external API responses.
+Structured logging records full error traces internally with contextual request_id and tenant workspace_id.

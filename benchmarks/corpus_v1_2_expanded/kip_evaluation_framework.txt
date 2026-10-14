@@ -1,0 +1,8 @@
+The KIP evaluation framework in the evaluation/ package provides automated benchmarking for RAG pipelines.
+EvaluationRunner executes BenchmarkDataset cases against KIP retrieval and generation services directly.
+Evaluation runs are isolated from production user workspaces using dedicated workspace IDs (kip-eval-workspace).
+The runner records retrieval metrics: Hit Rate (fraction of queries retrieving target docs) and MRR.
+Answer-level metrics include keyword coverage: the fraction of ground-truth keywords in generated answers.
+Stage latencies are recorded separately: retrieval latency, generation latency, and total latency in milliseconds.
+The framework supports offline evaluation using deterministic fakes (DeterministicEmbeddingProvider) in CI.
+Provider-backed evaluation scripts run against live Gemini APIs and Qdrant to measure real-world performance.

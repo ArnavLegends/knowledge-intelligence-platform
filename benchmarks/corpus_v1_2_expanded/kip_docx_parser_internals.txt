@@ -1,0 +1,8 @@
+The DOCX parser implementation in KIP extracts textual content from Microsoft Word OpenXML documents.
+Uploaded byte streams are parsed in memory using docx.Document without requiring local disk serialization.
+The parser iterates over document.paragraphs, extracting clean text while skipping empty whitespace lines.
+To capture structured tabular information, the parser loops through document.tables and cell rows.
+Table cells are joined with pipe delimiters to preserve tabular column relationships within the text stream.
+Headers and footers are filtered out to prevent repetitive boilerplate from polluting embedding representations.
+Special XML formatting artifacts and embedded images are safely ignored during paragraph extraction.
+The combined paragraph and table text is returned as a single normalized string for downstream chunking.
