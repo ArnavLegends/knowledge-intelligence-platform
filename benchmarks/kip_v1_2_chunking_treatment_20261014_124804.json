@@ -1,0 +1,3792 @@
+{
+  "run_id": "88117501a855a1e13930bc6e9eb73ded",
+  "timestamp": "2026-10-14T12:48:04.979550+00:00",
+  "experiment_name": "v1.2-sentence-boundary-chunking",
+  "configuration": {
+    "chunker": "SentenceBoundaryChunker",
+    "target_chunk_size": 400,
+    "min_chunk_size": 150,
+    "overlap_sentences": 1,
+    "total_documents": 50,
+    "total_chunks_indexed": 173,
+    "mean_chunks_per_doc": 3.46,
+    "embedding_provider": "gemini",
+    "embedding_model": "gemini-embedding-2",
+    "vector_store_provider": "qdrant",
+    "collection_name": "kip_eval_v1_2_chunking",
+    "workspace_id": "kip-eval-workspace-v1-2-chunking",
+    "top_k": 5
+  },
+  "overall_metrics": {
+    "raw": {
+      "mean_reciprocal_rank": 0.73,
+      "hit_rate_at_1": 0.6375,
+      "hit_rate_at_3": 0.8,
+      "hit_rate_at_5": 0.875
+    },
+    "deduped": {
+      "mean_reciprocal_rank": 0.7470833333333333,
+      "hit_rate_at_1": 0.6375,
+      "hit_rate_at_3": 0.85,
+      "hit_rate_at_5": 0.9125
+    }
+  },
+  "latency_profiling": {
+    "mean": 544.9115725000638,
+    "median": 536.4934499998526,
+    "p90": 597.1310900004029,
+    "p95": 618.5947799996484,
+    "min": 495.98930000047403,
+    "max": 652.4681999999302,
+    "warmup_query_ms": 528.6794000003283,
+    "indexing_duration_seconds": 92.51761600000009
+  },
+  "category_metrics": {
+    "boundary_handling": {
+      "total_cases": 8,
+      "raw_mrr": 0.6354166666666666,
+      "raw_hit_at_1": 0.5,
+      "raw_hit_at_3": 0.75,
+      "raw_hit_at_5": 0.875,
+      "dedup_mrr": 0.6916666666666667,
+      "dedup_hit_at_1": 0.5,
+      "dedup_hit_at_3": 0.875,
+      "dedup_hit_at_5": 1.0,
+      "mean_latency_ms": 534.1762750000498
+    },
+    "cross_document": {
+      "total_cases": 8,
+      "raw_mrr": 0.78125,
+      "raw_hit_at_1": 0.625,
+      "raw_hit_at_3": 0.875,
+      "raw_hit_at_5": 1.0,
+      "dedup_mrr": 0.7916666666666666,
+      "dedup_hit_at_1": 0.625,
+      "dedup_hit_at_3": 1.0,
+      "dedup_hit_at_5": 1.0,
+      "mean_latency_ms": 542.8503499999806
+    },
+    "exact_terminology": {
+      "total_cases": 16,
+      "raw_mrr": 0.85625,
+      "raw_hit_at_1": 0.8125,
+      "raw_hit_at_3": 0.875,
+      "raw_hit_at_5": 0.9375,
+      "dedup_mrr": 0.85625,
+      "dedup_hit_at_1": 0.8125,
+      "dedup_hit_at_3": 0.875,
+      "dedup_hit_at_5": 0.9375,
+      "mean_latency_ms": 548.37896250001
+    },
+    "hard_negative": {
+      "total_cases": 16,
+      "raw_mrr": 0.31979166666666664,
+      "raw_hit_at_1": 0.1875,
+      "raw_hit_at_3": 0.4375,
+      "raw_hit_at_5": 0.5625,
+      "dedup_mrr": 0.35625,
+      "dedup_hit_at_1": 0.1875,
+      "dedup_hit_at_3": 0.5625,
+      "dedup_hit_at_5": 0.625,
+      "mean_latency_ms": 536.0443750001309
+    },
+    "multi_concept": {
+      "total_cases": 16,
+      "raw_mrr": 0.96875,
+      "raw_hit_at_1": 0.9375,
+      "raw_hit_at_3": 1.0,
+      "raw_hit_at_5": 1.0,
+      "dedup_mrr": 0.96875,
+      "dedup_hit_at_1": 0.9375,
+      "dedup_hit_at_3": 1.0,
+      "dedup_hit_at_5": 1.0,
+      "mean_latency_ms": 556.04048750007
+    },
+    "paraphrase": {
+      "total_cases": 16,
+      "raw_mrr": 0.796875,
+      "raw_hit_at_1": 0.6875,
+      "raw_hit_at_3": 0.875,
+      "raw_hit_at_5": 0.9375,
+      "dedup_mrr": 0.8125,
+      "dedup_hit_at_1": 0.6875,
+      "dedup_hit_at_3": 0.875,
+      "dedup_hit_at_5": 1.0,
+      "mean_latency_ms": 545.580725000093
+    }
+  },
+  "case_results": [
+    {
+      "case_id": "exp-001",
+      "category": "exact_terminology",
+      "question": "What HTTP header must accompany every workspace-scoped API request in KIP?",
+      "expected_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "query_latency_ms": 580.2544000007401,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "8234ee42f7af645a748ea5502a7a88fe2cf46f9f7d4f31620e11c0a5d4591bc3",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03",
+        "da7916e7354fe0814896c1474a18aa5e6e2e3ae82c347cd108323bd346983a36"
+      ],
+      "raw_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "8234ee42f7af645a748ea5502a7a88fe2cf46f9f7d4f31620e11c0a5d4591bc3",
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-002",
+      "category": "exact_terminology",
+      "question": "What is the maximum upload file size in bytes supported by KIP document parsers?",
+      "expected_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9"
+      ],
+      "query_latency_ms": 539.1618000003291,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "raw_retrieved_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-003",
+      "category": "exact_terminology",
+      "question": "What are the default character chunk size and overlap values in KIP?",
+      "expected_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "query_latency_ms": 536.7237999998906,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "c1a8ee93936b0c0d4593a307c7977cb2f1ba7dc4d5167ae80fd3c938dfddd379",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "8dde92695b0a0ad5a4d0c0b33c1a285a10bf4d085283add55d7dd60b4716ad7a",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "e7cdd88b95543ee97fa7f28dbc85b9a4cf5b2c1438f07b05df9049a8132ee362"
+      ],
+      "raw_retrieved_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "c1a8ee93936b0c0d4593a307c7977cb2f1ba7dc4d5167ae80fd3c938dfddd379",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "8dde92695b0a0ad5a4d0c0b33c1a285a10bf4d085283add55d7dd60b4716ad7a",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-004",
+      "category": "exact_terminology",
+      "question": "What is the effective step size in characters between consecutive chunk starts?",
+      "expected_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "query_latency_ms": 517.7690000000439,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "c1a8ee93936b0c0d4593a307c7977cb2f1ba7dc4d5167ae80fd3c938dfddd379",
+        "8dde92695b0a0ad5a4d0c0b33c1a285a10bf4d085283add55d7dd60b4716ad7a",
+        "77afdff9e35b2b6de162976aba0d7336f6a3d7f58eaa8da1df1ee7ef3cdd8a2b",
+        "e7cdd88b95543ee97fa7f28dbc85b9a4cf5b2c1438f07b05df9049a8132ee362",
+        "6c5e460c689a93c760d219d8d0dc05e4cf2e1d4131a2e71eaa62e1c885e9adcb"
+      ],
+      "raw_retrieved_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "c1a8ee93936b0c0d4593a307c7977cb2f1ba7dc4d5167ae80fd3c938dfddd379",
+        "8dde92695b0a0ad5a4d0c0b33c1a285a10bf4d085283add55d7dd60b4716ad7a",
+        "77afdff9e35b2b6de162976aba0d7336f6a3d7f58eaa8da1df1ee7ef3cdd8a2b",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "acb0809aec2392ef27ac3e2bd28d80e39eade461a61495e8e665d09659878557"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-005",
+      "category": "exact_terminology",
+      "question": "What is the default Qdrant vector store collection name used by KIP?",
+      "expected_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "query_latency_ms": 556.5391000000091,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "0603f1bc0d0d096a74120930e7753ab147e0345f7d35f84da077c7fa09ffb2dd",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "f6ea64f3de4aad64f66bc4200d0e2e43252a362fe5003bff64b7a8239bf56e63"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "0603f1bc0d0d096a74120930e7753ab147e0345f7d35f84da077c7fa09ffb2dd",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "f6ea64f3de4aad64f66bc4200d0e2e43252a362fe5003bff64b7a8239bf56e63"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-006",
+      "category": "exact_terminology",
+      "question": "How many dimensions does the production Gemini embedding model generate in KIP?",
+      "expected_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806"
+      ],
+      "query_latency_ms": 521.3267999997697,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "cc87e3ba02adfc214a3f9875e1efe716aa40dad707c6e5659e80ce02e990feab",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "raw_retrieved_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "cc87e3ba02adfc214a3f9875e1efe716aa40dad707c6e5659e80ce02e990feab",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "24eb0c90e4f3ba5ef19240024d65d66ee4b9b9cd5d3c8590067d3b5cde08876a"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "8ef389f4896c6097d3fdbda82fdfbfe74e1343ee51ceb2ee52c27a8b5a08500e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-007",
+      "category": "exact_terminology",
+      "question": "What language model drives generative responses in KIP production deployments?",
+      "expected_doc_ids": [
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843"
+      ],
+      "query_latency_ms": 596.3625000003958,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e",
+        "80f78630697df6ddf9cfc8ceb227f7e48ac0c9a54860b089f14de9b117630c67"
+      ],
+      "raw_retrieved_doc_ids": [
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.2,
+      "dedup_retrieved_chunk_ids": [
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e",
+        "80f78630697df6ddf9cfc8ceb227f7e48ac0c9a54860b089f14de9b117630c67"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.2
+    },
+    {
+      "case_id": "exp-008",
+      "category": "exact_terminology",
+      "question": "What endpoint serves the system health check in the FastAPI backend?",
+      "expected_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3"
+      ],
+      "query_latency_ms": 564.0577999993184,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03",
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "f9ff68485b0cd15e55336a367ba9f9f27e20defdf89152f94899dce4456b0364",
+        "45e409a6e638399321f73f39ff9b3b0f9f5946b1f924c4fedf06b5eb8d8c9878"
+      ],
+      "raw_retrieved_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03",
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "6c65a9fae00b73ec19087502dc3d540bd81daba686942ffda3ebe148ddd4ce7d",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-009",
+      "category": "exact_terminology",
+      "question": "What is the maximum number of documents permitted in a single workspace?",
+      "expected_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "query_latency_ms": 523.6181000000215,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "bfc968b4614e5c9b9fbe45844e1c64abdf6f7f2b84e6f20234d58e7e6f57c6d9",
+        "409bedcfd253facb0c8cde71def0b245fd213a750350566bc488907656633c84"
+      ],
+      "raw_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "409bedcfd253facb0c8cde71def0b245fd213a750350566bc488907656633c84",
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10",
+        "e8e2ce4dcb6978d4a9cca9779ee41a58bc8db298ff2c8e27736d8f8c9929010e"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-010",
+      "category": "exact_terminology",
+      "question": "What is the ceiling on total vector chunks allowed in a single workspace?",
+      "expected_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "query_latency_ms": 552.4901999997383,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "bfc968b4614e5c9b9fbe45844e1c64abdf6f7f2b84e6f20234d58e7e6f57c6d9",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac"
+      ],
+      "raw_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "bce479814d2bd4a9f7ae1142bd03c66452bf4413138a9468e0b85ec61e162afb",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-011",
+      "category": "exact_terminology",
+      "question": "What is the word limit enforced on user feedback messages?",
+      "expected_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074"
+      ],
+      "query_latency_ms": 527.2750000003725,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "a55a34ed42757267b3b117af173aa724e550988c8d395432df565ad91b4098b2",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "1b5a64757b1fbf5b5384ca0f468148dcef933a4e46a5d3eff2b2b51d135b14a7"
+      ],
+      "raw_retrieved_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "a55a34ed42757267b3b117af173aa724e550988c8d395432df565ad91b4098b2",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-012",
+      "category": "exact_terminology",
+      "question": "What Google Apps Script HTTP handler function receives KIP feedback submissions?",
+      "expected_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074"
+      ],
+      "query_latency_ms": 549.9544999993304,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e",
+        "88ba3f540f3d4aa61fe4da1da30f4727953891636f49224680868a077abf8bdb",
+        "2f96cbb40506440552e4dda2c44c064f38e301fc4700cc50b1e6b98176131091",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d"
+      ],
+      "raw_retrieved_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-013",
+      "category": "exact_terminology",
+      "question": "How is Qdrant cosine distance converted to a similarity score in KIP?",
+      "expected_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "query_latency_ms": 533.4731000002648,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "6f1b562091b902d0edcace434964ac68c9b7606cd28f323e66842f65f749726e",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "60756bc8181fe3287bd364730317c7eeeee2cc19c2697004695c9798cdf5fcb4",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b"
+      ],
+      "raw_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "6f1b562091b902d0edcace434964ac68c9b7606cd28f323e66842f65f749726e",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "60756bc8181fe3287bd364730317c7eeeee2cc19c2697004695c9798cdf5fcb4",
+        "0603f1bc0d0d096a74120930e7753ab147e0345f7d35f84da077c7fa09ffb2dd"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-014",
+      "category": "exact_terminology",
+      "question": "What base class from Pydantic manages centralized application settings in KIP?",
+      "expected_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140"
+      ],
+      "query_latency_ms": 605.1766000000498,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "6c65a9fae00b73ec19087502dc3d540bd81daba686942ffda3ebe148ddd4ce7d",
+        "45e409a6e638399321f73f39ff9b3b0f9f5946b1f924c4fedf06b5eb8d8c9878",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "6c65a9fae00b73ec19087502dc3d540bd81daba686942ffda3ebe148ddd4ce7d",
+        "45e409a6e638399321f73f39ff9b3b0f9f5946b1f924c4fedf06b5eb8d8c9878",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-015",
+      "category": "exact_terminology",
+      "question": "What is the default temperature setting passed to LLM generation in KIP?",
+      "expected_doc_ids": [
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843"
+      ],
+      "query_latency_ms": 530.3646000002118,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1",
+        "279d9dd27b992c2339aa7d187de08f69ade13ca44b57042523d2a964c7fe2bd2",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "ac4bb3670ffe80a4baa5232c0e785032ec7e2d81f9efd987804cffb8b7525b20",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9"
+      ],
+      "raw_retrieved_doc_ids": [
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "ac4bb3670ffe80a4baa5232c0e785032ec7e2d81f9efd987804cffb8b7525b20",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-016",
+      "category": "exact_terminology",
+      "question": "What prefix is prepended to cryptographically random workspace access tokens?",
+      "expected_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "query_latency_ms": 539.5160999996733,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-017",
+      "category": "paraphrase",
+      "question": "Which file types can organizations feed into their private enterprise knowledge vaults?",
+      "expected_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9"
+      ],
+      "query_latency_ms": 495.98930000047403,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "8234ee42f7af645a748ea5502a7a88fe2cf46f9f7d4f31620e11c0a5d4591bc3",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07"
+      ],
+      "raw_retrieved_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "8234ee42f7af645a748ea5502a7a88fe2cf46f9f7d4f31620e11c0a5d4591bc3",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-018",
+      "category": "paraphrase",
+      "question": "How does the platform ensure that repeatedly re-indexing a text file never duplicates data?",
+      "expected_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e"
+      ],
+      "query_latency_ms": 536.2630999998146,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000",
+        "b0d8c1b2d53c98a7216c4feae81d7cdecd4e9eafca8fb09063b629eeb3211ce9",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "acb0809aec2392ef27ac3e2bd28d80e39eade461a61495e8e665d09659878557",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac"
+      ],
+      "raw_retrieved_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000",
+        "b0d8c1b2d53c98a7216c4feae81d7cdecd4e9eafca8fb09063b629eeb3211ce9",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000",
+        "ad0262bf657dc7a51b962b1e1b411da1dd08ed979e06f304ff24cfeb0b6f894d"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-019",
+      "category": "paraphrase",
+      "question": "Why does the system refuse to answer inquiries when no relevant background context exists?",
+      "expected_doc_ids": [
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836"
+      ],
+      "query_latency_ms": 530.677800000376,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "79eca6893b58bbed45fa7830a7635975d4e24a5cff382de5a1a3a63fc6da7b66",
+        "31a21b7510a0591f9405a39b333e21dfc468b03495a9ffa3ede296617e067b61",
+        "7cb207d56fd8ac8974d7ccfd8e5b3504c642ce28029da07f4dcb5270b77271a6",
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "155f02b0876d2993ac0e8a08b63bf88a52f15964c67ad8dd5414ae50e93e7b25"
+      ],
+      "raw_retrieved_doc_ids": [
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "79eca6893b58bbed45fa7830a7635975d4e24a5cff382de5a1a3a63fc6da7b66",
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-020",
+      "category": "paraphrase",
+      "question": "In what way does the chat interface let people verify where factual statements came from?",
+      "expected_doc_ids": [
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877"
+      ],
+      "query_latency_ms": 565.671299999849,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "95ca3cb4dca956889de1c9b11d2929fcff80ceeee14f588b9a250a3bea6e3a42",
+        "f48dc7bda0f337df56f120911702f9740a99734d9074bba844157f316366bf6d",
+        "74fac1ba5ed6cc3150d610427dee03e9148d80c4d1069c302d3962edf7644ac8",
+        "480999bf5f3ffde4e51b01b2c13b2557dc0f69c9cd9fa87bd0703d5ecbc6c1e9",
+        "95612e47bd10a05dc0004cf44396574c45716ef54a450953248e866e57b2585f"
+      ],
+      "raw_retrieved_doc_ids": [
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "95ca3cb4dca956889de1c9b11d2929fcff80ceeee14f588b9a250a3bea6e3a42",
+        "95612e47bd10a05dc0004cf44396574c45716ef54a450953248e866e57b2585f",
+        "a55a34ed42757267b3b117af173aa724e550988c8d395432df565ad91b4098b2",
+        "4be763b8a1d23b2267f50e33f5ee34553f17a655691b17a3d148442b866861e5",
+        "155f02b0876d2993ac0e8a08b63bf88a52f15964c67ad8dd5414ae50e93e7b25"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-021",
+      "category": "paraphrase",
+      "question": "How does the cloud service gracefully wake up sleeping containers on free hosting tiers?",
+      "expected_doc_ids": [
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "query_latency_ms": 531.9675000000643,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "18b815e606723f88554474ba37d9f1cc789f26d7ff086e7729c4d577096d4ace",
+        "2ccfcab41f02b1de93d61c34a8000f6c1047bfd0cf463f1b93eb3c3dda5a32e7",
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "f9ff68485b0cd15e55336a367ba9f9f27e20defdf89152f94899dce4456b0364"
+      ],
+      "raw_retrieved_doc_ids": [
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "1339ce7e0d232066eecd5fe07bb606100c2e5977fd8d3d5bf0678f0c159fd67c",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-022",
+      "category": "paraphrase",
+      "question": "What prevents one enterprise tenant from reading another organization's confidential embeddings?",
+      "expected_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "query_latency_ms": 558.7681000006341,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21"
+      ],
+      "raw_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "1b4f099fc50d39573d04ba7d421cb6d2c4331d2edba80f1ad0b545042f407f16",
+        "f5bcc969d479f5773f8540448d951d15f471c62031e92768e188e1d9d305bea4"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-023",
+      "category": "paraphrase",
+      "question": "How does the software handle Word document tables so that column data remains understandable?",
+      "expected_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b"
+      ],
+      "query_latency_ms": 528.4021999996185,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "4b0a526c8fba3350fa66c47113f0d49be18046f83e8e80781c959a0f29b78daf",
+        "5a8373cc2feee25a4fd2a6df68a98e745e60a9ab07f2663b22ba6f9414aeb0fe",
+        "093a4c2570e2a9266d068b2966410f1eef86af9147309c63a9fb6b2a1f9b257c",
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd"
+      ],
+      "raw_retrieved_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "4b0a526c8fba3350fa66c47113f0d49be18046f83e8e80781c959a0f29b78daf",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd",
+        "1b5a64757b1fbf5b5384ca0f468148dcef933a4e46a5d3eff2b2b51d135b14a7",
+        "95ca3cb4dca956889de1c9b11d2929fcff80ceeee14f588b9a250a3bea6e3a42",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-024",
+      "category": "paraphrase",
+      "question": "What mechanism guarantees that evaluating retrieval improvements will never touch customer workspaces?",
+      "expected_doc_ids": [
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b"
+      ],
+      "query_latency_ms": 558.4724000000278,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "9ae66cfb7a8a6d88b506ad7593540c4b484ae6e35e664a6c632b14d08ddbf68a",
+        "97a0bc4ca0e4def9f8d132550e20893e0762084b71b67aa3252ea6a61f07c55b",
+        "ad0262bf657dc7a51b962b1e1b411da1dd08ed979e06f304ff24cfeb0b6f894d",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64"
+      ],
+      "raw_retrieved_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "9ae66cfb7a8a6d88b506ad7593540c4b484ae6e35e664a6c632b14d08ddbf68a",
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "7cb207d56fd8ac8974d7ccfd8e5b3504c642ce28029da07f4dcb5270b77271a6"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-025",
+      "category": "paraphrase",
+      "question": "How does the system ensure evaluation tests produce identical results across Windows and Linux machines?",
+      "expected_doc_ids": [
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46"
+      ],
+      "query_latency_ms": 632.3357000001124,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "42ad7e32826448677d01d9071ca1811726f2e2019d112aa1a8c9d905f24f9015",
+        "b5db3fed733b73adb9bd97ee892027c75a3557c7bdcc70082e92007c79ff79bc",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "925c25c7baee6c949299ec2772b948f09459b1b0ac3c9fffd939988b5c622c9e"
+      ],
+      "raw_retrieved_doc_ids": [
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "b5db3fed733b73adb9bd97ee892027c75a3557c7bdcc70082e92007c79ff79bc",
+        "925c25c7baee6c949299ec2772b948f09459b1b0ac3c9fffd939988b5c622c9e",
+        "77afdff9e35b2b6de162976aba0d7336f6a3d7f58eaa8da1df1ee7ef3cdd8a2b",
+        "9ae66cfb7a8a6d88b506ad7593540c4b484ae6e35e664a6c632b14d08ddbf68a"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.25
+    },
+    {
+      "case_id": "exp-026",
+      "category": "paraphrase",
+      "question": "What fallback vector database adapter allows developer testing without external cloud network calls?",
+      "expected_doc_ids": [
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "query_latency_ms": 618.3377999996083,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "60756bc8181fe3287bd364730317c7eeeee2cc19c2697004695c9798cdf5fcb4",
+        "f6ea64f3de4aad64f66bc4200d0e2e43252a362fe5003bff64b7a8239bf56e63",
+        "d25c74ac054ad11fce2b3f8df28b5277610cfb921697bb755d04e7db534a0d8c",
+        "20a58c3c2c0cc8817238cf0367655da2732b7db9bf816bce2c45d9703a3e0a30"
+      ],
+      "raw_retrieved_doc_ids": [
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "60756bc8181fe3287bd364730317c7eeeee2cc19c2697004695c9798cdf5fcb4",
+        "f6ea64f3de4aad64f66bc4200d0e2e43252a362fe5003bff64b7a8239bf56e63",
+        "a16716c2af3c31b96b934eb7c814204e57cd02c0f8938eb979118132334e841a",
+        "b5db3fed733b73adb9bd97ee892027c75a3557c7bdcc70082e92007c79ff79bc"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-027",
+      "category": "paraphrase",
+      "question": "Why does the Gemini embedding provider omit the task type parameter when generating embeddings?",
+      "expected_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806"
+      ],
+      "query_latency_ms": 522.638200000074,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "84ca2c63e5aedc6a3c53a801514c51cad0f4225934229f905687796fcf271275",
+        "cc87e3ba02adfc214a3f9875e1efe716aa40dad707c6e5659e80ce02e990feab",
+        "a16716c2af3c31b96b934eb7c814204e57cd02c0f8938eb979118132334e841a",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000"
+      ],
+      "raw_retrieved_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "cc87e3ba02adfc214a3f9875e1efe716aa40dad707c6e5659e80ce02e990feab",
+        "a16716c2af3c31b96b934eb7c814204e57cd02c0f8938eb979118132334e841a",
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "36bbfc423bcbe7372b8eefb35b2a9ccee6a0bfeb5e2c22b991e0842849e1ddf4"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-028",
+      "category": "paraphrase",
+      "question": "How does the user interface prevent session data from leaking when a person switches tenants?",
+      "expected_doc_ids": [
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "query_latency_ms": 534.9593999999342,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "409bedcfd253facb0c8cde71def0b245fd213a750350566bc488907656633c84",
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21"
+      ],
+      "raw_retrieved_doc_ids": [
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "0d71d2222029e01db84a0635f08a9db706baa22974e34eaee26331382d44d882"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-029",
+      "category": "paraphrase",
+      "question": "What prevents random web crawlers from injecting malicious feedback rows into Google Sheets?",
+      "expected_doc_ids": [
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a"
+      ],
+      "query_latency_ms": 557.2431000000506,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "88ba3f540f3d4aa61fe4da1da30f4727953891636f49224680868a077abf8bdb",
+        "72d136d9681c560b27dcc30ad8cdb57289d6c0af4baccc59dd05244a329f3238",
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.25,
+      "dedup_retrieved_chunk_ids": [
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "88ba3f540f3d4aa61fe4da1da30f4727953891636f49224680868a077abf8bdb",
+        "72d136d9681c560b27dcc30ad8cdb57289d6c0af4baccc59dd05244a329f3238",
+        "a55a34ed42757267b3b117af173aa724e550988c8d395432df565ad91b4098b2"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.25
+    },
+    {
+      "case_id": "exp-030",
+      "category": "paraphrase",
+      "question": "How does the RAG prompt instruct the language model to handle inquiries it cannot verify?",
+      "expected_doc_ids": [
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9"
+      ],
+      "query_latency_ms": 523.4613000002355,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "f5bcc969d479f5773f8540448d951d15f471c62031e92768e188e1d9d305bea4",
+        "79eca6893b58bbed45fa7830a7635975d4e24a5cff382de5a1a3a63fc6da7b66",
+        "e8e2ce4dcb6978d4a9cca9779ee41a58bc8db298ff2c8e27736d8f8c9929010e",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae"
+      ],
+      "raw_retrieved_doc_ids": [
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "79eca6893b58bbed45fa7830a7635975d4e24a5cff382de5a1a3a63fc6da7b66",
+        "e8e2ce4dcb6978d4a9cca9779ee41a58bc8db298ff2c8e27736d8f8c9929010e",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-031",
+      "category": "paraphrase",
+      "question": "What happens when an uploaded PDF file contains password encryption?",
+      "expected_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "query_latency_ms": 509.7603000003801,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd",
+        "fbaac65436788c30f73b9b301cb01116438de706fa4b740300b12983f921b5d3",
+        "390f395e0ec1e71cd46f56070ec8fb6140be36aa40267931b8f552c6ada90aad"
+      ],
+      "raw_retrieved_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "691ebff5964c891e0c6dd39ce4d4b229a9c621378e4a5245dd2b5727dc71cbff",
+        "1b5a64757b1fbf5b5384ca0f468148dcef933a4e46a5d3eff2b2b51d135b14a7"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-032",
+      "category": "paraphrase",
+      "question": "How does the platform handle unexpected server crashes to avoid exposing internal tracebacks?",
+      "expected_doc_ids": [
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c"
+      ],
+      "query_latency_ms": 524.3441000002349,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "685d4f8ad2649e7d37a231a259dfd717479ec78d38acfe9b2542f0618b30908c",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "a55a34ed42757267b3b117af173aa724e550988c8d395432df565ad91b4098b2",
+        "72d136d9681c560b27dcc30ad8cdb57289d6c0af4baccc59dd05244a329f3238",
+        "66e3679e6051617921b18c966e78359da06ecc9e35f20a3ce3807f8e6eb69c17"
+      ],
+      "raw_retrieved_doc_ids": [
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "685d4f8ad2649e7d37a231a259dfd717479ec78d38acfe9b2542f0618b30908c",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "a55a34ed42757267b3b117af173aa724e550988c8d395432df565ad91b4098b2",
+        "72d136d9681c560b27dcc30ad8cdb57289d6c0af4baccc59dd05244a329f3238",
+        "2ccfcab41f02b1de93d61c34a8000f6c1047bfd0cf463f1b93eb3c3dda5a32e7"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-033",
+      "category": "multi_concept",
+      "question": "How do workspace IDs propagate from HTTP request headers into Qdrant vector search filters?",
+      "expected_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "query_latency_ms": 566.5482000003976,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "01a230aea99f3e25578949f9de4c645aaefab0f553c91a757850bd6b680ede26",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11"
+      ],
+      "raw_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "46771a13f8fdf6c8a620e20119f97e87c5b530717167298ae01d5a119694eab7"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-034",
+      "category": "multi_concept",
+      "question": "How does DocumentIngestionService connect file byte hashing with chunk identifier generation?",
+      "expected_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e"
+      ],
+      "query_latency_ms": 604.0484000004653,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "acb0809aec2392ef27ac3e2bd28d80e39eade461a61495e8e665d09659878557",
+        "691ebff5964c891e0c6dd39ce4d4b229a9c621378e4a5245dd2b5727dc71cbff",
+        "9eaa43f08fbf438b6c8aceea1f07e39e14cd36736f31f88daf627302530a6594",
+        "f707fbf5d65c514e0c558a40777d71324a72e5985b5850cad9489afb3774ab68",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "raw_retrieved_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "acb0809aec2392ef27ac3e2bd28d80e39eade461a61495e8e665d09659878557",
+        "9eaa43f08fbf438b6c8aceea1f07e39e14cd36736f31f88daf627302530a6594",
+        "f707fbf5d65c514e0c558a40777d71324a72e5985b5850cad9489afb3774ab68",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-035",
+      "category": "multi_concept",
+      "question": "How does the PDF parser attach page metadata that downstream provenance models expose to users?",
+      "expected_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "query_latency_ms": 648.414899999807,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "6b4f3c65151e4d7e4442d74dbc042e39cb376ffb983f9b527f06a3bf51fdbdf7",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "390f395e0ec1e71cd46f56070ec8fb6140be36aa40267931b8f552c6ada90aad",
+        "9eaa43f08fbf438b6c8aceea1f07e39e14cd36736f31f88daf627302530a6594",
+        "85e3e6d9be6301192a7c33d19a823cd2267da24ce6e51e2a95de3c5270da8077"
+      ],
+      "raw_retrieved_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "6b4f3c65151e4d7e4442d74dbc042e39cb376ffb983f9b527f06a3bf51fdbdf7",
+        "9eaa43f08fbf438b6c8aceea1f07e39e14cd36736f31f88daf627302530a6594",
+        "f48dc7bda0f337df56f120911702f9740a99734d9074bba844157f316366bf6d",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-036",
+      "category": "multi_concept",
+      "question": "How do workspace capacity limits interact with Qdrant Cloud cluster memory protections?",
+      "expected_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "query_latency_ms": 507.99189999997907,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "bfc968b4614e5c9b9fbe45844e1c64abdf6f7f2b84e6f20234d58e7e6f57c6d9",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e"
+      ],
+      "raw_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "bfc968b4614e5c9b9fbe45844e1c64abdf6f7f2b84e6f20234d58e7e6f57c6d9",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-037",
+      "category": "multi_concept",
+      "question": "How does EmbeddingManager isolate upper retrieval services from specific third-party embedding SDKs?",
+      "expected_doc_ids": [
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14"
+      ],
+      "query_latency_ms": 556.1244999998962,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "cdb2adab2d175831ef43ee67c2c2eaefd7e8289f84bbd799f13e7a9b804b33de",
+        "dcd3f6f9724626e33b9decce782cfdaeb99e491f9341c9c7a2ff7a37df5f7d80",
+        "75a12d3bbc81fc3f686f98e5d12ecbcc8ff78366e6534e37403bcb7784fee3b3",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "36bbfc423bcbe7372b8eefb35b2a9ccee6a0bfeb5e2c22b991e0842849e1ddf4"
+      ],
+      "raw_retrieved_doc_ids": [
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "cdb2adab2d175831ef43ee67c2c2eaefd7e8289f84bbd799f13e7a9b804b33de",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "85e3e6d9be6301192a7c33d19a823cd2267da24ce6e51e2a95de3c5270da8077",
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "b5db3fed733b73adb9bd97ee892027c75a3557c7bdcc70082e92007c79ff79bc"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-038",
+      "category": "multi_concept",
+      "question": "How does QdrantVectorStoreProvider map cosine distance metrics into similarity scores?",
+      "expected_doc_ids": [
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7"
+      ],
+      "query_latency_ms": 537.5272999999652,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "0603f1bc0d0d096a74120930e7753ab147e0345f7d35f84da077c7fa09ffb2dd",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "d8aeb88fbe43c3a5b48da2abd15ebcf742bab3478c32f96ddab67e09b5b34937",
+        "b614a4769b10092bf5eaad903d507a3e9f854c10a46ccd525abae51051f94ea2"
+      ],
+      "raw_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "0603f1bc0d0d096a74120930e7753ab147e0345f7d35f84da077c7fa09ffb2dd",
+        "d8aeb88fbe43c3a5b48da2abd15ebcf742bab3478c32f96ddab67e09b5b34937",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "87fe4d5771f1f81c67f61f6ab07b0ab245c4eb30424e291a4fc9ab489c192879"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-039",
+      "category": "multi_concept",
+      "question": "How does RAGService coordinate query vectorization, prompt formatting, and generative LLM completion?",
+      "expected_doc_ids": [
+        "6c61b0b1da2718bc478cfa0b540be731c390541357bd78ae08486528a4996cc2"
+      ],
+      "query_latency_ms": 652.4681999999302,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "c9cf2687688890b8bd244b02c96b19aee712b1a5010d5542cd5b8a75acf18825",
+        "12488eaad0959b9e56450952d9ddfe07bdcc15cdd881bfa0f83c07ab64c72774",
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "106af244fa0c2e7d00590c840da704c1a49335a76271c8d3d16b1e5bca77becc"
+      ],
+      "raw_retrieved_doc_ids": [
+        "6c61b0b1da2718bc478cfa0b540be731c390541357bd78ae08486528a4996cc2",
+        "6c61b0b1da2718bc478cfa0b540be731c390541357bd78ae08486528a4996cc2",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "6c61b0b1da2718bc478cfa0b540be731c390541357bd78ae08486528a4996cc2"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "c9cf2687688890b8bd244b02c96b19aee712b1a5010d5542cd5b8a75acf18825",
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "ac4bb3670ffe80a4baa5232c0e785032ec7e2d81f9efd987804cffb8b7525b20",
+        "74fac1ba5ed6cc3150d610427dee03e9148d80c4d1069c302d3962edf7644ac8"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "6c61b0b1da2718bc478cfa0b540be731c390541357bd78ae08486528a4996cc2",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-040",
+      "category": "multi_concept",
+      "question": "How do feedback modal submissions in Streamlit securely route through FastAPI to Google Sheets?",
+      "expected_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074"
+      ],
+      "query_latency_ms": 522.2479000003659,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e",
+        "88ba3f540f3d4aa61fe4da1da30f4727953891636f49224680868a077abf8bdb",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174"
+      ],
+      "raw_retrieved_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-041",
+      "category": "multi_concept",
+      "question": "How does EvaluationRunner maintain test isolation while measuring retrieval latency and MRR?",
+      "expected_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "query_latency_ms": 525.3966000000219,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64",
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "42ad7e32826448677d01d9071ca1811726f2e2019d112aa1a8c9d905f24f9015",
+        "97a0bc4ca0e4def9f8d132550e20893e0762084b71b67aa3252ea6a61f07c55b"
+      ],
+      "raw_retrieved_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "97a0bc4ca0e4def9f8d132550e20893e0762084b71b67aa3252ea6a61f07c55b",
+        "00b54ae4ace2df9698227a4d649e1311ccfdfd47175900970fc248ba46293e4c",
+        "1284c6772e8e4bdb5b73f90512e9c242efa4e029788a729263c615eedcb20b4d"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-042",
+      "category": "multi_concept",
+      "question": "How does KIP calculate Mean Reciprocal Rank (MRR) across labelled evaluation cases?",
+      "expected_doc_ids": [
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6"
+      ],
+      "query_latency_ms": 541.4906999994855,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "bd8c792ceb863a188aed335b7428d84c76b097705428ce479dc830c1256c4e2b",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64",
+        "1284c6772e8e4bdb5b73f90512e9c242efa4e029788a729263c615eedcb20b4d"
+      ],
+      "raw_retrieved_doc_ids": [
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "1284c6772e8e4bdb5b73f90512e9c242efa4e029788a729263c615eedcb20b4d",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-043",
+      "category": "multi_concept",
+      "question": "How does the paired experiment protocol compare Control and Treatment conditions without data contamination?",
+      "expected_doc_ids": [
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639"
+      ],
+      "query_latency_ms": 516.8253000001641,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "591f573fc55ac301851cde8e298fe0960db4450c6f0188fa26862d8892d6a2c4",
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "42ad7e32826448677d01d9071ca1811726f2e2019d112aa1a8c9d905f24f9015",
+        "cc8d14280273084007d399986b9920cdfb54274ff13a304d730a8ee0eef42070",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b"
+      ],
+      "raw_retrieved_doc_ids": [
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "591f573fc55ac301851cde8e298fe0960db4450c6f0188fa26862d8892d6a2c4",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "925c25c7baee6c949299ec2772b948f09459b1b0ac3c9fffd939988b5c622c9e",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "97a0bc4ca0e4def9f8d132550e20893e0762084b71b67aa3252ea6a61f07c55b"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-044",
+      "category": "multi_concept",
+      "question": "How does the Streamlit UI layout connect file uploads with backend parsing status spinners?",
+      "expected_doc_ids": [
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "query_latency_ms": 513.8465999998516,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000",
+        "1b5a64757b1fbf5b5384ca0f468148dcef933a4e46a5d3eff2b2b51d135b14a7",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0"
+      ],
+      "raw_retrieved_doc_ids": [
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-045",
+      "category": "multi_concept",
+      "question": "How does Pydantic BaseSettings handle fallback defaults when environment variables are omitted?",
+      "expected_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140"
+      ],
+      "query_latency_ms": 523.7844000002951,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561",
+        "4102bcbbd25b648984e8ba895c4f196334725a24a3c8456cb30431e6af42dc1b",
+        "a16716c2af3c31b96b934eb7c814204e57cd02c0f8938eb979118132334e841a",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561",
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "d25c74ac054ad11fce2b3f8df28b5277610cfb921697bb755d04e7db534a0d8c",
+        "faf13094fafc10a0e89d2f8d3f1c6b2a28d144ad800b73af053ef39a9a693a0a",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-046",
+      "category": "multi_concept",
+      "question": "How does the Dockerfile configure the non-root execution environment for Render hosting?",
+      "expected_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3"
+      ],
+      "query_latency_ms": 520.880600000055,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "3846596c8e9220d90e785b33d7900d9e28196c9283e420eda72ba0e6d8aad575",
+        "45e409a6e638399321f73f39ff9b3b0f9f5946b1f924c4fedf06b5eb8d8c9878",
+        "1339ce7e0d232066eecd5fe07bb606100c2e5977fd8d3d5bf0678f0c159fd67c",
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c"
+      ],
+      "raw_retrieved_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "1339ce7e0d232066eecd5fe07bb606100c2e5977fd8d3d5bf0678f0c159fd67c",
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-047",
+      "category": "multi_concept",
+      "question": "How does the security model ensure workspace bearer tokens cannot be guessed by adversaries?",
+      "expected_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "query_latency_ms": 607.7894999998534,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "da7916e7354fe0814896c1474a18aa5e6e2e3ae82c347cd108323bd346983a36",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e",
+        "72d136d9681c560b27dcc30ad8cdb57289d6c0af4baccc59dd05244a329f3238"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-048",
+      "category": "multi_concept",
+      "question": "How does the DOCX parser handle paragraph extraction without writing temporary files to disk?",
+      "expected_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b"
+      ],
+      "query_latency_ms": 551.2628000005861,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "5a8373cc2feee25a4fd2a6df68a98e745e60a9ab07f2663b22ba6f9414aeb0fe",
+        "093a4c2570e2a9266d068b2966410f1eef86af9147309c63a9fb6b2a1f9b257c"
+      ],
+      "raw_retrieved_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-049",
+      "category": "hard_negative",
+      "question": "What document chunking strategy does KIP actively implement in its production ingestion service?",
+      "expected_doc_ids": [
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "query_latency_ms": 542.8124000000025,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "c1a8ee93936b0c0d4593a307c7977cb2f1ba7dc4d5167ae80fd3c938dfddd379",
+        "e7cdd88b95543ee97fa7f28dbc85b9a4cf5b2c1438f07b05df9049a8132ee362",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9"
+      ],
+      "raw_retrieved_doc_ids": [
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "c1a8ee93936b0c0d4593a307c7977cb2f1ba7dc4d5167ae80fd3c938dfddd379",
+        "e7cdd88b95543ee97fa7f28dbc85b9a4cf5b2c1438f07b05df9049a8132ee362",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "eb7328c9548152284ee036160852db349e8870efedb702bc30c257bf0ce85a46",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-050",
+      "category": "hard_negative",
+      "question": "What vector store engine powers multi-tenant cloud retrieval in active KIP deployments?",
+      "expected_doc_ids": [
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7"
+      ],
+      "query_latency_ms": 505.1878000003853,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "dd0a6d51bfcfdcf96657ab67d4952181d14f85434f119573afd4ffde379aec92",
+        "20a58c3c2c0cc8817238cf0367655da2732b7db9bf816bce2c45d9703a3e0a30"
+      ],
+      "raw_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "dd0a6d51bfcfdcf96657ab67d4952181d14f85434f119573afd4ffde379aec92",
+        "20a58c3c2c0cc8817238cf0367655da2732b7db9bf816bce2c45d9703a3e0a30",
+        "46771a13f8fdf6c8a620e20119f97e87c5b530717167298ae01d5a119694eab7"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-051",
+      "category": "hard_negative",
+      "question": "Does KIP currently utilize sparse lexical search like BM25 or SPLADE in its retrieval pipeline?",
+      "expected_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "query_latency_ms": 513.0691000003935,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "6f1b562091b902d0edcace434964ac68c9b7606cd28f323e66842f65f749726e",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "4f15cd5d8ed5741db805ba7d046f73804f8bfa139b1fa0233ec869d5c7049b41"
+      ],
+      "raw_retrieved_doc_ids": [
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.25,
+      "dedup_retrieved_chunk_ids": [
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "6f1b562091b902d0edcace434964ac68c9b7606cd28f323e66842f65f749726e",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "case_id": "exp-052",
+      "category": "hard_negative",
+      "question": "How are benchmark evaluations conducted in KIP: through external LLM judges or mechanical metrics?",
+      "expected_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "query_latency_ms": 546.4246000001367,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1284c6772e8e4bdb5b73f90512e9c242efa4e029788a729263c615eedcb20b4d",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64",
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82"
+      ],
+      "raw_retrieved_doc_ids": [
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.3333333333333333,
+      "dedup_retrieved_chunk_ids": [
+        "1284c6772e8e4bdb5b73f90512e9c242efa4e029788a729263c615eedcb20b4d",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64",
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "case_id": "exp-053",
+      "category": "hard_negative",
+      "question": "What caching technology is deployed in KIP v1.1 to cache embedding vectors and LLM answers?",
+      "expected_doc_ids": [
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836"
+      ],
+      "query_latency_ms": 526.0432000004585,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "3abada8cf4a8b99e2d1d9aa8ccba5f81de8a2fa362e3ecd73d36a9ec6acb1807",
+        "0d71d2222029e01db84a0635f08a9db706baa22974e34eaee26331382d44d882",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82"
+      ],
+      "raw_retrieved_doc_ids": [
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "3abada8cf4a8b99e2d1d9aa8ccba5f81de8a2fa362e3ecd73d36a9ec6acb1807",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "a13411f63cb34f93930a70561c734cbca18939dd5b5a2f15193e3bc3ecb6a4ae"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "4a43847e0a59e1f0a140670fe9f2835d650d01777f068c7059ca4dde01d297c7"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-054",
+      "category": "hard_negative",
+      "question": "Does KIP v1.1 support multi-turn conversational dialogue memory across successive user questions?",
+      "expected_doc_ids": [
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "query_latency_ms": 544.9306000000433,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a13411f63cb34f93930a70561c734cbca18939dd5b5a2f15193e3bc3ecb6a4ae",
+        "16595e97b360861a6694d5526fb3e38a7913f0fad6a13c683327b17b94431c42",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b"
+      ],
+      "raw_retrieved_doc_ids": [
+        "4a43847e0a59e1f0a140670fe9f2835d650d01777f068c7059ca4dde01d297c7",
+        "4a43847e0a59e1f0a140670fe9f2835d650d01777f068c7059ca4dde01d297c7",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "a13411f63cb34f93930a70561c734cbca18939dd5b5a2f15193e3bc3ecb6a4ae",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "4a43847e0a59e1f0a140670fe9f2835d650d01777f068c7059ca4dde01d297c7",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-055",
+      "category": "hard_negative",
+      "question": "What autonomous multi-step reasoning framework like LangGraph or CrewAI powers KIP workflows?",
+      "expected_doc_ids": [
+        "6c61b0b1da2718bc478cfa0b540be731c390541357bd78ae08486528a4996cc2"
+      ],
+      "query_latency_ms": 556.4475000001039,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "db0e3a1a2c1163ba93013073de3ea03aefb8bb93cb239551d39161a0a92929c7",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10"
+      ],
+      "raw_retrieved_doc_ids": [
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10",
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-056",
+      "category": "hard_negative",
+      "question": "Does KIP store knowledge relationships in a Neo4j property graph database for GraphRAG?",
+      "expected_doc_ids": [
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a"
+      ],
+      "query_latency_ms": 552.5563000001057,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "755f5867650d6d9040035388ac735c39c24c2a093d9ab01f952147d048ea31ea",
+        "876b5ce9e4b665f6fc0722baa7a2b7958fcfaadc1fd9342abd523fbec9247273",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a"
+      ],
+      "raw_retrieved_doc_ids": [
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-057",
+      "category": "hard_negative",
+      "question": "How is the KIP production backend hosted: on a Kubernetes cluster or Render Free Tier?",
+      "expected_doc_ids": [
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3"
+      ],
+      "query_latency_ms": 535.2114999996047,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1339ce7e0d232066eecd5fe07bb606100c2e5977fd8d3d5bf0678f0c159fd67c",
+        "45e409a6e638399321f73f39ff9b3b0f9f5946b1f924c4fedf06b5eb8d8c9878",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e",
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c"
+      ],
+      "raw_retrieved_doc_ids": [
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "1339ce7e0d232066eecd5fe07bb606100c2e5977fd8d3d5bf0678f0c159fd67c",
+        "45e409a6e638399321f73f39ff9b3b0f9f5946b1f924c4fedf06b5eb8d8c9878",
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "3abada8cf4a8b99e2d1d9aa8ccba5f81de8a2fa362e3ecd73d36a9ec6acb1807"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-058",
+      "category": "hard_negative",
+      "question": "What authentication standard protects KIP tenant workspaces: OAuth2/OIDC SSO or bearer tokens?",
+      "expected_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "query_latency_ms": 560.0328999998965,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "da7916e7354fe0814896c1474a18aa5e6e2e3ae82c347cd108323bd346983a36",
+        "7cb1c39540e6e083193a892d32b7c99d69d93ab291bf66d19ef42e58988812d2",
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "1c8f27fe49e72b75b885edea12fa020bf8d45721174561015649187abfa1e1be",
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21"
+      ],
+      "raw_retrieved_doc_ids": [
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.2,
+      "dedup_retrieved_chunk_ids": [
+        "da7916e7354fe0814896c1474a18aa5e6e2e3ae82c347cd108323bd346983a36",
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "cc186008312a98203efe9c33acb60fbcf962447efc3af900fbbc0830d2f5a35c",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "case_id": "exp-059",
+      "category": "hard_negative",
+      "question": "How are language model tokens transmitted to the UI: via streaming WebSockets or synchronous JSON?",
+      "expected_doc_ids": [
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5"
+      ],
+      "query_latency_ms": 556.7529999998442,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "150e7f6487afcae465fed797c33717ed520fbe2e6d033de4827101c5bbafb800",
+        "435ce92d4a8007aef935dc07c1deb986bbda2d2a7bde02e347240eb22d988cc9",
+        "d2849487082738bd29f77ede3942a864a3203aab77c0716f63eff397cb1a05bc",
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10",
+        "1b5a64757b1fbf5b5384ca0f468148dcef933a4e46a5d3eff2b2b51d135b14a7"
+      ],
+      "raw_retrieved_doc_ids": [
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "150e7f6487afcae465fed797c33717ed520fbe2e6d033de4827101c5bbafb800",
+        "7588d10d66e841e1811653bf33a27467a54a3d0aa776fc50e8f8f7bfa102cb10",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "89c524b1f5484a277acd6629e6106def0cb334d9ba6117d489fe0a1e16a55605"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "49df4a8ebbf6953363e21ff7d77c48d3d0facf726f03230475a98156e09f9179",
+        "252d1bbb10d93bfad68acd919930a4b217ba92ac42a52626b225c20bb35391ba",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843"
+      ],
+      "dedup_hit": false,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.0
+    },
+    {
+      "case_id": "exp-060",
+      "category": "hard_negative",
+      "question": "Does the active KIP retrieval pipeline include a second-stage cross-encoder reranker like Cohere Rerank?",
+      "expected_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538"
+      ],
+      "query_latency_ms": 531.8272000004072,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "ecc36b29ca846ad7d0d936004993aa51a3012d637c1c2fc34bffb3a2e25d4c2b",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "6f1b562091b902d0edcace434964ac68c9b7606cd28f323e66842f65f749726e",
+        "fbcaed48e3d42ce6cf6019df5a232d0e8e2b447434fda9dbecd19a9099bc59a4"
+      ],
+      "raw_retrieved_doc_ids": [
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.3333333333333333,
+      "dedup_retrieved_chunk_ids": [
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "6f1b562091b902d0edcace434964ac68c9b7606cd28f323e66842f65f749726e",
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-061",
+      "category": "hard_negative",
+      "question": "Where does ChromaVectorStoreProvider store vector files during automated pytest execution?",
+      "expected_doc_ids": [
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "query_latency_ms": 496.27290000080393,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "e17a30893f11b3c286f9c7a634502dcfeac97909488b82e4f37aa3d5040a9263",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "d25c74ac054ad11fce2b3f8df28b5277610cfb921697bb755d04e7db534a0d8c",
+        "20a58c3c2c0cc8817238cf0367655da2732b7db9bf816bce2c45d9703a3e0a30",
+        "60756bc8181fe3287bd364730317c7eeeee2cc19c2697004695c9798cdf5fcb4"
+      ],
+      "raw_retrieved_doc_ids": [
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "e17a30893f11b3c286f9c7a634502dcfeac97909488b82e4f37aa3d5040a9263",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "d25c74ac054ad11fce2b3f8df28b5277610cfb921697bb755d04e7db534a0d8c",
+        "85e3e6d9be6301192a7c33d19a823cd2267da24ce6e51e2a95de3c5270da8077",
+        "6aa2aa45747db31f94e16cbdb6af87da5b0ad1e2aee7cc1696b73eeda4915561"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "2052e898f98dfaa9a756da58babe0543d21bc43aa64a3382b62699bfaf2b4f0e",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-062",
+      "category": "hard_negative",
+      "question": "How does KIP prevent hallucinations: by prompting strict grounding or through post-generation Ragas checks?",
+      "expected_doc_ids": [
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9"
+      ],
+      "query_latency_ms": 538.3230999996158,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "ac4bb3670ffe80a4baa5232c0e785032ec7e2d81f9efd987804cffb8b7525b20"
+      ],
+      "raw_retrieved_doc_ids": [
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "1a5842017292cf1a455b136c460fbf343fe0f1a930d72b39c113270bfd274add",
+        "035252393ae3cada16912c5ed7c614c830087bfbb550e94995543176734117ae",
+        "4ac8805707b40bc516da676c2913d432588cabaeb1bab383e4c9acf5908a0c82",
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "ac4bb3670ffe80a4baa5232c0e785032ec7e2d81f9efd987804cffb8b7525b20"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "a69f55b648c0d0d7eb2420cf877606ef6ac0300dd60bcfd06b7558cc741a1aa9",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd",
+        "c88c2e952b78fb0c59828144a2f6dc31066b9d40fdfd0cf64cf455e05aed6d6f",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-063",
+      "category": "hard_negative",
+      "question": "How does the Streamlit UI handle dormant backend containers on Render without caching answers in Redis?",
+      "expected_doc_ids": [
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "query_latency_ms": 555.4288000002998,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "87fe4d5771f1f81c67f61f6ab07b0ab245c4eb30424e291a4fc9ab489c192879",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "18b815e606723f88554474ba37d9f1cc789f26d7ff086e7729c4d577096d4ace",
+        "f9ff68485b0cd15e55336a367ba9f9f27e20defdf89152f94899dce4456b0364"
+      ],
+      "raw_retrieved_doc_ids": [
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "cd2d51e5f2333a7f6baa8bff44fcd0e7c2947817dcfb20d87b73ef3376456c3c",
+        "87fe4d5771f1f81c67f61f6ab07b0ab245c4eb30424e291a4fc9ab489c192879",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "1eff45f600fb28b55e319d5afce0f0d964429e497d1bacb491742690a38731ee",
+        "74fac1ba5ed6cc3150d610427dee03e9148d80c4d1069c302d3962edf7644ac8"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "eb66b55f0ac4d316a63501580bd58de644dddef365851aadbdc184a8450639e4",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "85844219742c280e2fa111770f6179e0fe8cf4f1bd67fff3d6cb4c2296f018a3",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-064",
+      "category": "hard_negative",
+      "question": "What entity coordinates vector transformations without introducing LangChain or LlamaIndex dependencies?",
+      "expected_doc_ids": [
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14"
+      ],
+      "query_latency_ms": 515.389099999993,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "876b5ce9e4b665f6fc0722baa7a2b7958fcfaadc1fd9342abd523fbec9247273",
+        "755f5867650d6d9040035388ac735c39c24c2a093d9ab01f952147d048ea31ea",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000"
+      ],
+      "raw_retrieved_doc_ids": [
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "ba2995274e876cf0a27d260825f93021dae65f00f81f02c82ff2f736aec6cf07",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000",
+        "e704e33aabfd4e1d88e1bf72cd45964e95958504abf5f72acaeb3a07abe85bf7",
+        "36bbfc423bcbe7372b8eefb35b2a9ccee6a0bfeb5e2c22b991e0842849e1ddf4"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "860245a0c6c64c5eced3a001fc624234945d7021b99cfb90c17f03e12933d08a",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.2
+    },
+    {
+      "case_id": "exp-065",
+      "category": "cross_document",
+      "question": "How do document parser upload limits and workspace chunk capacities work together to bound tenant resource usage?",
+      "expected_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "query_latency_ms": 513.9411000000109,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "1516a2c57cb038ca57313dd1f84b0518aaa1ce90ec67a1c7289a852950fe76d9",
+        "bfc968b4614e5c9b9fbe45844e1c64abdf6f7f2b84e6f20234d58e7e6f57c6d9",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000"
+      ],
+      "raw_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "6ae980bbaa1c40e295741bc955a576f7265dad0044f95d6f5a54bc8591b8e000",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-066",
+      "category": "cross_document",
+      "question": "How do PDF and DOCX parsers extract structured textual information from complex business files?",
+      "expected_doc_ids": [
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b"
+      ],
+      "query_latency_ms": 533.4332000002178,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "5a8373cc2feee25a4fd2a6df68a98e745e60a9ab07f2663b22ba6f9414aeb0fe",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd"
+      ],
+      "raw_retrieved_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "d8b5ec525b6a24bb17b0ea234cb9a733900b94a113cb078660fb5e80e3dca6ac",
+        "051ec1d77191186e51854d1bc3dbf6cb5061d80d4c4dbcf34a80eb5e527e2a61",
+        "a8b0c1ffd07793ab1fa4b8c07539bb3b231f2a729070f487431a1779fc2b27a0",
+        "876b5ce9e4b665f6fc0722baa7a2b7958fcfaadc1fd9342abd523fbec9247273",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "13bcf306cda2e63a1006c0e6e4636009d64611eba82c91923337fb669677a79b",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "3f61e52aea163d310e47016c89f60d93006eef4fe7a5f6bfde9ccc5e36e1685e",
+        "5273133127acb88c5ba1cf3ca6bd52ee54dbb5b258bb4942d09cc99fc72cc708",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-067",
+      "category": "cross_document",
+      "question": "How does the content-addressed hashing algorithm establish deterministic document and chunk IDs?",
+      "expected_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46"
+      ],
+      "query_latency_ms": 534.8991999999271,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "acb0809aec2392ef27ac3e2bd28d80e39eade461a61495e8e665d09659878557",
+        "691ebff5964c891e0c6dd39ce4d4b229a9c621378e4a5245dd2b5727dc71cbff",
+        "f707fbf5d65c514e0c558a40777d71324a72e5985b5850cad9489afb3774ab68",
+        "77afdff9e35b2b6de162976aba0d7336f6a3d7f58eaa8da1df1ee7ef3cdd8a2b",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000"
+      ],
+      "raw_retrieved_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "acb0809aec2392ef27ac3e2bd28d80e39eade461a61495e8e665d09659878557",
+        "f707fbf5d65c514e0c558a40777d71324a72e5985b5850cad9489afb3774ab68",
+        "0114351d63f5a794173664b8071da837780e2551906476b6f642d07e2ec78000",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "d5bb2146121b7983b9a12fb4f2bea7e765657a49ef763845b8a4d258aec8f7c5",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-068",
+      "category": "cross_document",
+      "question": "What embedding providers are supported in KIP and what output dimensionalities do they produce?",
+      "expected_doc_ids": [
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "8ef389f4896c6097d3fdbda82fdfbfe74e1343ee51ceb2ee52c27a8b5a08500e"
+      ],
+      "query_latency_ms": 623.4774000004109,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "24eb0c90e4f3ba5ef19240024d65d66ee4b9b9cd5d3c8590067d3b5cde08876a",
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "cdb2adab2d175831ef43ee67c2c2eaefd7e8289f84bbd799f13e7a9b804b33de",
+        "9d2f86472b55d23a8e29233f7f7353fcadbf0d825aee607ee63804a417808dea",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "raw_retrieved_doc_ids": [
+        "8ef389f4896c6097d3fdbda82fdfbfe74e1343ee51ceb2ee52c27a8b5a08500e",
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14",
+        "8ef389f4896c6097d3fdbda82fdfbfe74e1343ee51ceb2ee52c27a8b5a08500e",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "24eb0c90e4f3ba5ef19240024d65d66ee4b9b9cd5d3c8590067d3b5cde08876a",
+        "6c65063696e5452158e285300396e89314ff58ff0cc217829d0fbe1649c729a2",
+        "cdb2adab2d175831ef43ee67c2c2eaefd7e8289f84bbd799f13e7a9b804b33de",
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af",
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "8ef389f4896c6097d3fdbda82fdfbfe74e1343ee51ceb2ee52c27a8b5a08500e",
+        "211adde2b71f8a8e42f4979d234681d7caeba21dc429acc6d93dac860657f806",
+        "b419750e3e13f00a867232f3480a00e675d0e87a21b81c95e7c2d0b4779d9e14",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-069",
+      "category": "cross_document",
+      "question": "How do Qdrant Cloud and embedded Chroma vector store implementations enforce workspace tenant filtering?",
+      "expected_doc_ids": [
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "query_latency_ms": 552.5463000003583,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "c8132407dc7cfc5bb191497f1b0dc511547d1e90a62cc485e37ee437ecca057e",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "01a230aea99f3e25578949f9de4c645aaefab0f553c91a757850bd6b680ede26",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac"
+      ],
+      "raw_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.25,
+      "dedup_retrieved_chunk_ids": [
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "01a230aea99f3e25578949f9de4c645aaefab0f553c91a757850bd6b680ede26",
+        "ccc1c2de38ca174e7454eef53f43ee7439ff25ad9348ec88da4a51d1b1d3c7ac",
+        "46771a13f8fdf6c8a620e20119f97e87c5b530717167298ae01d5a119694eab7"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "dd1062cdcdf97d941f0c469d35c50f00911dc3c237a6d5d58e05b4abe180f607"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "case_id": "exp-070",
+      "category": "cross_document",
+      "question": "What language model providers can power answer generation and what models do they target?",
+      "expected_doc_ids": [
+        "7814e557c2f42e3801fd958cfa580d3964bae3567ebe81d008d227f39ce4e843",
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3"
+      ],
+      "query_latency_ms": 505.87569999970583,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "a16716c2af3c31b96b934eb7c814204e57cd02c0f8938eb979118132334e841a",
+        "4be763b8a1d23b2267f50e33f5ee34553f17a655691b17a3d148442b866861e5"
+      ],
+      "raw_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "ae37acdfbccfca25b03082c8e68bafe16561d8c5e31939df3ff61ff6bebbfba1",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "a16716c2af3c31b96b934eb7c814204e57cd02c0f8938eb979118132334e841a",
+        "4be763b8a1d23b2267f50e33f5ee34553f17a655691b17a3d148442b866861e5"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "89ac20511510f46dddb54d94c939f8cceea2521cdff31deb3107e70b75a9e4e3",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "719be3bc1a65bf1668c556088b9e52c3b053b8d5ceed43ba3a53c07664235bbd"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-071",
+      "category": "cross_document",
+      "question": "How does user feedback travel from the Streamlit UI to Google Sheets with token authentication?",
+      "expected_doc_ids": [
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a"
+      ],
+      "query_latency_ms": 546.2610999993558,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "88ba3f540f3d4aa61fe4da1da30f4727953891636f49224680868a077abf8bdb",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e",
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50",
+        "2f96cbb40506440552e4dda2c44c064f38e301fc4700cc50b1e6b98176131091"
+      ],
+      "raw_retrieved_doc_ids": [
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "88ba3f540f3d4aa61fe4da1da30f4727953891636f49224680868a077abf8bdb",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-072",
+      "category": "cross_document",
+      "question": "How do EvaluationRunner and Pydantic benchmark schemas measure Hit Rate and Mean Reciprocal Rank?",
+      "expected_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52"
+      ],
+      "query_latency_ms": 532.3687999998583,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "00b54ae4ace2df9698227a4d649e1311ccfdfd47175900970fc248ba46293e4c",
+        "bd8c792ceb863a188aed335b7428d84c76b097705428ce479dc830c1256c4e2b",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64"
+      ],
+      "raw_retrieved_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7",
+        "00b54ae4ace2df9698227a4d649e1311ccfdfd47175900970fc248ba46293e4c",
+        "42ad7e32826448677d01d9071ca1811726f2e2019d112aa1a8c9d905f24f9015",
+        "073c3876a71c93d01ae5950fbec80974dda7ca06afa618eddda26237575e4e5f"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-073",
+      "category": "boundary_handling",
+      "question": "What error is raised when a client issues a vector retrieval search without providing a workspace ID?",
+      "expected_doc_ids": [
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c"
+      ],
+      "query_latency_ms": 521.4285000001837,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "bce479814d2bd4a9f7ae1142bd03c66452bf4413138a9468e0b85ec61e162afb",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "a03ae726812bea7961cafd9743e2a3a61bd28e9ed3b3a3ed52b0b819c18e5b11",
+        "01a230aea99f3e25578949f9de4c645aaefab0f553c91a757850bd6b680ede26",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd"
+      ],
+      "raw_retrieved_doc_ids": [
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3"
+      ],
+      "raw_hit": false,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.0,
+      "dedup_retrieved_chunk_ids": [
+        "bce479814d2bd4a9f7ae1142bd03c66452bf4413138a9468e0b85ec61e162afb",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "a2a8eeb62a68854b542805a870290c5f330692a8a3c95903f163d30f1bd31cbd",
+        "e8e2ce4dcb6978d4a9cca9779ee41a58bc8db298ff2c8e27736d8f8c9929010e",
+        "f14ff0220c109dcff3dc15e669e331b2586c84faa96e4dcd02e303d453ff241b"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "1b9edfe7492b4a9eaa4eb09b14f5eeb358d5e0fe41b8dae1af8868fd02b8a12a",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": false,
+      "dedup_reciprocal_rank": 0.2
+    },
+    {
+      "case_id": "exp-074",
+      "category": "boundary_handling",
+      "question": "How does the platform prevent denial-of-service through oversized document uploads?",
+      "expected_doc_ids": [
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9"
+      ],
+      "query_latency_ms": 507.72760000018025,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "fbaac65436788c30f73b9b301cb01116438de706fa4b740300b12983f921b5d3",
+        "ee26413a6231f4bec8501cc38ba1ff47667163f5a616aa3586cce35568e44ddd",
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "bfc968b4614e5c9b9fbe45844e1c64abdf6f7f2b84e6f20234d58e7e6f57c6d9"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.5,
+      "dedup_retrieved_chunk_ids": [
+        "880d0d6e3901cac940c35c086f55513e20b363cdda1498e6e7681663dc9ddb2c",
+        "fbaac65436788c30f73b9b301cb01116438de706fa4b740300b12983f921b5d3",
+        "467b87e6f9df57ceb6cea800eb0f10b51f4630eaea865bb4855246a728ee9964",
+        "6f08677d802c4fcd1e01cffe1deaa0aebe4c51b50b2d1e3e36ddb4a29b67dc03",
+        "691ebff5964c891e0c6dd39ce4d4b229a9c621378e4a5245dd2b5727dc71cbff"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "4fbdf23f18ad0ac98c6399beb1685504c99a817d37127a3a035e1aebe0f290f9",
+        "99e284eeccd19425ddfa9ce3b3b56aee093a00e21115b1c1811f4f226658ff61",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "52d4987e73b9984814b2f7314430103c12cbfcf69d433309a93ccefa126c625e"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-075",
+      "category": "boundary_handling",
+      "question": "What happens when a search query returns zero matching vectors or all scores fall below threshold?",
+      "expected_doc_ids": [
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836"
+      ],
+      "query_latency_ms": 538.3325000002515,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "09f1529ed16f1881487e1f5dce9f1c64e5e3148a047fea25bbdbdf80a3afde8a",
+        "79eca6893b58bbed45fa7830a7635975d4e24a5cff382de5a1a3a63fc6da7b66",
+        "d8aeb88fbe43c3a5b48da2abd15ebcf742bab3478c32f96ddab67e09b5b34937"
+      ],
+      "raw_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": false,
+      "raw_reciprocal_rank": 0.25,
+      "dedup_retrieved_chunk_ids": [
+        "b8696e8fbea627872308d4850c4ec9f34cd24ca1601a45d649bde5ff616810de",
+        "d153807c3d2bb033ffad58c87499f96eff8f255953c5d540e240af377411efe6",
+        "79eca6893b58bbed45fa7830a7635975d4e24a5cff382de5a1a3a63fc6da7b66",
+        "d8aeb88fbe43c3a5b48da2abd15ebcf742bab3478c32f96ddab67e09b5b34937",
+        "87fe4d5771f1f81c67f61f6ab07b0ab245c4eb30424e291a4fc9ab489c192879"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "423a09a2d8b079bb55b4663e0e9ae7846e7d90f80f1bb54db20030a98067f538",
+        "fcf8d7a92b7a1afaa6563c14e01cd1b77aadd4b0ee4fd1ffc5bbdc69ed60d4f7",
+        "e20250354884e429019e726075b2ff761c6640afdb45ad1c21d43b5a1fda7836",
+        "983d6d8c567def41851d81b22bfd11101162c756df71d44c203c7ea127fffebc",
+        "f9ff823a7997421940062d0860e452d9aa3041b0143541f38aa42d85766280fa"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.3333333333333333
+    },
+    {
+      "case_id": "exp-076",
+      "category": "boundary_handling",
+      "question": "What HTTP status code is returned when user feedback is submitted with an unconfigured webhook destination?",
+      "expected_doc_ids": [
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a"
+      ],
+      "query_latency_ms": 546.2302000005366,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "2f96cbb40506440552e4dda2c44c064f38e301fc4700cc50b1e6b98176131091",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "5ea1d4420afc9f6ef48f7e0bfef8bbaaec3e375d9e1c9d0c56dfff73e810af5a",
+        "4bbbd3fe638bc5cc7b548af0552605618dac99a3a57bfa3e017281decd3a264e"
+      ],
+      "raw_retrieved_doc_ids": [
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "2f96cbb40506440552e4dda2c44c064f38e301fc4700cc50b1e6b98176131091",
+        "c317003908837a081e98ce3773d1e8f09183e1a637fe758bcc74c64c083a24e9",
+        "a8457dbf027f65dbe45fc67b2b2a832ea659d47d24bf579b79717331ac6f333d",
+        "5ea1d4420afc9f6ef48f7e0bfef8bbaaec3e375d9e1c9d0c56dfff73e810af5a",
+        "4725c194d5bd7fbbcfd4eae4290853e0bd4f8947f1189f176c897a4366978c50"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "10fd50444d1f061419ceab7ca1fcf953c85d7e0e5ca1e5ed5c2454dc6c36197a",
+        "7fef86ca551535b7734af4a1936fd691ee0c8066411060465e217e82252fc140",
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324",
+        "82ddbc93b8ada53f638e7f19172b9db774b8b0c943d5f057257c0a9b25bf77c5",
+        "c94143ee63b68e97f2dd58bab327285a1152843f67a1636ade5b91d86ced9074"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-077",
+      "category": "boundary_handling",
+      "question": "How does the evaluation runner distinguish an infrastructure outage from a genuine retrieval miss?",
+      "expected_doc_ids": [
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52"
+      ],
+      "query_latency_ms": 521.9750999995085,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "00b54ae4ace2df9698227a4d649e1311ccfdfd47175900970fc248ba46293e4c",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "a091074f3d4518f47eee0c42cc20d05c4e76a9db69fc9f8b8068cf294fe8cc64",
+        "ee61365fdcaf2c05ad1801f382a804d8dcb1f1dc04ed8872dd770c94765b46bc"
+      ],
+      "raw_retrieved_doc_ids": [
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "00b54ae4ace2df9698227a4d649e1311ccfdfd47175900970fc248ba46293e4c",
+        "a52f8e60aee71db334d8b587e5af5b06f8914c1835a5d1d15ff98bb57f9a7c4b",
+        "1018666f7244b20b86addc4f07371739bad7784e7f0e037d61a3e06c937d0bf6",
+        "925c25c7baee6c949299ec2772b948f09459b1b0ac3c9fffd939988b5c622c9e",
+        "34fc14a73b7a0d3f16065fc5ab0eaec98e32ee8b83748919ad5a11e9c02494a7"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "33f5341a76abe7abad9ec92cafb5cc73be29bda23000d5e06fb6af35b59008e8",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "b97ea6a6da102ef23eb0f738d9a3e3d9a90e52d9c6e500bbafc83ec8cdf26827",
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-078",
+      "category": "boundary_handling",
+      "question": "What happens if an unlabelled benchmark case with empty expected document IDs is evaluated?",
+      "expected_doc_ids": [
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6"
+      ],
+      "query_latency_ms": 582.6779999997598,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "0101dafe5c22654d2bce1f11bd1fafd982a724fb2d9992fb2a01f040461d32cc",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "4e3075c61ba40afebb92549b748b2dd24f3cb114a4fdfeb74737744bfc53b8ef",
+        "ad0262bf657dc7a51b962b1e1b411da1dd08ed979e06f304ff24cfeb0b6f894d",
+        "95ca3cb4dca956889de1c9b11d2929fcff80ceeee14f588b9a250a3bea6e3a42"
+      ],
+      "raw_retrieved_doc_ids": [
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "0101dafe5c22654d2bce1f11bd1fafd982a724fb2d9992fb2a01f040461d32cc",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "4e3075c61ba40afebb92549b748b2dd24f3cb114a4fdfeb74737744bfc53b8ef",
+        "ad0262bf657dc7a51b962b1e1b411da1dd08ed979e06f304ff24cfeb0b6f894d",
+        "95ca3cb4dca956889de1c9b11d2929fcff80ceeee14f588b9a250a3bea6e3a42"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "949d52cb6ed7148e01009c8b5246331d0aebadebae534dd28128e391db5147f6",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b",
+        "8ac34d311cee845e8b56370230ae7101e45dcf14085e15d0a99c4b1889a22877"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    },
+    {
+      "case_id": "exp-079",
+      "category": "boundary_handling",
+      "question": "How does KIP protect database connection secrets when unexpected internal errors occur?",
+      "expected_doc_ids": [
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c"
+      ],
+      "query_latency_ms": 528.7434000001667,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "b64edecb642c62752d79a7114d0a1728e1efd65990687a0f20250b4b45da9174",
+        "6c65a9fae00b73ec19087502dc3d540bd81daba686942ffda3ebe148ddd4ce7d",
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e"
+      ],
+      "raw_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": false,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 0.3333333333333333,
+      "dedup_retrieved_chunk_ids": [
+        "5b98d566ccf20984ffb9f22ed419cce50b95e3678823326cb4b4d46481d3cd21",
+        "6c65a9fae00b73ec19087502dc3d540bd81daba686942ffda3ebe148ddd4ce7d",
+        "9a0a16f48b242544f5ac50424009aeb08df83fa11c8aea8b169883b055ba896c",
+        "bf1a29092a168fb6d5f53583e15b899b3d8bb573ac1c04c2f97325dba0df312e",
+        "3df0da6da1eb91423a1b8a67a567308ba514d3aa81c7ba1803715466ad96e462"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "7c2e66d00531cb18f524ec1161705f3945812b6de08f511789d896a70efa3d2f",
+        "cba1b60df81cc05102c55c065ac08a952ba7521b8f6c3839ebfb877af44c772c",
+        "f0ecc88754c5bb06bae3d49716ce1f2ee0befe74adaceb859a2d3017f61470e3",
+        "605674cad36b6932f295624278decc6b869979d13d6d01d93d584d8da4e4d5ce",
+        "5ed26ebb9d3c7ad93aff533cc2fabc7ad32ac113ec48b648fb0406bb8ce2d99f"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": false,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 0.5
+    },
+    {
+      "case_id": "exp-080",
+      "category": "boundary_handling",
+      "question": "What prevents benchmark ground truth IDs from breaking when running tests on Windows systems?",
+      "expected_doc_ids": [
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46"
+      ],
+      "query_latency_ms": 526.2948999998116,
+      "retrieval_error": null,
+      "raw_retrieved_chunk_ids": [
+        "f707fbf5d65c514e0c558a40777d71324a72e5985b5850cad9489afb3774ab68",
+        "77afdff9e35b2b6de162976aba0d7336f6a3d7f58eaa8da1df1ee7ef3cdd8a2b",
+        "cb307ae07fb72b09e7c8c7f07fe04151d3080388802c132cf68e6858034e4299",
+        "cc8d14280273084007d399986b9920cdfb54274ff13a304d730a8ee0eef42070",
+        "4e3075c61ba40afebb92549b748b2dd24f3cb114a4fdfeb74737744bfc53b8ef"
+      ],
+      "raw_retrieved_doc_ids": [
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46"
+      ],
+      "raw_hit": true,
+      "raw_hit_at_1": true,
+      "raw_hit_at_3": true,
+      "raw_reciprocal_rank": 1.0,
+      "dedup_retrieved_chunk_ids": [
+        "f707fbf5d65c514e0c558a40777d71324a72e5985b5850cad9489afb3774ab68",
+        "cc8d14280273084007d399986b9920cdfb54274ff13a304d730a8ee0eef42070",
+        "cc88cff236313e257ec4f09cdbeb9bd2575663ae4826e23769970a0806000a9f",
+        "ad0262bf657dc7a51b962b1e1b411da1dd08ed979e06f304ff24cfeb0b6f894d"
+      ],
+      "dedup_retrieved_doc_ids": [
+        "d741eb22e0b69fdb3b3f249618771d02171b4bc1ed43a09ac0fbc21190ccdb46",
+        "adf82ba374b87a4def586e51e84b0572732495fc15eff0bc980bd5e659286639",
+        "a1308d724380a1c00c0d93729f1230521ade1678b094587506576c6a1db23d52",
+        "5a158d5895fd470945075400f063cb5c1fa98cba1505e3e115ae5326f8d7127b"
+      ],
+      "dedup_hit": true,
+      "dedup_hit_at_1": true,
+      "dedup_hit_at_3": true,
+      "dedup_reciprocal_rank": 1.0
+    }
+  ]
+}

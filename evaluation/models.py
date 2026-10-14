@@ -56,6 +56,22 @@ class RetrievalMetrics(BaseModel):
     hit_at_3: bool = False
     retrieved_chunk_ids: list[str] = Field(default_factory=list)
     expected_chunk_ids: list[str] = Field(default_factory=list)
+    # Stage A candidate retrieval and Stage B reranking metrics (optional)
+    candidate_hit_at_20: bool | None = None
+    candidate_count: int | None = None
+    candidate_doc_ids: list[str] = Field(default_factory=list)
+    candidate_chunk_ids: list[str] = Field(default_factory=list)
+    reranking_latency_ms: float | None = None
+    dense_scores: list[float] = Field(default_factory=list)
+    rerank_scores: list[float] = Field(default_factory=list)
+    # Hybrid sparse/dense retrieval metrics (optional)
+    dense_latency_ms: float | None = None
+    sparse_latency_ms: float | None = None
+    fusion_latency_ms: float | None = None
+    sparse_scores: list[float] = Field(default_factory=list)
+    rrf_scores: list[float] = Field(default_factory=list)
+    dense_hit_at_depth: bool | None = None
+    sparse_hit_at_depth: bool | None = None
 
 
 class AnswerMetrics(BaseModel):
@@ -123,10 +139,15 @@ class BenchmarkResult(BaseModel):
     hit_rate_at_1: float | None = None
     hit_rate_at_3: float | None = None
     hit_rate_at_5: float | None = None
+    candidate_hit_rate_at_20: float | None = None
 
     # Answer metrics — computed over all cases.
     keyword_coverage: float  # Mean keyword coverage across all cases
     mean_retrieval_latency_ms: float
+    mean_reranking_latency_ms: float | None = None
+    mean_dense_latency_ms: float | None = None
+    mean_sparse_latency_ms: float | None = None
+    mean_fusion_latency_ms: float | None = None
     mean_total_latency_ms: float
 
     @classmethod
@@ -180,6 +201,59 @@ class BenchmarkResult(BaseModel):
             hit_rate_at_5 = None
             mrr = None
 
+        # Candidate hit rate @ 20 across labelled cases
+        cand_labelled = [
+            r for r in labelled if r.retrieval.candidate_hit_at_20 is not None
+        ]
+        if cand_labelled:
+            candidate_hit_rate_at_20: float | None = (
+                sum(1 for r in cand_labelled if r.retrieval.candidate_hit_at_20)
+                / len(cand_labelled)
+            )
+        else:
+            candidate_hit_rate_at_20 = None
+
+        has_rerank_lat = [
+            r for r in results if r.retrieval.reranking_latency_ms is not None
+        ]
+        if has_rerank_lat:
+            mean_rerank_lat: float | None = (
+                sum(r.retrieval.reranking_latency_ms or 0.0 for r in has_rerank_lat)
+                / len(has_rerank_lat)
+            )
+        else:
+            mean_rerank_lat = None
+
+        has_dense_lat = [
+            r for r in results if r.retrieval.dense_latency_ms is not None
+        ]
+        mean_dense_lat = (
+            sum(r.retrieval.dense_latency_ms or 0.0 for r in has_dense_lat)
+            / len(has_dense_lat)
+            if has_dense_lat
+            else None
+        )
+
+        has_sparse_lat = [
+            r for r in results if r.retrieval.sparse_latency_ms is not None
+        ]
+        mean_sparse_lat = (
+            sum(r.retrieval.sparse_latency_ms or 0.0 for r in has_sparse_lat)
+            / len(has_sparse_lat)
+            if has_sparse_lat
+            else None
+        )
+
+        has_fusion_lat = [
+            r for r in results if r.retrieval.fusion_latency_ms is not None
+        ]
+        mean_fusion_lat = (
+            sum(r.retrieval.fusion_latency_ms or 0.0 for r in has_fusion_lat)
+            / len(has_fusion_lat)
+            if has_fusion_lat
+            else None
+        )
+
         kw_cov = sum(r.answer_metrics.keyword_coverage for r in results) / n
         mean_ret_lat = sum(r.retrieval.retrieval_latency_ms for r in results) / n
         mean_total_lat = sum(r.total_latency_ms for r in results) / n
@@ -196,7 +270,12 @@ class BenchmarkResult(BaseModel):
             hit_rate_at_1=hit_rate_at_1,
             hit_rate_at_3=hit_rate_at_3,
             hit_rate_at_5=hit_rate_at_5,
+            candidate_hit_rate_at_20=candidate_hit_rate_at_20,
             keyword_coverage=kw_cov,
             mean_retrieval_latency_ms=mean_ret_lat,
+            mean_reranking_latency_ms=mean_rerank_lat,
+            mean_dense_latency_ms=mean_dense_lat,
+            mean_sparse_latency_ms=mean_sparse_lat,
+            mean_fusion_latency_ms=mean_fusion_lat,
             mean_total_latency_ms=mean_total_lat,
         )

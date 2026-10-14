@@ -228,6 +228,50 @@ Output: `benchmarks/kip_v1_2_expanded_benchmark.json`
 
 All document IDs are verified offline against `benchmarks/corpus_v1_2_expanded_ids.json` and by the automated test suite (`test_v12_expanded_ids_json_consistency`).
 
+### 7. KIP v1.2 Expanded Retrieval Baseline Runner
+
+A self-contained runner executes the 80-case benchmark against the production Gemini + Qdrant retrieval path:
+
+```bash
+# Requires: LLM_API_KEY in .env, Qdrant running (see Prerequisites below)
+python evaluation/run_v1_2_expanded_baseline.py
+```
+
+#### What the runner does
+
+1. **Preflight validation** (offline, before any API call):
+   - Verifies `LLM_API_KEY` is set.
+   - Verifies `benchmarks/corpus_v1_2_expanded/` exists and contains exactly 50 LF-only `.txt` files.
+   - Derives and logs SHA-256 document IDs from raw file bytes.
+   - Verifies all 80 `expected_document_ids` in the benchmark refer to actual corpus files.
+   - Verifies all 80 case IDs are unique and all cases are labelled.
+2. **Service initialisation**: Gemini embedding (768d), local/cloud Qdrant, `chunk_size=1000`, `chunk_overlap=200`.
+3. **Corpus indexing**: Indexes all 50 documents into isolated collection `kip_eval_v1_2_expanded` under workspace `kip-eval-workspace-v1-2-expanded`. Idempotent — re-runs skip already-indexed documents.
+4. **80-case retrieval evaluation** (no LLM generation, retrieval-only): Hit@1/3/5, MRR, latency.
+5. **Category-level aggregation**: Separate metrics for `exact_terminology`, `paraphrase`, `multi_concept`, `hard_negative`, `cross_document`, `boundary_handling`.
+6. **Result persistence**: Timestamped JSON to `benchmarks/kip_v1_2_expanded_baseline_<timestamp>.json`. Includes corpus/benchmark SHA-256 hashes, chunking params, embedding config, run ID, per-case output, and category metrics.
+
+#### Metric denominators
+
+All retrieval metrics (Hit@1/3/5, MRR) are computed **only over labelled cases** (`expected_count > 0`). Since all 80 cases are labelled, the denominator is always 80. Retrieval infrastructure failures (e.g., Qdrant unavailable, embedding error) are recorded in `retrieval_error` per case and **do not count as hits** — they are distinguishable from genuine retrieval misses.
+
+#### Quota handling
+
+The runner uses raw-text embedding (no LLM generation) with 0.5 s inter-case spacing. At ~550 ms/query this runs 80 queries in approximately 44 s of Gemini embedding calls. If the embedding quota is exceeded, the error is surfaced in `retrieval_error` on the affected case and the run continues. No results are fabricated.
+
+#### Prerequisites for live run
+
+```bash
+# Start Qdrant (Docker required)
+docker run -d -p 6333:6333 qdrant/qdrant:latest
+
+# Or set QDRANT_URL/QDRANT_API_KEY in .env for Qdrant Cloud
+QDRANT_URL=https://<cluster>.cloud.qdrant.io:6333
+QDRANT_API_KEY=<key>
+```
+
+> **Current status:** The runner is implemented and validated (285 tests pass, ruff clean). A live run attempted on 2026-10-14 was blocked because Qdrant was not running (port 6333 unreachable, Docker not available in current session). Results will be recorded here when the live run succeeds.
+
 ## Remaining Limitations
 
 1. **Keyword coverage is substring match.** `kw.lower() in answer.lower()` does
@@ -238,10 +282,11 @@ All document IDs are verified offline against `benchmarks/corpus_v1_2_expanded_i
 3. **Single-node latency.** Latency measurements are wall-clock and include
    embedding API network round-trips; not suitable for throughput profiling.
 
-4. **Corpus scale.** The v1.1 reference corpus contains 3 documents; the v1.2 pilot
-   corpus contains 18 documents. The v1.2 expanded corpus contains 50 documents and
-   eliminates Hit@3/Hit@5 saturation. A live provider-backed run against the 80-case
-   expanded benchmark is the recommended next step.
+4. **Expanded baseline live run blocked.** The `run_v1_2_expanded_baseline.py` runner
+   is implemented and validated offline. A live run on 2026-10-14 could not complete
+   because Qdrant was not running (port 6333 unreachable, Docker unavailable in session).
+   To execute: start Qdrant (`docker run -d -p 6333:6333 qdrant/qdrant:latest`) then run
+   `python evaluation/run_v1_2_expanded_baseline.py`.
 
 ## Planned Role (v1.2+)
 

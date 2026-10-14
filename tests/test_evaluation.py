@@ -1107,3 +1107,261 @@ def test_v12_expanded_ids_json_consistency():
             f"doc_id mismatch for {filename}: "
             f"mapping has {doc_id!r}, derived {expected_id!r}"
         )
+
+
+# ---------------------------------------------------------------------------
+# v1.2 expanded baseline runner — preflight, aggregation, and failure tests
+# ---------------------------------------------------------------------------
+
+
+def test_expanded_baseline_preflight_passes_with_real_corpus():
+    """preflight_check must pass with the real corpus and benchmark."""
+    import pathlib
+    import re
+
+    from evaluation.run_v1_2_expanded_baseline import preflight_check
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json")
+
+    corpus_ids, dataset_data = preflight_check(corpus_dir, dataset_path, "fake_api_key")
+
+    assert len(corpus_ids) == 50
+    assert len(dataset_data["cases"]) == 80
+    hex64 = re.compile(r"^[0-9a-f]{64}$")
+    for fname, did in corpus_ids.items():
+        assert hex64.match(did), f"doc_id for {fname} not 64-char hex: {did!r}"
+
+
+def test_expanded_baseline_preflight_fails_missing_api_key():
+    """preflight_check must raise ValueError when API key is absent."""
+    import pathlib
+
+    import pytest
+    from evaluation.run_v1_2_expanded_baseline import preflight_check
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json")
+
+    with pytest.raises(ValueError, match="LLM_API_KEY"):
+        preflight_check(corpus_dir, dataset_path, None)
+
+    with pytest.raises(ValueError, match="LLM_API_KEY"):
+        preflight_check(corpus_dir, dataset_path, "   ")
+
+
+def test_expanded_baseline_preflight_fails_missing_corpus(tmp_path):
+    """preflight_check must raise ValueError when corpus dir is missing."""
+    import pathlib
+
+    import pytest
+    from evaluation.run_v1_2_expanded_baseline import preflight_check
+
+    missing_dir = tmp_path / "nonexistent_corpus"
+    dataset_path = pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json")
+
+    with pytest.raises(ValueError, match="Corpus directory not found"):
+        preflight_check(missing_dir, dataset_path, "fake_api_key")
+
+
+def test_expanded_baseline_preflight_fails_crlf_corpus(tmp_path):
+    """preflight_check must raise ValueError when a corpus file has CRLF endings."""
+    import hashlib
+
+    import pytest
+    from evaluation.run_v1_2_expanded_baseline import preflight_check
+
+    (tmp_path / "bad_doc.txt").write_bytes(b"text with CRLF\r\nending\r\n")
+
+    bad_id = hashlib.sha256(b"text with CRLF\r\nending\r\n").hexdigest()
+    dataset = {
+        "version": "test",
+        "cases": [{"id": "t1", "question": "Q?", "expected_document_ids": [bad_id]}],
+    }
+    ds_path = tmp_path / "bench.json"
+    ds_path.write_text(json.dumps(dataset), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="CR bytes"):
+        preflight_check(tmp_path, ds_path, "fake_api_key")
+
+
+def test_expanded_baseline_preflight_fails_wrong_corpus_size(tmp_path):
+    """preflight_check must raise ValueError when corpus has != 50 files."""
+    import pytest
+    from evaluation.run_v1_2_expanded_baseline import preflight_check
+
+    for i in range(2):
+        (tmp_path / f"doc_{i}.txt").write_bytes(f"content {i}\n".encode())
+
+    dataset = {"version": "test", "cases": [{"id": "t1", "question": "Q?"}]}
+    ds_path = tmp_path / "bench.json"
+    ds_path.write_text(json.dumps(dataset), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="Expected 50 corpus files"):
+        preflight_check(tmp_path, ds_path, "fake_api_key")
+
+
+def test_expanded_baseline_preflight_fails_unknown_doc_id(tmp_path):
+    """preflight_check must raise ValueError when a case references an unknown doc ID."""
+    import pytest
+    from evaluation.run_v1_2_expanded_baseline import preflight_check
+
+    for i in range(50):
+        (tmp_path / f"doc_{i:02d}.txt").write_bytes(f"content {i}\n".encode())
+
+    dataset = {
+        "version": "test",
+        "cases": [
+            {"id": f"c{i}", "question": "Q?", "expected_document_ids": ["a" * 64]}
+            for i in range(80)
+        ],
+    }
+    ds_path = tmp_path / "bench.json"
+    ds_path.write_text(json.dumps(dataset), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="not found in corpus"):
+        preflight_check(tmp_path, ds_path, "fake_api_key")
+
+
+def test_expanded_baseline_category_aggregation():
+    """_aggregate_by_category must correctly partition results by metadata category."""
+    from evaluation.models import (
+        AnswerMetrics,
+        BenchmarkCase,
+        CaseResult,
+        RetrievalMetrics,
+    )
+    from evaluation.run_v1_2_expanded_baseline import _aggregate_by_category
+
+    def _make_cr(case_id, hit, hit_at_1, hit_at_3, rr, lat=100.0, error=None):
+        return CaseResult(
+            case_id=case_id,
+            question="Q?",
+            answer="",
+            sources_count=1,
+            retrieval=RetrievalMetrics(
+                case_id=case_id,
+                hit=hit,
+                reciprocal_rank=rr,
+                retrieved_count=5,
+                expected_count=1,
+                retrieved_doc_ids=["d1"],
+                expected_doc_ids=["d1"],
+                retrieval_latency_ms=lat,
+                retrieval_error=error,
+                hit_at_1=hit_at_1,
+                hit_at_3=hit_at_3,
+            ),
+            answer_metrics=AnswerMetrics(
+                case_id=case_id,
+                has_answer=True,
+                has_context=True,
+                keyword_hits=[],
+                keyword_misses=[],
+                keyword_coverage=1.0,
+            ),
+            total_latency_ms=lat,
+        )
+
+    dataset_cases = [
+        BenchmarkCase(id="a1", question="Q?", metadata={"category": "exact_terminology"}),
+        BenchmarkCase(id="a2", question="Q?", metadata={"category": "exact_terminology"}),
+        BenchmarkCase(id="b1", question="Q?", metadata={"category": "paraphrase"}),
+    ]
+    case_results = [
+        _make_cr("a1", hit=True, hit_at_1=True, hit_at_3=True, rr=1.0),
+        _make_cr("a2", hit=False, hit_at_1=False, hit_at_3=False, rr=0.0),
+        _make_cr("b1", hit=True, hit_at_1=False, hit_at_3=True, rr=0.333),
+    ]
+
+    summary = _aggregate_by_category(case_results, dataset_cases)
+
+    assert "exact_terminology" in summary
+    assert "paraphrase" in summary
+    et = summary["exact_terminology"]
+    assert et["labelled_cases"] == 2
+    assert et["hit_rate_at_1"] == 0.5
+    assert et["hit_rate_at_5"] == 0.5
+    assert abs(et["mean_reciprocal_rank"] - 0.5) < 1e-9
+
+    par = summary["paraphrase"]
+    assert par["labelled_cases"] == 1
+    assert par["hit_rate_at_1"] == 0.0
+    assert par["hit_rate_at_3"] == 1.0
+    assert abs(par["mean_reciprocal_rank"] - 0.333) < 1e-3
+
+
+def test_expanded_baseline_config_records_expected_fields():
+    """BenchmarkRunConfig from the expanded runner must record expected configuration."""
+    cfg = BenchmarkRunConfig(
+        benchmark_version="v1.2-expanded-baseline",
+        evaluation_workspace_id="kip-eval-workspace-v1-2-expanded",
+        llm_provider="none",
+        llm_model="none",
+        embedding_provider="gemini",
+        embedding_model="gemini-embedding-2",
+        retrieval_top_k=5,
+        chunk_size=1000,
+        chunk_overlap=200,
+        live_llm_available=False,
+        inter_case_delay_seconds=0.5,
+    )
+
+    assert cfg.benchmark_version == "v1.2-expanded-baseline"
+    assert cfg.evaluation_workspace_id == "kip-eval-workspace-v1-2-expanded"
+    assert cfg.llm_provider == "none"
+    assert cfg.retrieval_top_k == 5
+    assert cfg.chunk_size == 1000
+    assert cfg.chunk_overlap == 200
+    assert cfg.live_llm_available is False
+
+
+def test_expanded_baseline_retrieval_errors_not_counted_as_misses():
+    """A retrieval infrastructure error must not silently inflate hit rate."""
+    from unittest.mock import MagicMock
+
+    from evaluation.runner import EvaluationRunner
+
+    mock_retrieval = MagicMock()
+    mock_retrieval.search.side_effect = RuntimeError("Embedding service unavailable")
+
+    config = BenchmarkRunConfig(
+        benchmark_version="v1.2-expanded-baseline",
+        evaluation_workspace_id="kip-eval-workspace-v1-2-expanded",
+        llm_provider="none",
+        llm_model="none",
+        embedding_provider="gemini",
+        embedding_model="gemini-embedding-2",
+        retrieval_top_k=5,
+        chunk_size=1000,
+        chunk_overlap=200,
+        live_llm_available=False,
+    )
+
+    from evaluation.models import BenchmarkCase, BenchmarkDataset
+
+    dataset = BenchmarkDataset(
+        version="v1.2-expanded-baseline",
+        cases=[
+            BenchmarkCase(
+                id="exp-001",
+                question="What is KIP?",
+                expected_document_ids=["a" * 64],
+            )
+        ],
+    )
+
+    runner = EvaluationRunner(
+        rag_service=None,
+        retrieval_service=mock_retrieval,
+        config=config,
+    )
+    result = runner.evaluate_dataset(dataset)
+
+    assert result.total_cases == 1
+    assert result.labelled_cases == 1
+    assert result.case_results[0].retrieval.retrieval_error is not None
+    assert "RuntimeError" in result.case_results[0].retrieval.retrieval_error
+    # Error counts as miss — not as a hit
+    assert result.hit_rate == 0.0
+    assert result.mean_reciprocal_rank == 0.0

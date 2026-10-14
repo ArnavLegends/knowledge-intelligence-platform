@@ -96,6 +96,10 @@ ignore = []
 "benchmarks/*.py" = ["E501"]
 # Test docstrings may contain long file paths for clarity.
 "tests/test_evaluation.py" = ["E501"]
+"tests/test_reranker.py" = ["E501"]
+"tests/test_hybrid.py" = ["E501"]
+"tests/test_sentence_chunker.py" = ["E501"]
+"evaluation/*.py" = ["E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]

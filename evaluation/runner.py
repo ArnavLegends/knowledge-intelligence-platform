@@ -60,12 +60,23 @@ class EvaluationRunner:
     """
 
     def __init__(
-        self, rag_service, retrieval_service, config: BenchmarkRunConfig
+        self,
+        rag_service,
+        retrieval_service,
+        config: BenchmarkRunConfig,
+        reranker=None,
+        candidate_top_k: int = 20,
+        sparse_retriever=None,
+        rrf_k: int = 60,
     ) -> None:
         self._rag_service = rag_service
         self._retrieval_service = retrieval_service
         self._config = config
         self._workspace_id = config.evaluation_workspace_id
+        self._reranker = reranker
+        self._candidate_top_k = candidate_top_k
+        self._sparse_retriever = sparse_retriever
+        self._rrf_k = rrf_k
 
     def evaluate_dataset(self, dataset: BenchmarkDataset) -> BenchmarkResult:
         """Run all cases in the dataset and return a full BenchmarkResult."""
@@ -121,14 +132,127 @@ class EvaluationRunner:
         retrieval_error: str | None = None
         chunks = []
         retrieved_doc_ids: list[str] = []
+        candidate_chunks = []
+        candidate_doc_ids: list[str] = []
+        candidate_chunk_ids: list[str] = []
+        candidate_hit_at_20: bool | None = None
+        reranking_latency_ms: float | None = None
+        dense_latency_ms: float | None = None
+        sparse_latency_ms: float | None = None
+        fusion_latency_ms: float | None = None
+        dense_hit_at_depth: bool | None = None
+        sparse_hit_at_depth: bool | None = None
 
         try:
-            retrieval_query = RetrievalQuery(
-                text=case.question,
-                top_k=self._config.retrieval_top_k,
-                workspace_id=self._workspace_id,
-            )
-            chunks = self._retrieval_service.search(retrieval_query)
+            if self._sparse_retriever is not None:
+                from evaluation.fusion import reciprocal_rank_fusion
+
+                # Stage A (Dense retrieval)
+                t_d_start = time.perf_counter()
+                dense_query = RetrievalQuery(
+                    text=case.question,
+                    top_k=self._candidate_top_k,
+                    workspace_id=self._workspace_id,
+                )
+                dense_candidates = self._retrieval_service.search(dense_query)
+                dense_latency_ms = (time.perf_counter() - t_d_start) * 1000
+
+                # Stage A (Sparse BM25 retrieval)
+                t_s_start = time.perf_counter()
+                sparse_candidates = self._sparse_retriever.search(
+                    query=case.question,
+                    top_k=self._candidate_top_k,
+                )
+                sparse_latency_ms = (time.perf_counter() - t_s_start) * 1000
+
+                # Stage B (Reciprocal Rank Fusion)
+                t_f_start = time.perf_counter()
+                chunks = reciprocal_rank_fusion(
+                    {"dense": dense_candidates, "sparse": sparse_candidates},
+                    k=self._rrf_k,
+                    top_k=self._config.retrieval_top_k,
+                )
+                fusion_latency_ms = (time.perf_counter() - t_f_start) * 1000
+
+                candidate_chunks = dense_candidates
+                candidate_doc_ids = list(
+                    {c.document_id for c in dense_candidates if c.document_id}
+                )
+                candidate_chunk_ids = [
+                    c.id for c in dense_candidates if hasattr(c, "id") and c.id
+                ]
+
+                dense_doc_ids = {
+                    c.document_id for c in dense_candidates if c.document_id
+                }
+                dense_chunk_id_set = {
+                    c.id for c in dense_candidates if hasattr(c, "id") and c.id
+                }
+                sparse_doc_ids = {
+                    c.document_id for c in sparse_candidates if c.document_id
+                }
+                sparse_chunk_id_set = {
+                    c.id for c in sparse_candidates if hasattr(c, "id") and c.id
+                }
+
+                is_labelled_cand = bool(
+                    case.expected_document_ids or case.expected_chunk_ids
+                )
+                if is_labelled_cand:
+                    dense_hit_at_depth = any(
+                        d in dense_doc_ids for d in case.expected_document_ids
+                    ) or any(
+                        c in dense_chunk_id_set for c in case.expected_chunk_ids
+                    )
+                    sparse_hit_at_depth = any(
+                        d in sparse_doc_ids for d in case.expected_document_ids
+                    ) or any(
+                        c in sparse_chunk_id_set for c in case.expected_chunk_ids
+                    )
+                    candidate_hit_at_20 = dense_hit_at_depth or sparse_hit_at_depth
+                else:
+                    dense_hit_at_depth = False
+                    sparse_hit_at_depth = False
+                    candidate_hit_at_20 = False
+
+            elif self._reranker is not None:
+                retrieval_query = RetrievalQuery(
+                    text=case.question,
+                    top_k=self._candidate_top_k,
+                    workspace_id=self._workspace_id,
+                )
+                retrieved_initial = self._retrieval_service.search(retrieval_query)
+                candidate_chunks = retrieved_initial
+                candidate_doc_ids = list(
+                    {c.document_id for c in candidate_chunks if c.document_id}
+                )
+                candidate_chunk_ids = [
+                    c.id for c in candidate_chunks if hasattr(c, "id") and c.id
+                ]
+                is_labelled_cand = bool(
+                    case.expected_document_ids or case.expected_chunk_ids
+                )
+                if is_labelled_cand:
+                    candidate_hit_at_20 = any(
+                        d in candidate_doc_ids for d in case.expected_document_ids
+                    ) or any(c in candidate_chunk_ids for c in case.expected_chunk_ids)
+                else:
+                    candidate_hit_at_20 = False
+
+                # Stage B: Cross-encoder reranking
+                chunks, reranking_latency_ms = self._reranker.rerank(
+                    query=case.question,
+                    candidates=candidate_chunks,
+                    top_k=self._config.retrieval_top_k,
+                )
+            else:
+                retrieval_query = RetrievalQuery(
+                    text=case.question,
+                    top_k=self._config.retrieval_top_k,
+                    workspace_id=self._workspace_id,
+                )
+                chunks = self._retrieval_service.search(retrieval_query)
+
             retrieved_doc_ids = list({c.document_id for c in chunks if c.document_id})
         except Exception as exc:
             # Record the infrastructure failure visibly. This is NOT treated as
@@ -183,6 +307,38 @@ class EvaluationRunner:
         expected_count = max(
             len(case.expected_document_ids), len(case.expected_chunk_ids)
         )
+
+        dense_scores = [
+            float(c.metadata["dense_score"])
+            for c in chunks
+            if c.metadata and "dense_score" in c.metadata and c.metadata["dense_score"] is not None
+        ] if self._sparse_retriever is not None else [
+            float(c.score)
+            for c in chunks
+            if hasattr(c, "score") and c.score is not None
+        ]
+        sparse_scores = [
+            float(c.metadata["sparse_score"])
+            for c in chunks
+            if c.metadata and "sparse_score" in c.metadata and c.metadata["sparse_score"] is not None
+        ]
+        rrf_scores = [
+            float(c.metadata["rrf_score"])
+            for c in chunks
+            if c.metadata and "rrf_score" in c.metadata and c.metadata["rrf_score"] is not None
+        ]
+        rerank_scores = [
+            float(c.rerank_score)
+            for c in chunks
+            if hasattr(c, "rerank_score") and c.rerank_score is not None
+        ]
+
+        candidate_cnt = (
+            (len(dense_candidates) + len(sparse_candidates))
+            if self._sparse_retriever is not None
+            else (len(candidate_chunks) if self._reranker is not None else None)
+        )
+
         retrieval_metrics = RetrievalMetrics(
             case_id=case.id,
             hit=hit,
@@ -197,7 +353,22 @@ class EvaluationRunner:
             hit_at_3=hit_at_3,
             retrieved_chunk_ids=retrieved_chunk_ids,
             expected_chunk_ids=list(case.expected_chunk_ids),
+            candidate_hit_at_20=candidate_hit_at_20,
+            candidate_count=candidate_cnt,
+            candidate_doc_ids=candidate_doc_ids,
+            candidate_chunk_ids=candidate_chunk_ids,
+            reranking_latency_ms=reranking_latency_ms,
+            dense_scores=dense_scores,
+            rerank_scores=rerank_scores,
+            dense_latency_ms=dense_latency_ms,
+            sparse_latency_ms=sparse_latency_ms,
+            fusion_latency_ms=fusion_latency_ms,
+            sparse_scores=sparse_scores,
+            rrf_scores=rrf_scores,
+            dense_hit_at_depth=dense_hit_at_depth,
+            sparse_hit_at_depth=sparse_hit_at_depth,
         )
+
 
         # --- Generation phase ---
         t_gen_start = time.perf_counter()

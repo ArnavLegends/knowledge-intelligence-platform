@@ -1,7 +1,7 @@
 # Product Roadmap
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
+**Document Version:** 2.1  
+**Project Version:** v1.2 (Research Phase — Experiments Complete)  
 **Status:** Active Forward-Looking Roadmap
 
 ---
@@ -45,7 +45,7 @@ The development of the Knowledge Intelligence Platform is organized into a serie
 | **v1.1** | Multi-Tenant Cloud | Workspace bearer tokens, Qdrant Cloud, Render deployment, public testing, authenticated GET feedback | ✅ Complete & Frozen |
 | **Current** | Documentation Reconciliation | Complete project history audit, synchronizing all docs with live code | 🚧 In Progress |
 | **Active** | Public Testing & Feedback | Community testing on deployed cloud, feedback collection via Google Sheets | ⚡ Active / Available |
-| **v1.2** | Retrieval Intelligence | Research-driven retrieval: chunking experiments, hybrid search, reranking | 📅 Next Milestone |
+| **v1.2** | Retrieval Intelligence | Research-driven retrieval: formatting experiment (neutral), cross-encoder reranking (rejected), hybrid BM25+dense (rejected), sentence-boundary chunking (rejected) — dense retrieval retained as default | ✅ Research Complete — All Candidates Rejected |
 | **v1.3** | Performance Engineering | Caching, optimization, monitoring, scalability | 📅 Planned |
 | **v2.0** | AI Memory | Persistent memory, conversation history, personalization | 📅 Planned → Deferred |
 | **v2.1** | Tool Integration | Tool calling, external services, automation | 📅 Planned → Deferred |
@@ -507,13 +507,15 @@ Gather qualitative and quantitative user feedback from public community testing 
 
 ---
 
-# Version v1.2 — Retrieval Intelligence & Evaluation 🚧 Next Engineering / Research Milestone
+# Version v1.2 — Retrieval Intelligence & Evaluation ✅ Research Complete — All Candidates Rejected
 
 ## Objective
 
 Improve retrieval quality through advanced information retrieval techniques, systematic experimentation, and reproducible benchmarking, resulting in more relevant context, reduced noise, and higher-quality AI responses.
 
-v1.2 transitions KIP into an empirical research-driven phase. Rather than assuming which retrieval strategy works best, every architectural addition will be validated through an evidence-based research progression.
+v1.2 transitioned KIP into an empirical research-driven phase. Four controlled retrieval experiments were executed against a frozen 50-document, 80-case benchmark. All four candidates failed the preregistered primary target (MRR ≥ 0.8200). **The existing dense whole-document retrieval baseline (MRR 0.7623) remains the production default.**
+
+> **Research Integrity Outcome:** No experimental technique was integrated without meeting preregistered success criteria. All experiment decisions are documented in `docs/evaluation/`.
 
 ---
 
@@ -521,38 +523,38 @@ v1.2 transitions KIP into an empirical research-driven phase. Rather than assumi
 
 Every candidate technique evaluated in v1.2 will progress through a disciplined 14-step lifecycle:
 
-1. **Literature Review**: Survey existing research on dense retrieval failure modes, semantic chunking, and lexical-dense fusion.
-2. **Gap Identification**: Characterize specific retrieval failures observed during v1.1 public testing.
-3. **Research Question Selection**: Formulate precise, falsifiable research questions.  
-   *(Note: Document chunking and semantic segmentation is currently the leading research candidate, but the final question depends on literature review findings).*
-4. **Benchmark & Test-Set Definition**: Construct a multi-document evaluation dataset with ground-truth citations.
-5. **Dense Retrieval Baseline**: Execute and record quantitative baseline metrics using KIP v1.1's fixed-size chunking and dense similarity search.
-6. **Chunking / Segmentation Experiment**: Test candidate chunking strategies (e.g., recursive character, semantic markdown header-aware segmentation, hierarchical chunking).
-7. **Hybrid Retrieval Experiment**: Evaluate combining sparse lexical search (e.g., BM25) with dense vector embeddings.
-8. **Reranking Experiment**: Evaluate cross-encoder reranking models on top retrieved candidate chunks.
-9. **Context Optimization Experiment**: Evaluate dynamic context trimming and compression to maximize signal-to-noise ratio in LLM prompts.
-10. **Measured Comparison**: Compare experimental variants against the established baseline across precision, recall, MRR, faithfulness, and latency.
-11. **Analysis**: Perform quantitative and error analysis on experimental outcomes.
-12. **Evidence-Based Decision**: Select only strategies that demonstrate statistically meaningful improvements.
-13. **Integration of Winning Approach**: Merge winning methods into KIP's production service layer.
-14. **Research Documentation**: Publish reproducible experiment reports and update benchmark baselines.
+1. **Literature Review**: ✅ Surveyed dense retrieval failure modes, semantic chunking, and lexical-dense fusion.
+2. **Gap Identification**: ✅ Characterized retrieval failures via failure analysis on v1.1 public testing data.
+3. **Research Question Selection**: ✅ Formulated falsifiable research questions for chunking, hybrid retrieval, and reranking.
+4. **Benchmark & Test-Set Definition**: ✅ Constructed 50-document / 80-case expanded benchmark (`kip_v1_2_expanded_benchmark.json`) with six ground-truth category labels.
+5. **Dense Retrieval Baseline**: ✅ Executed and frozen (Run ID `02d492c76c7343aaaeb78506fa4b0395`): Overall MRR 0.7623, Hit@5 0.8750, P95 643.0 ms.
+6. **Chunking / Segmentation Experiment**: ✅ `SentenceBoundaryChunker(400, 150, 1)` — **REJECTED**. MRR 0.7471 (failed ≥ 0.8200); `multi_concept` safety violation (0.9688 vs 1.0000). See `docs/evaluation/v1.2_chunking_experiment.md`.
+7. **Hybrid Retrieval Experiment**: ✅ BM25 + Dense RRF (k=60) — **REJECTED**. MRR 0.6554 (-0.1069 vs baseline); severe vocabulary mismatch on technical corpus. See `docs/evaluation/v1.2_hybrid_retrieval_experiment.md`.
+8. **Reranking Experiment**: ✅ `cross-encoder/ms-marco-MiniLM-L-6-v2` ONNX — **REJECTED**. P95 latency +1,048 ms; `multi_concept` safety violation (0.9062 vs 1.0000). See `docs/evaluation/v1.2_cross_encoder_experiment.md`.
+9. **Context Optimization Experiment**: 📅 Not started — deferred pending a synthesis architecture.
+10. **Measured Comparison**: ✅ All experiments compared against frozen control baseline across MRR, Hit@K, category breakdown, and P95 latency.
+11. **Analysis**: ✅ Query-level regression/improvement analysis documented for each experiment.
+12. **Evidence-Based Decision**: ✅ All candidates rejected based on preregistered criteria; no subjective integration.
+13. **Integration of Winning Approach**: ❌ No winning approach — integration deferred. Production behavior unchanged.
+14. **Research Documentation**: ✅ Four evaluation reports in `docs/evaluation/`; Research-Roadmap.md updated with all experiment records.
 
-> **Research Integrity Principle**: No experimental claims (e.g., "chunking improved retrieval by X%") will be published until experiments are executed and data is recorded.
+> **Research Integrity Principle**: No experimental claims (e.g., "chunking improved retrieval by X%") will be published until experiments are executed and data is recorded. All four v1.2 experiments were executed; all four were rejected based on objective preregistered criteria.
 
 ---
 
 ## Key Deliverables
 
-- Hybrid search
-- BM25 integration
-- Semantic search improvements
-- Metadata filtering
-- Reranking models
-- Query expansion
-- Context optimization
-- Retrieval benchmarking
-- Search analytics
-- Performance comparison
+**Executed & Rejected:**
+- Embedding input formatting experiment (neutral; raw-text retained)
+- Cross-encoder reranking (`ms-marco-MiniLM-L-6-v2`): rejected — latency violation & safety regression
+- Hybrid BM25 + dense RRF: rejected — MRR regression (-0.1069) & vocabulary mismatch
+- Sentence-boundary chunking (`target=400`): rejected — MRR regression & `multi_concept` safety violation
+
+**Not Started / Deferred:**
+- Context optimization (dynamic trimming, compression)
+- Query expansion (HyDE / multi-query)
+- Search analytics dashboard
+- Hierarchical / parent-child chunking (identified as synthesis path forward)
 
 ---
 
@@ -589,10 +591,9 @@ At the completion of v1.2:
 
 ## Success Criteria
 
-- Improved benchmark scores.
-- Reduced retrieval errors.
-- Better context precision.
-- Measurable improvement over v1.0.
+**v1.2 Research Outcome:** All four preregistered candidate techniques failed to meet the primary MRR target of ≥ 0.8200 or violated a safety criterion. The dense whole-document retrieval baseline (MRR 0.7623, Hit@5 0.8750) remains the production default. Experiments are reproducible and archived in `benchmarks/` and `docs/evaluation/`.
+
+**Identified Synthesis Path:** Hierarchical (parent-child) chunking combined with hybrid retrieval, evaluated as a unified architecture in the next milestone.
 
 ---
 

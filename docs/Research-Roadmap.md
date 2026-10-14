@@ -1,8 +1,8 @@
 # Research Roadmap
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
-**Status:** Complete / Frozen  
+**Document Version:** 2.1  
+**Project Version:** v1.2 (Research Phase — Experiments Complete)  
+**Status:** Active — v1.2 Research Concluded  
 
 ---
 
@@ -28,8 +28,8 @@ The platform emphasizes applied AI systems research, where experimental findings
 
 Research activities should prioritize reproducibility, objectivity, and practical impact over novelty alone.
 
-> **Research Infrastructure Status (v1.1.0):**  
-> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0, utilizing a mechanical benchmark suite (`benchmarks/kip_v1_baseline.json`) that measures Document Hit Rate, Mean Reciprocal Rank (MRR), Keyword Coverage, and stage latencies deterministically. In v1.1.0, Qdrant Cloud vector search and Gemini dense embeddings were added as production options. Systematic comparative experimentation across chunking strategies, hybrid BM25 + dense search, and cross-encoder reranking is planned for v1.2 under the 14-step research lifecycle. All comparative research records remain marked as **Baseline / Not Yet Evaluated against empirical benchmark matrix** to maintain complete scientific integrity.
+> **Research Infrastructure Status (v1.2):**  
+> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0. In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`). Four controlled retrieval experiments were executed against this frozen benchmark under the 14-step research lifecycle. **All four candidates were rejected** — none reached the preregistered primary MRR target of ≥ 0.8200. Dense whole-document retrieval (MRR 0.7623) remains the production default pending a synthesis approach.
 
 ---
 
@@ -70,11 +70,11 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 ### Retrieval Systems
 
 - Dense Retrieval (Implemented: Gemini `gemini-embedding-2`, OpenAI `text-embedding-3-small`)
-- Sparse Retrieval (Planned: BM25 / SPLADE)
-- Hybrid Retrieval (Planned: Convex / Reciprocal Rank Fusion)
+- Sparse Retrieval (Evaluated: BM25 + RRF — Rejected in v1.2, MRR 0.6554 vs baseline 0.7623)
+- Hybrid Retrieval (Evaluated: BM25 + Dense RRF — Rejected in v1.2; see `docs/evaluation/v1.2_hybrid_retrieval_experiment.md`)
 - Query Expansion (Planned: HyDE / multi-query)
 - Metadata Filtering (Implemented: `workspace_id` payload filter)
-- Reranking (Planned: Cross-Encoder / Cohere Rerank)
+- Reranking (Evaluated: Cross-Encoder `ms-marco-MiniLM-L-6-v2` — Rejected in v1.2, latency +1,048 ms; see `docs/evaluation/v1.2_cross_encoder_experiment.md`)
 - Context Selection (Implemented: Top-K truncation)
 
 ### Language Models
@@ -290,7 +290,90 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 1. **Raw-Text Default Preserved:** Due to exactly neutral retrieval performance, raw-text embedding remains the production default, avoiding prefix token overhead.
 2. **Formatter Extension Hooks:** Provider-neutral `doc_formatter` in `EmbeddingService` and `query_formatter` in `RetrievalService` remain in the codebase for future experimentation.
 3. **Pilot Scope & Qualifications:** The evaluation covers 25 queries and 18 documents. Hit Rate@3 and Hit Rate@5 saturated at 1.0000 on this pilot; results do not establish general retrieval superiority. The ~20 ms latency difference is within normal network variance and not claimed as statistically meaningful.
-4. **Future Research Priority:** Developing a larger, more discriminative multi-domain evaluation benchmark is required for upcoming hybrid retrieval (BM25 + dense) and cross-encoder reranking research.
+4. **Expanded Benchmark Built:** A 50-document / 80-case expanded benchmark was subsequently constructed to provide a more discriminative evaluation surface for subsequent hybrid and reranking experiments.
+
+---
+
+### EXP-V12-EXPANDED-BASELINE-001
+
+**Status:** Completed (2026-10-14)  
+**Title:** v1.2 Expanded Dense Retrieval Baseline  
+**Strategy:** Dense cosine retrieval with fixed-size chunking (`chunk_size=1000, overlap=200`) against 50-document corpus  
+**Run ID:** `02d492c76c7343aaaeb78506fa4b0395`  
+**Artifacts:** [`benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json`](../benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json), [`docs/evaluation/v1.2_failure_analysis.md`](evaluation/v1.2_failure_analysis.md)
+
+**Measured Results (80 cases, 50 documents):**
+
+| Category | Cases | MRR | Hit@1 | Hit@3 | Hit@5 |
+|---|---:|---:|---:|---:|---:|
+| `multi_concept` | 16 | **1.0000** | 1.0000 | 1.0000 | 1.0000 |
+| `paraphrase` | 16 | **0.9375** | 0.9375 | 0.9375 | 0.9375 |
+| `exact_terminology` | 16 | **0.7938** | 0.6875 | 0.8750 | 0.9375 |
+| `cross_document` | 8 | **0.7500** | 0.6250 | 0.8750 | 0.8750 |
+| `boundary_handling` | 8 | **0.5250** | 0.3750 | 0.6250 | 0.7500 |
+| `hard_negative` | 16 | **0.4427** | 0.3125 | 0.5625 | 0.6875 |
+| **Overall** | **80** | **0.7623** | **0.6875** | **0.8375** | **0.8750** |
+
+P95 query latency: 643.0 ms. This is the **frozen control baseline** for all v1.2 candidate experiments.
+
+---
+
+### EXP-V12-CROSS-ENCODER-001
+
+**Status:** Completed — **REJECTED** (2026-10-14)  
+**Title:** Controlled Cross-Encoder Reranking Experiment  
+**Strategy:** Dense top-20 candidate retrieval followed by `cross-encoder/ms-marco-MiniLM-L-6-v2` ONNX reranker to produce final top-5  
+**Artifact:** [`benchmarks/kip_v1_2_reranking_treatment_20261014_115445.json`](../benchmarks/kip_v1_2_reranking_treatment_20261014_115445.json)  
+**Report:** [`docs/evaluation/v1.2_cross_encoder_experiment.md`](evaluation/v1.2_cross_encoder_experiment.md)
+
+**Measured Results (80 cases):**
+- Overall MRR: **0.7762** (+0.0140 vs control 0.7623) — **Failed primary target (≥ 0.8500)**
+- `hard_negative` MRR: **0.4344** — **Failed secondary target (≥ 0.6500)**
+- `multi_concept` MRR: **0.9062** — **Failed safety invariant (must be 1.0000)**
+- P95 Latency: **1,691.5 ms** (+1,048.5 ms) — **Triggered rejection guardrail (> +300 ms)**
+
+**Decision:** REJECTED. The MS MARCO cross-encoder introduced severe latency overhead (+1,048 ms P95), regressed `paraphrase` MRR (0.9375 → 0.7854), and violated the `multi_concept` safety invariant. No production integration.
+
+---
+
+### EXP-V12-HYBRID-RETRIEVAL-001
+
+**Status:** Completed — **REJECTED** (2026-10-14)  
+**Title:** Controlled Hybrid BM25 + Dense Retrieval with Reciprocal Rank Fusion  
+**Strategy:** BM25 sparse retrieval fused with Gemini dense retrieval via RRF (k=60), deduplication, top-5 final  
+**Artifact:** [`benchmarks/kip_v1_2_hybrid_treatment_20261014_121435.json`](../benchmarks/kip_v1_2_hybrid_treatment_20261014_121435.json)  
+**Report:** [`docs/evaluation/v1.2_hybrid_retrieval_experiment.md`](evaluation/v1.2_hybrid_retrieval_experiment.md)
+
+**Measured Results (80 cases):**
+- Overall MRR: **0.6554** (-0.1069 vs control 0.7623) — **Failed primary target (≥ 0.8200)**
+- `multi_concept` MRR: **0.8750** — **Failed safety invariant (must be 1.0000)**
+- `paraphrase` MRR: **0.8281** (marginal improvement)
+- P95 Latency: **670.2 ms** (+27.2 ms) — Passed guardrail
+
+**Decision:** REJECTED. BM25 on dense technical documents with short, whole-document chunks caused severe vocabulary mismatch, harming `multi_concept` and `hard_negative` categories significantly. No production integration.
+
+---
+
+### EXP-V12-SENTENCE-CHUNKING-001
+
+**Status:** Completed — **REJECTED** (2026-10-14)  
+**Title:** Controlled Sentence-Boundary Chunking Experiment  
+**Strategy:** `SentenceBoundaryChunker(target_chunk_size=400, min_chunk_size=150, overlap_sentences=1)` producing 173 chunks across 50 documents (3.46/doc), evaluated raw and with document-level deduplication  
+**Artifact:** [`benchmarks/kip_v1_2_chunking_treatment_20261014_124804.json`](../benchmarks/kip_v1_2_chunking_treatment_20261014_124804.json)  
+**Report:** [`docs/evaluation/v1.2_chunking_experiment.md`](evaluation/v1.2_chunking_experiment.md)
+
+**Measured Results (80 cases, document-deduplicated top-5):**
+- Overall MRR: **0.7471** (-0.0152 vs control 0.7623) — **Failed primary target (≥ 0.8200)**
+- `exact_terminology` Hit@1: **0.8125** — Passed secondary target (≥ 0.7500)
+- `boundary_handling` MRR: **0.6917** — Passed secondary target (≥ 0.6500)
+- `multi_concept` MRR: **0.9688** — **Failed safety invariant (must be 1.0000)**
+- `paraphrase` MRR: **0.8125** (-0.1250 vs control 0.9375) — Regression
+- `hard_negative` MRR: **0.3563** (-0.0865 vs control 0.4427) — Regression
+- P95 Latency: **618.6 ms** (-24.4 ms) — Passed guardrail
+
+**Decision:** REJECTED. While sentence segmentation improves exact-terminology and boundary-handling categories, it fragments semantic context for paraphrase and multi-concept queries and fails the primary MRR target. Document-level deduplication is confirmed necessary for sub-document chunk indexing. No production integration.
+
+**v1.2 Research Conclusion:** All four evaluated candidates failed the preregistered primary target (MRR ≥ 0.8200). The existing dense whole-document retrieval baseline (MRR 0.7623) remains the production default. Identified path forward: hierarchical parent-child chunking combined with hybrid retrieval, evaluated as a unified architecture in a future milestone.
 
 ---
 
@@ -305,7 +388,7 @@ The research roadmap evolves alongside the product roadmap. Each product milesto
 | v0.3 | Document chunking, embedding strategies, vector indexing | ✅ Completed |
 | v1.0 | RAG pipeline, prompt engineering, evaluation harness (`runner.py`) | ✅ Completed |
 | v1.1 | Multi-tenant vector filtering (Qdrant), Gemini batching, user feedback persistence | ✅ Completed |
-| v1.2 | Gemini Embedding 2 input formatting (neutral; raw-text default retained); hybrid retrieval (BM25 + dense) & reranking | 🔬 Active Research |
+| v1.2 | Embedding formatting (neutral); cross-encoder reranking (rejected); hybrid BM25+dense RRF (rejected); sentence-boundary chunking (rejected) — dense whole-document retrieval retained as production default | ✅ Research Complete — All Candidates Rejected |
 | v1.3 | Performance optimization, caching, latency profiling, observability | 📅 Planned → Deferred |
 | v2.0 | Conversational memory, long-term memory architectures | 📅 Planned → Deferred |
 | v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned → Deferred |
@@ -379,10 +462,10 @@ Publication is considered an optional outcome rather than the primary objective.
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 2.1 |
+| Project Version | v1.2 (Research Phase — Experiments Complete) |
+| Status | Active — v1.2 Research Concluded |
+| Last Reviewed | 2026-10-14 |
 
 ### Review Policy
 
