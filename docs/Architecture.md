@@ -157,25 +157,30 @@ Responsible for locating relevant information from indexed knowledge sources.
 
 Responsibilities include:
 
-- Document retrieval
-- Hybrid search
-- Metadata filtering
-- Reranking
-- Context selection
+- **Current (v1.1)**:
+  - Dense semantic vector retrieval scoped to the active workspace
+  - Workspace metadata filtering (`workspace_id` payload match)
+  - Top-$k$ context selection and ranking by cosine similarity score
+- **Planned (v1.2+)**:
+  - Hybrid search (sparse BM25 + dense vector combination)
+  - Cross-encoder reranking
 
 ---
 
 ## AI Orchestrator
 
-Coordinates interactions between retrieval, memory, language models, tools, and evaluation components.
+Coordinates interactions across RAG pipeline components.
 
 Responsibilities include:
 
-- Workflow execution
-- Prompt construction
-- Tool orchestration
-- Agent coordination
-- Response generation
+- **Current (v1.1)**:
+  - RAG workflow execution (`RAGService`)
+  - Grounded prompt construction (`ContextBuilder`)
+  - Response generation with citation and provenance attribution (`LLMService`)
+- **Planned / Deferred (v2.0+)**:
+  - Multi-turn conversation memory management (v2.0)
+  - External tool orchestration (v2.1)
+  - Autonomous multi-step agent coordination (v2.2)
 
 ---
 
@@ -496,20 +501,18 @@ The evaluation layer currently provides:
 
 The platform follows a request-driven workflow in which components communicate through clearly defined interfaces.
 
-A typical request follows this sequence:
+A typical v1.1 RAG request follows this sequence:
 
-1. User submits a query.
-2. Frontend sends the request to the backend.
-3. Backend validates and routes the request.
-4. Retrieval engine identifies relevant knowledge.
-5. Memory system retrieves contextual information.
-6. AI Orchestrator combines retrieved knowledge and memory.
-7. Language model generates a response.
-8. Evaluation layer records metrics.
-9. Backend returns the response.
-10. Frontend presents the results to the user.
+1. User submits a query in the frontend UI or via REST API.
+2. Frontend sends the request to the FastAPI backend with the `X-KIP-Workspace-ID` header.
+3. Backend validates the workspace token and routes the request to `RAGService`.
+4. Retrieval engine encodes the query and identifies relevant knowledge chunks filtered by `workspace_id`.
+5. Context Builder assembles retrieved chunks into a grounded context prompt.
+6. Language Model service generates a response with strict provenance citations.
+7. Backend logs execution metrics and returns the structured response.
+8. Frontend presents the response and interactive provenance sources to the user.
 
-Future versions may extend this workflow by introducing autonomous agents, tool execution, multimodal processing, and distributed reasoning while preserving the same modular communication principles.
+*(Note: Conversational Memory System integration is planned for v2.0; external tool calling in v2.1; and autonomous agent planning in v2.2.)*
 
 ---
 
@@ -523,43 +526,40 @@ The Knowledge Intelligence Platform processes requests through a structured data
 User Query
       │
       ▼
-Frontend
+Frontend (Streamlit)
+      │
+      ▼ HTTPS (X-KIP-Workspace-ID)
+Backend API (FastAPI)
       │
       ▼
-Backend API
+Authentication & Validation (workspace dependency)
       │
       ▼
-Authentication & Validation
+RAG Service (AI Orchestration)
       │
       ▼
-AI Orchestrator
+Retrieval Engine (Dense Vector Search)
       │
-      ├──────────────┐
-      ▼              ▼
-Retrieval Engine   Memory System
-      │              │
-      ▼              ▼
-Vector Database   Memory Store
-      │              │
-      └──────┬───────┘
-             ▼
-      Context Assembly
-             │
-             ▼
-      Language Model
-             │
-             ▼
- Evaluation & Logging
-             │
-             ▼
-      API Response
-             │
-             ▼
-         Frontend
-             │
-             ▼
-            User
+      ▼
+Vector Database (Qdrant Cloud / ChromaDB scoped to workspace)
+      │
+      ▼
+Context Builder (Chunk Assembly & Prompt Formatting)
+      │
+      ▼
+Language Model (Gemini / OpenAI Provider)
+      │
+      ▼
+Structured Response with Provenance Citations
+      │
+      ▼
+Frontend (Answer Display & Provenance Inspector)
+      │
+      ▼
+User
 ```
+
+*(Planned extensions: Hybrid BM25/reranking in v1.2; Memory Store parallel retrieval in v2.0; Tool/Agent loops in v2.1/v2.2.)*
 
 Every stage has a clearly defined responsibility and communicates through stable interfaces, allowing individual components to evolve independently without affecting the overall workflow.
 
@@ -602,13 +602,16 @@ Contains the core AI capabilities.
 
 Responsibilities include:
 
-- Retrieval
-- Memory
-- Agent orchestration
-- Prompt construction
-- Tool execution
-- Knowledge synthesis
-- Response generation
+- **Current (v1.1)**:
+  - Dense semantic retrieval
+  - Grounded context assembly and prompt construction
+  - Language model generation with provenance mapping
+- **Planned / Deferred (v1.2+)**:
+  - Hybrid search and cross-encoder reranking (v1.2)
+  - Conversational memory (v2.0)
+  - Tool execution (v2.1)
+  - Agent orchestration (v2.2)
+  - Knowledge graph reasoning and entity synthesis (v2.4)
 
 ---
 
@@ -732,10 +735,10 @@ The current live deployment implements a zero-cost cloud topology across special
 - **Vector Storage Tier**: Qdrant Cloud (Free Tier)
   - Single managed cluster hosting collection `knowledge_base` with 768-dimensional vectors (COSINE distance).
   - Multi-tenant workspace isolation enforced at query time via `workspace_id` payload filters.
-  - Deterministic point IDs generated via MD5 UUID conversion of chunk identifiers.
+  - Deterministic point IDs generated via UUID5 scheme: `uuid5(NAMESPACE_URL, f"kip://{workspace_id}/{chunk_id}")`.
 - **LLM / Embedding Provider**: Google Gemini API (Free Tier)
   - Text generation via `gemini-2.5-flash`.
-  - Dense embeddings via `text-embedding-004` (768 dimensions), utilizing 1:1 `Content`/`Part` batch formatting.
+  - Dense embeddings via Gemini embedding model (defaults to `gemini-embedding-2`, 768 dimensions), utilizing 1:1 `Content`/`Part` batch formatting.
 - **Feedback Persistence Tier**: Google Apps Script Web App (`doGet`) + Google Sheet
   - Backend dispatches authenticated HTTPS GET requests with URL query parameters (`token`, `category`, `message`, `workspace_id`, `timestamp`).
   - Google Apps Script parses parameters and appends structured rows to `Sheet1`.

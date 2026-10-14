@@ -12,8 +12,8 @@ This document defines the benchmarking and evaluation methodology for the Knowle
 
 > **Evaluation Status (v1.1.0):**  
 > The full test suite contains 245 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, and evaluation).  
-> The core evaluation subsystem was implemented in v1.0.0 (`evaluation/models.py` and `evaluation/runner.py`), coupled with a mechanical ground-truth baseline dataset (`benchmarks/kip_v1_baseline.json`, containing 5 grounded test cases). This harness deterministically measures Hit Rate, Exact Match, and Provenance Accuracy against mock or live providers without external dependencies.  
-> High-volume empirical sweeps across multiple retrieval algorithms (BM25 vs. dense vectors, chunk sizes, cross-encoder rerankers) are scheduled for v1.2 under the 14-step research lifecycle.
+> The core evaluation subsystem was implemented in v1.0.0 (`evaluation/models.py` and `evaluation/runner.py`), coupled with a mechanical ground-truth baseline dataset (`benchmarks/kip_v1_baseline.json`, containing 5 grounded test cases). This harness deterministically measures Document Hit Rate, Mean Reciprocal Rank (MRR), Keyword Coverage, and stage latencies against mock or live providers without external dependencies.
+> High-volume empirical sweeps across multiple retrieval algorithms (BM25 vs. dense vectors, chunk sizes, cross-encoder rerankers) and LLM-as-judge evaluation are scheduled for v1.2 under the 14-step research lifecycle.
 
 Once fully scaled, benchmarking will provide objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
 
@@ -135,15 +135,17 @@ Metrics include:
 
 | Metric | Description | Current Harness Support |
 |---------|-------------|-------------------------|
-| Hit Rate | Whether at least one expected context chunk was retrieved | Implemented (`evaluation/runner.py`) |
-| Exact Match | Whether generated answer matches ground-truth reference | Implemented (`evaluation/runner.py`) |
-| Provenance Accuracy | Whether returned source citations contain ground truth document IDs | Implemented (`evaluation/runner.py`) |
-| Retrieval Precision | Percentage of retrieved documents that are relevant | Planned (v1.2) |
-| Retrieval Recall | Percentage of relevant documents successfully retrieved | Planned (v1.2) |
-| Faithfulness | Degree to which responses are supported by retrieved context | Planned (v1.2) |
-| Answer Relevancy | Alignment between the answer and the user's query | Planned (v1.2) |
-| Hallucination Rate | Frequency of unsupported information | Planned (v1.2) |
-| Latency | Time required to complete processing | Planned (v1.2) |
+| Hit Rate | Whether at least one expected document was retrieved | Implemented (`evaluation/runner.py`) |
+| Mean Reciprocal Rank (MRR) | Reciprocal rank of the first relevant document hit | Implemented (`evaluation/runner.py`) |
+| Keyword Coverage | Fraction of expected keywords found in the generated answer | Implemented (`evaluation/runner.py`) |
+| Retrieval Latency | Duration of vector search query in milliseconds | Implemented (`evaluation/runner.py`) |
+| Generation Latency | Duration of LLM answer generation in milliseconds | Implemented (`evaluation/runner.py`) |
+| Total Latency | End-to-end execution latency in milliseconds | Implemented (`evaluation/runner.py`) |
+| Exact Match | Strict mechanical match against reference answer | Planned (v1.2; optional schema in `evaluation/models.py`) |
+| Provenance Accuracy | Verification that returned source citations contain ground-truth document IDs | Planned (v1.2) |
+| Faithfulness | Degree to which responses are supported by retrieved context | Planned (v1.2, requires LLM judge) |
+| Answer Relevancy | Alignment between the answer and the user's query | Planned (v1.2, requires LLM judge) |
+| Hallucination Rate | Frequency of unsupported information | Planned (v1.2, requires LLM judge) |
 | Throughput | Requests processed per second | Planned (v1.2) |
 | Memory Usage | Runtime memory consumption | Planned (v1.3) |
 | CPU Utilization | Processor usage during execution | Planned (v1.3) |
@@ -315,7 +317,7 @@ Every release should include benchmark comparisons against previous versions.
 | Version | Retrieval Strategy | Latency | Faithfulness / Accuracy | Status |
 |----------|-------------------|----------|-------------------------|--------|
 | v0.3 | Dense (ChromaDB + OpenAI) | — | — | Baseline Foundation |
-| v1.0 | Dense (ChromaDB + OpenAI) | Baseline | 100% Mechanical Pass (5 cases) | ✅ Verified (`evaluation/runner.py`) |
+| v1.0 | Dense (ChromaDB + OpenAI) | Baseline | Mechanical Baseline (Hit Rate, MRR, Keyword Coverage) | ✅ Verified (`evaluation/runner.py`) |
 | v1.1 | Dense (Qdrant Cloud + Gemini) | Baseline | Multi-Tenant Isolation Verified | ✅ Verified (Cloud & Local) |
 | v1.2 | Hybrid (BM25 + Qdrant) + Reranking | Comparative | Target: Improved NDCG/MRR | 🔬 Planned Candidate |
 | v2.0 | Memory-Augmented Retrieval | TBD | TBD | 📅 Planned → Deferred |
@@ -328,7 +330,7 @@ Historical benchmark data should never be deleted. Once established, newer resul
 
 ### Current Implementation (v1.0.0 / v1.1.0)
 
-- **Custom Evaluation Harness (`evaluation/runner.py`, `evaluation/models.py`):** Self-contained, lightweight evaluation engine capable of evaluating RAG retrieval hit rates, exact match answer generation, and provenance tracking without requiring heavy external evaluation dependencies.
+- **Custom Evaluation Harness (`evaluation/runner.py`, `evaluation/models.py`):** Self-contained, lightweight evaluation engine capable of evaluating RAG retrieval hit rates, Mean Reciprocal Rank (MRR), keyword coverage, and stage latencies without requiring heavy external evaluation dependencies.
 - **Automated Pytest Suite:** 245 unit and integration tests asserting component-level correctness across ingestion, embeddings, vector stores, API routes, and multitenancy.
 
 ### Planned Evaluation Tools (v1.2+)

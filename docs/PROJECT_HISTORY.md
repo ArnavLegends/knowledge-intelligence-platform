@@ -6,7 +6,7 @@ This document provides a durable, chronological engineering history of the Knowl
 
 It serves as the definitive historical record of architectural decisions, implementation milestones, bug fixes, deployment evolutions, and validation records.
 
-Unlike [Product-Roadmap.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Product-Roadmap.md) (which is forward-looking) and [Changelog.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Changelog.md) (which summarizes releases for developers and users), this document traces the detailed engineering journey and technical rationale behind each evolutionary phase.
+Unlike [Product-Roadmap.md](Product-Roadmap.md) (which is forward-looking) and [Changelog.md](Changelog.md) (which summarizes releases for developers and users), this document traces the detailed engineering journey and technical rationale behind each evolutionary phase.
 
 ---
 
@@ -51,7 +51,7 @@ Current Frozen v1.1 State
 - **Category**: Official Release Milestone (`v0.1.0`)
 - **Status**: Completed
 - **Period**: 2026-07-19
-- **Related Commits**: [`bde42e2`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`095cf64`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`2ad1d95`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`bde42e2`], [`095cf64`], [`2ad1d95`]
 
 #### Objective
 Establish a solid engineering foundation for the Knowledge Intelligence Platform. Set up repository architecture, development infrastructure, coding standards, and a comprehensive planning documentation suite prior to writing application code.
@@ -59,13 +59,13 @@ Establish a solid engineering foundation for the Knowledge Intelligence Platform
 #### Implemented
 - Initialized Git repository with MIT License, `.gitignore`, and standard directory tree (`backend/`, `frontend/`, `docs/`, `tests/`, `research/`, `benchmarks/`, `evaluation/`, `datasets/`, `examples/`, `docker/`, `configs/`, `assets/`, `scripts/`, `paper/`).
 - Authored the core planning documents:
-  - [Vision.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Vision.md): Long-term mission, strategic goals, and engineering philosophy.
-  - [SRS.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/SRS.md): Software Requirements Specification covering functional and non-functional requirements.
-  - [Architecture.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Architecture.md): Modular, layered architectural blueprint.
-  - [Product-Roadmap.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Product-Roadmap.md): Multi-version product evolutionary milestones.
-  - [Research-Roadmap.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Research-Roadmap.md): Applied AI systems research framework and evaluation methodology.
-  - [Benchmarking.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Benchmarking.md): Benchmarking lifecycle and metric definitions.
-  - [Development-Workflow.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/Development-Workflow.md): Coding conventions, Git workflows, and testing guidelines.
+  - [Vision.md](Vision.md): Long-term mission, strategic goals, and engineering philosophy.
+  - [SRS.md](SRS.md): Software Requirements Specification covering functional and non-functional requirements.
+  - [Architecture.md](Architecture.md): Modular, layered architectural blueprint.
+  - [Product-Roadmap.md](Product-Roadmap.md): Multi-version product evolutionary milestones.
+  - [Research-Roadmap.md](Research-Roadmap.md): Applied AI systems research framework and evaluation methodology.
+  - [Benchmarking.md](Benchmarking.md): Benchmarking lifecycle and metric definitions.
+  - [Development-Workflow.md](Development-Workflow.md): Coding conventions, Git workflows, and testing guidelines.
 - Configured Python packaging with `pyproject.toml` using `hatchling` and defined `dev` dependencies (`pytest`, `pytest-cov`, `ruff`).
 - Set up initial test scaffold (`tests/test_scaffold.py`) to validate directory structures and packaging.
 
@@ -89,7 +89,7 @@ The repository structure was locked, documented, and ready for backend service c
 - **Category**: Engineering Milestone (`v0.2.0` Phase 1)
 - **Status**: Completed
 - **Period**: 2026-08-23
-- **Related Commits**: [`1bfecd2`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`40f46b7`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`a454978`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`53f1faa`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`86a3576`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`40808f4`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`1bfecd2`], [`40f46b7`], [`a454978`], [`53f1faa`], [`86a3576`], [`40808f4`]
 
 #### Objective
 Construct the core FastAPI application infrastructure, centralized settings management, structured logging, centralized exception handling, operational health checks, and a provider-agnostic language model gateway.
@@ -122,7 +122,7 @@ The backend platform was capable of starting, routing requests, handling errors 
 - **Category**: Engineering Milestone (`v0.2.0` Phase 2 / `v0.3.0` Core)
 - **Status**: Completed
 - **Period**: 2026-09-17
-- **Related Commits**: [`3854002`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`aaeced5`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`6175b66`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`7bc7fc9`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`7fc1d7d`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`decd3e6`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`1b9832f`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`a67fb7f`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`3854002`], [`aaeced5`], [`6175b66`], [`7bc7fc9`], [`7fc1d7d`], [`decd3e6`], [`1b9832f`], [`a67fb7f`]
 
 #### Objective
 Implement the complete end-to-end Retrieval-Augmented Generation (RAG) backend pipeline for plain-text documents: ingestion, text segmentation, embedding generation, vector storage, similarity search, prompt assembly, and response synthesis.
@@ -161,7 +161,7 @@ A functioning, fully tested local RAG pipeline capable of indexing plain text do
 - **Category**: Engineering Milestone
 - **Status**: Completed
 - **Period**: 2026-09-17
-- **Related Commits**: [`d09b855`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`d09b855`]
 
 #### Objective
 Synchronize repository documentation with the implemented v0.3 foundation, purge test artifacts, enforce in-memory test isolation, and ensure no fabricated claims existed in the docs.
@@ -192,7 +192,7 @@ The repository reached a professional, highly disciplined open-source baseline.
 - **Category**: Official Release (`v1.0.0`)
 - **Status**: Completed
 - **Period**: 2026-10-07
-- **Related Commits**: [`1b8d3f7`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`1b8d3f7`]
 - **Tag**: `v1.0.0`
 
 #### Objective
@@ -242,7 +242,7 @@ KIP v1.0.0 was officially released as a multi-format, multi-provider, self-conta
 - **Category**: Official Release Patch (`v1.0.1`)
 - **Status**: Completed
 - **Period**: 2026-10-07
-- **Related Commits**: [`fcdb6b8`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`fcdb6b8`]
 - **Tag**: `v1.0.1`
 
 #### Objective
@@ -272,7 +272,7 @@ Idempotent document upload verified and tagged as `v1.0.1`.
 - **Category**: Official Release (`v1.1.0`)
 - **Status**: Completed
 - **Period**: 2026-10-07
-- **Related Commits**: [`6a5d4e6`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`1a546b6`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`7c7eefc`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`6a5d4e6`], [`1a546b6`], [`7c7eefc`]
 - **Tag**: `v1.1.0`
 
 #### Objective
@@ -297,7 +297,7 @@ Transform KIP from a single-tenant local application into a multi-tenant cloud-r
   - In commit `7c7eefc`, ensured `workspace_id` is validated before initializing heavy service singletons.
 - **Cloud Deployment Infrastructure**:
   - Authored `render.yaml` infrastructure-as-code configuration for Render Web Service.
-  - Authored comprehensive [deployment.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/deployment.md).
+  - Authored comprehensive [deployment.md](deployment.md).
   - Updated Streamlit frontend to support private workspace tokens, switching workspaces, and listing active documents.
 
 #### Architectural Impact
@@ -322,7 +322,7 @@ KIP v1.1.0 tagged and released as a production-grade multi-tenant cloud knowledg
 - **Category**: Engineering Milestone
 - **Status**: Completed
 - **Period**: 2026-10-08
-- **Related Commits**: [`58038bf`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`b3d6bf4`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`64c6562`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`cc4ee47`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`58038bf`], [`b3d6bf4`], [`64c6562`], [`cc4ee47`]
 
 #### Objective
 Harden the deployed platform against operational edge cases: Render free-tier 15-minute cold starts, Streamlit state management across workspace switching, Gemini batch embedding limits, and multi-file document indexing.
@@ -363,7 +363,7 @@ The cloud-deployed application became robust against cold starts, multi-document
 - **Category**: Engineering Milestone
 - **Status**: Completed
 - **Period**: 2026-10-08
-- **Related Commits**: [`09842ef`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform), [`ce1c42a`](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform)
+- **Related Commits**: [`09842ef`], [`ce1c42a`]
 
 #### Objective
 Finalize KIP v1.1 for public community evaluation: add orientation guidance for first-time visitors, provide structured test workflows, and implement a zero-cost, persistent feedback submission pipeline that routes submissions to Google Sheets without storing state on ephemeral Render instances.

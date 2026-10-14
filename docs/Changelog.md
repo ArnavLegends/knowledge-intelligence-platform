@@ -15,7 +15,7 @@ Examples:
 - v1.0.0
 - v1.1.0
 
-For a detailed commit-by-commit engineering narrative explaining the evolutionary rationale of each milestone, see [PROJECT_HISTORY.md](file:///c:/Users/arun/OneDrive/Desktop/knowledge-intelligence-platform/docs/PROJECT_HISTORY.md).
+For a detailed commit-by-commit engineering narrative explaining the evolutionary rationale of each milestone, see [PROJECT_HISTORY.md](PROJECT_HISTORY.md).
 
 ---
 

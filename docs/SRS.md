@@ -96,7 +96,7 @@ The requirements defined in this document assume:
 
 # Functional Requirements
 
-The functional requirements describe the capabilities that the Knowledge Intelligence Platform shall provide. Each requirement is assigned a unique identifier for traceability throughout development, testing, benchmarking, and future releases.
+The functional requirements describe the capabilities that the Knowledge Intelligence Platform shall provide. Each requirement is assigned a unique identifier for traceability throughout development, testing, benchmarking, and future releases. Requirements are explicitly distinguished between **Implemented (v1.1)** and **Planned (Future Milestone)**.
 
 ---
 
@@ -106,6 +106,10 @@ The functional requirements describe the capabilities that the Knowledge Intelli
 
 The system shall accept natural language queries from users and process them through the AI orchestration pipeline.
 
+### Status
+
+Implemented (v1.1)
+
 ### Priority
 
 Critical
@@ -113,8 +117,8 @@ Critical
 ### Acceptance Criteria
 
 - Accept text-based user queries.
-- Validate incoming requests.
-- Route requests through the orchestration workflow.
+- Validate incoming requests (including `X-KIP-Workspace-ID` header and payload schema).
+- Route requests through the orchestration workflow (`RAGService`).
 - Return generated responses.
 - Handle invalid requests gracefully.
 
@@ -126,17 +130,21 @@ Critical
 
 The system shall allow users to upload supported documents for knowledge ingestion.
 
+### Status
+
+Implemented (v1.1)
+
 ### Priority
 
 Critical
 
 ### Acceptance Criteria
 
-- Accept supported document formats.
-- Validate uploaded files.
-- Store uploaded documents securely.
-- Reject unsupported formats.
-- Generate upload status notifications.
+- Accept supported document formats (`.pdf`, `.docx`, `.txt`, `.md`).
+- Validate uploaded files (file size enforced via `MAX_UPLOAD_BYTES ≤ 2 MB`).
+- Store uploaded documents securely within the workspace boundary during ingestion.
+- Reject unsupported formats with descriptive errors.
+- Generate upload status notifications with per-document indexed chunk counts.
 
 ---
 
@@ -146,16 +154,20 @@ Critical
 
 The platform shall extract textual content and metadata from uploaded documents.
 
+### Status
+
+Implemented (v1.1)
+
 ### Priority
 
 Critical
 
 ### Acceptance Criteria
 
-- Extract readable text.
-- Preserve metadata where available.
-- Handle parsing failures gracefully.
-- Produce structured intermediate representations.
+- Extract readable text across plain text, Markdown, PDF (`pypdf`), and Word (`python-docx`).
+- Preserve metadata where available (filename, media type, file size).
+- Handle parsing failures gracefully without crashing subsequent document processing.
+- Produce structured intermediate representations (`Document` model).
 
 ---
 
@@ -165,17 +177,21 @@ Critical
 
 The system shall convert parsed documents into searchable knowledge.
 
+### Status
+
+Implemented (v1.1)
+
 ### Priority
 
 Critical
 
 ### Acceptance Criteria
 
-- Chunk documents.
-- Generate embeddings.
-- Store vector representations.
-- Maintain metadata.
-- Preserve document relationships.
+- Chunk documents deterministically (`FixedSizeChunker` with configurable `chunk_size` and `chunk_overlap`).
+- Generate embeddings via configured provider (`gemini-embedding-2` or `text-embedding-3-small`).
+- Store vector representations in vector database (Qdrant Cloud in production, ChromaDB for local testing).
+- Maintain metadata (deterministic `document_id`, `chunk_id`, `workspace_id`).
+- Preserve document relationships and chunk ordering.
 
 ---
 
@@ -185,17 +201,21 @@ Critical
 
 The system shall retrieve relevant knowledge for user queries.
 
+### Status
+
+Implemented (v1.1: Dense Semantic Retrieval); Planned (v1.2: Hybrid Retrieval & Reranking)
+
 ### Priority
 
 Critical
 
 ### Acceptance Criteria
 
-- Perform semantic retrieval.
-- Support metadata filtering.
-- Rank retrieved results.
-- Return configurable numbers of documents.
-- Support future hybrid retrieval.
+- Perform semantic retrieval using dense query embeddings.
+- Support workspace metadata filtering (`workspace_id` tenant isolation).
+- Rank retrieved results by cosine similarity score.
+- Return configurable numbers of documents (Top-$k$ slider range 1–20).
+- Support future hybrid retrieval (sparse BM25 + dense vectors) and cross-encoder reranking (Planned: v1.2).
 
 ---
 
@@ -205,16 +225,20 @@ Critical
 
 The platform shall construct context for language model inference.
 
+### Status
+
+Implemented (v1.1: Retrieved Chunk Context); Planned (v2.0: Conversational Memory)
+
 ### Priority
 
 High
 
 ### Acceptance Criteria
 
-- Combine retrieved documents.
-- Include conversation memory.
-- Respect token limitations.
-- Produce structured prompts.
+- Combine retrieved documents into a grounded context prompt (`ContextBuilder`).
+- Include conversation memory across multi-turn sessions (Planned: v2.0).
+- Respect token limitations and model context windows.
+- Produce structured prompts with strict grounding instructions and refusal behavior on empty context.
 
 ---
 
@@ -224,16 +248,20 @@ High
 
 The platform shall generate responses using configurable language models.
 
+### Status
+
+Implemented (v1.1: Request/Response Generation); Planned (v1.3: Streaming Responses)
+
 ### Priority
 
 Critical
 
 ### Acceptance Criteria
 
-- Invoke configured LLMs.
-- Support streaming responses.
-- Handle provider failures.
-- Return structured outputs.
+- Invoke configured LLMs (`gemini-2.5-flash` or `gpt-4o-mini`).
+- Support streaming responses (Planned: v1.3).
+- Handle provider failures (rate limits, context limits, service unavailability) and translate them into typed exceptions.
+- Return structured outputs (`LLMResponse` with token usage metadata).
 
 ---
 
@@ -243,167 +271,9 @@ Critical
 
 The platform shall deliver generated responses to users.
 
-### Priority
+### Status
 
-Critical
-
-### Acceptance Criteria
-
-- Return generated text.
-- Include citations where supported.
-- Return execution status.
-- Report errors consistently.
-
----
-
-# Functional Requirements
-
-The functional requirements describe the capabilities that the Knowledge Intelligence Platform shall provide. Each requirement is assigned a unique identifier for traceability throughout development, testing, benchmarking, and future releases.
-
----
-
-## FR-001 User Query Processing
-
-### Description
-
-The system shall accept natural language queries from users and process them through the AI orchestration pipeline.
-
-### Priority
-
-Critical
-
-### Acceptance Criteria
-
-- Accept text-based user queries.
-- Validate incoming requests.
-- Route requests through the orchestration workflow.
-- Return generated responses.
-- Handle invalid requests gracefully.
-
----
-
-## FR-002 Document Upload
-
-### Description
-
-The system shall allow users to upload supported documents for knowledge ingestion.
-
-### Priority
-
-Critical
-
-### Acceptance Criteria
-
-- Accept supported document formats.
-- Validate uploaded files.
-- Store uploaded documents securely.
-- Reject unsupported formats.
-- Generate upload status notifications.
-
----
-
-## FR-003 Document Parsing
-
-### Description
-
-The platform shall extract textual content and metadata from uploaded documents.
-
-### Priority
-
-Critical
-
-### Acceptance Criteria
-
-- Extract readable text.
-- Preserve metadata where available.
-- Handle parsing failures gracefully.
-- Produce structured intermediate representations.
-
----
-
-## FR-004 Knowledge Ingestion
-
-### Description
-
-The system shall convert parsed documents into searchable knowledge.
-
-### Priority
-
-Critical
-
-### Acceptance Criteria
-
-- Chunk documents.
-- Generate embeddings.
-- Store vector representations.
-- Maintain metadata.
-- Preserve document relationships.
-
----
-
-## FR-005 Retrieval
-
-### Description
-
-The system shall retrieve relevant knowledge for user queries.
-
-### Priority
-
-Critical
-
-### Acceptance Criteria
-
-- Perform semantic retrieval.
-- Support metadata filtering.
-- Rank retrieved results.
-- Return configurable numbers of documents.
-- Support future hybrid retrieval.
-
----
-
-## FR-006 Context Construction
-
-### Description
-
-The platform shall construct context for language model inference.
-
-### Priority
-
-High
-
-### Acceptance Criteria
-
-- Combine retrieved documents.
-- Include conversation memory.
-- Respect token limitations.
-- Produce structured prompts.
-
----
-
-## FR-007 Language Model Generation
-
-### Description
-
-The platform shall generate responses using configurable language models.
-
-### Priority
-
-Critical
-
-### Acceptance Criteria
-
-- Invoke configured LLMs.
-- Support streaming responses.
-- Handle provider failures.
-- Return structured outputs.
-
----
-
-## FR-008 Response Delivery
-
-### Description
-
-The platform shall deliver generated responses to users.
+Implemented (v1.1)
 
 ### Priority
 
@@ -412,9 +282,9 @@ Critical
 ### Acceptance Criteria
 
 - Return generated text.
-- Include citations where supported.
+- Include ranked source citations with explicit provenance metadata (document name, chunk index, score).
 - Return execution status.
-- Report errors consistently.
+- Report errors consistently with structured API error schemas.
 
 ---
 

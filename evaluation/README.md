@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This directory contains the lightweight, self-contained AI evaluation harness for measuring retrieval hit rates, answer generation accuracy, and provenance tracking across the Knowledge Intelligence Platform.
+This directory contains the lightweight, self-contained AI evaluation harness for measuring retrieval hit rates, Mean Reciprocal Rank (MRR), keyword coverage, and stage latencies across the Knowledge Intelligence Platform.
 
 ## Current Status (v1.1.0)
 
@@ -10,20 +10,21 @@ This directory contains the lightweight, self-contained AI evaluation harness fo
 
 ### Implemented Components
 
-- **`evaluation/models.py`:** Pydantic domain models defining `EvaluationSample`, `EvaluationDataset`, `EvaluationResult`, `EvaluationMetricScore`, and `EvaluationReport`.
+- **`evaluation/models.py`:** Pydantic domain models defining `BenchmarkCase`, `BenchmarkDataset`, `RetrievalMetrics`, `AnswerMetrics`, `CaseResult`, `BenchmarkRunConfig`, and `BenchmarkResult`.
 - **`evaluation/runner.py`:** Execution engine that runs benchmark datasets (e.g. `benchmarks/kip_v1_baseline.json`) against the RAG pipeline or mock providers to compute:
-  - **Hit Rate:** Ratio of queries where relevant context chunk was successfully retrieved.
-  - **Exact Match:** Mechanical equality against reference answers.
-  - **Provenance Accuracy:** Verification that retrieved chunk IDs contain ground-truth document IDs.
+  - **Hit Rate:** Fraction of queries where at least one expected document was retrieved.
+  - **Mean Reciprocal Rank (MRR):** Reciprocal rank of the first relevant document hit.
+  - **Keyword Coverage:** Fraction of expected ground-truth keywords found in the generated answer.
+  - **Latency:** Retrieval latency, generation latency, and total latency in milliseconds.
 
-No external evaluation packages (such as heavy LLM-as-a-judge frameworks) are required for baseline execution, keeping the evaluation pipeline deterministic and fast.
+No external evaluation packages (such as heavy LLM-as-a-judge frameworks) are required for baseline execution, keeping the evaluation pipeline deterministic and fast. Exact Match and LLM Faithfulness are defined as optional model fields reserved for external judge configurations in v1.2+.
 
 ## Planned Role (v1.2+)
 
 Planned enhancements for future versions:
 - Integration with external evaluation frameworks (RAGAS, DeepEval) for automated LLM-as-a-judge evaluation of answer relevance and faithfulness.
 - Automated per-version evaluation reporting against standardized benchmark corpora.
-- Latency and throughput profiling utilities.
+- Latency and throughput profiling utilities under concurrent loads.
 
 ## Related Documentation
 

@@ -29,7 +29,7 @@ The platform emphasizes applied AI systems research, where experimental findings
 Research activities should prioritize reproducibility, objectivity, and practical impact over novelty alone.
 
 > **Research Infrastructure Status (v1.1.0):**  
-> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0, utilizing a mechanical benchmark suite (`benchmarks/kip_v1_baseline.json`) that measures Hit Rate, Exact Match, and Provenance Accuracy deterministically. In v1.1.0, Qdrant Cloud vector search and Gemini dense embeddings were added as production options. Systematic comparative experimentation across chunking strategies, hybrid BM25 + dense search, and cross-encoder reranking is planned for v1.2 under the 14-step research lifecycle. All comparative research records remain marked as **Baseline / Not Yet Evaluated against empirical benchmark matrix** to maintain complete scientific integrity.
+> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0, utilizing a mechanical benchmark suite (`benchmarks/kip_v1_baseline.json`) that measures Document Hit Rate, Mean Reciprocal Rank (MRR), Keyword Coverage, and stage latencies deterministically. In v1.1.0, Qdrant Cloud vector search and Gemini dense embeddings were added as production options. Systematic comparative experimentation across chunking strategies, hybrid BM25 + dense search, and cross-encoder reranking is planned for v1.2 under the 14-step research lifecycle. All comparative research records remain marked as **Baseline / Not Yet Evaluated against empirical benchmark matrix** to maintain complete scientific integrity.
 
 ---
 
@@ -69,7 +69,7 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 
 ### Retrieval Systems
 
-- Dense Retrieval (Implemented: Gemini `text-embedding-004`, OpenAI `text-embedding-3-small`)
+- Dense Retrieval (Implemented: Gemini `gemini-embedding-2`, OpenAI `text-embedding-3-small`)
 - Sparse Retrieval (Planned: BM25 / SPLADE)
 - Hybrid Retrieval (Planned: Convex / Reciprocal Rank Fusion)
 - Query Expansion (Planned: HyDE / multi-query)
@@ -148,22 +148,24 @@ Every significant engineering improvement should be evaluated using a standardiz
 
 - Precision
 - Recall
-- Mean Reciprocal Rank (MRR)
+- Mean Reciprocal Rank (MRR) (Implemented in `evaluation/runner.py`)
 - Normalized Discounted Cumulative Gain (NDCG)
 - Hit Rate (Implemented in `evaluation/runner.py`)
 
 #### Response Quality
 
-- Faithfulness
-- Answer Relevance
+- Faithfulness (Planned: v1.2, requires LLM judge)
+- Answer Relevance (Planned: v1.2, requires LLM judge)
 - Context Relevance
 - Completeness
-- Hallucination Rate
-- Exact Match (Implemented in `evaluation/runner.py`)
+- Hallucination Rate (Planned: v1.2, requires LLM judge)
+- Keyword Coverage (Implemented in `evaluation/runner.py`)
+- Exact Match (Planned: optional schema in `evaluation/models.py`)
 
 #### System Performance
 
-- Latency (p50, p95, p99)
+- Latency (Retrieval, Generation, Total) (Implemented in `evaluation/runner.py`)
+- Latency Profiling (p50, p95, p99) (Planned: v1.3)
 - Throughput (requests/sec)
 - Memory Usage
 - Storage Requirements
