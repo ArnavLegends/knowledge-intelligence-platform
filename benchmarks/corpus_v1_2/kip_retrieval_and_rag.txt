@@ -1,0 +1,10 @@
+KIP retrieval uses dense vector search over a Qdrant collection named knowledge_base.
+The Qdrant collection uses COSINE distance; Qdrant returns cosine similarity scores.
+KIP converts similarity to distance: distance = max(0, 1 - similarity_score).
+The default retrieval top-k is 5. No similarity threshold is applied by default.
+Results are returned in cosine-similarity-descending order with no post-retrieval reranking.
+Context is assembled into numbered source blocks with START and END delimiters.
+The RAG system prompt instructs the LLM to answer only from provided context.
+When no context is retrieved the system returns a predefined empty-context message.
+The LLM temperature is fixed at 0.0 for deterministic generation.
+The production LLM provider is Gemini 2.5 Flash (gemini-2.5-flash).

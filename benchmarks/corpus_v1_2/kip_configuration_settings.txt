@@ -1,0 +1,7 @@
+KIP centralizes runtime configuration in the Settings class powered by pydantic-settings BaseSettings.
+Settings are loaded from environment variables and optional .env files with UTF-8 encoding.
+Validation rules ensure that chunk_size is strictly positive and chunk_overlap is strictly less than chunk_size.
+Key configuration parameters include embedding_dimensions default 768, qdrant_timeout_seconds default 10.0,
+and log_level defaulting to INFO.
+The default vector store collection name is knowledge_base, which can be overridden via QDRANT_COLLECTION.
+Sensitive credentials such as LLM_API_KEY and QDRANT_API_KEY default to empty strings for offline safety.

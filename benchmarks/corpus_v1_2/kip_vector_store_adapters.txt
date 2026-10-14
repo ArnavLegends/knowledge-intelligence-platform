@@ -1,0 +1,7 @@
+KIP decouples vector persistence through the VectorStoreManager interface and underlying provider adapters.
+For local offline testing and CI, ChromaVectorStoreProvider manages an embedded ChromaDB instance.
+Chroma collections append the embedding provider name to avoid vector dimension mismatches (e.g., knowledge_base_openai).
+For cloud deployments, QdrantVectorStoreProvider connects to Qdrant Cloud or local Qdrant server instances.
+Qdrant collections require explicit dimension specifications (768 for gemini-embedding-2) and COSINE distance.
+Point IDs in Qdrant are deterministic UUIDs generated via uuid5 in the URL namespace using kip://workspace_id/chunk_id.
+This deterministic ID formulation guarantees that re-indexing a chunk overwrites the existing point rather than creating duplicates.

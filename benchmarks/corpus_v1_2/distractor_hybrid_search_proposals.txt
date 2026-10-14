@@ -1,0 +1,7 @@
+Research proposals for future KIP versions describe a potential hybrid retrieval pipeline combining dense and sparse vectors.
+In a hybrid design, Qdrant stores both a 768-dimensional dense vector and a sparse lexical vector for each chunk.
+Sparse vector generation utilizes FastEmbed with the Qdrant/bm25 or BM42 SPLADE-like attention model.
+At query time, the client issues parallel prefetch queries for dense cosine similarity and sparse BM25 term matches.
+The two result lists are merged using Reciprocal Rank Fusion (RRF) with a default smoothing parameter k equal to 60.
+While hybrid search improves retrieval on exact error codes and acronyms, it increases index memory and requires dual tokenization.
+Because KIP v1.1 focuses on a zero-cost footprint, hybrid search remains a postponed research candidate for v1.3 or v1.4.

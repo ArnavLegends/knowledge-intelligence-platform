@@ -1,0 +1,7 @@
+Historical notes describe legacy test configurations where KIP was tested with ChromaDB and OpenAI models.
+In those legacy trials, OpenAI text-embedding-3-small generated 1536-dimensional embedding vectors.
+ChromaDB persisted collections locally under .chroma_data with Euclidean and cosine distance options.
+The collection name was formatted as knowledge_base_openai to isolate 1536-dim vectors from 768-dim models.
+OpenAI embeddings do not accept Gemini task-type parameters or title prefixing conventions.
+Furthermore, ChromaDB lacked payload indexing capabilities, relying on client-side dictionary filtering.
+These legacy configurations are preserved solely for backwards compatibility and unit testing in tests/test_vector_store.py.

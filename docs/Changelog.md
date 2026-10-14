@@ -37,7 +37,32 @@ Each release documents significant engineering changes while maintaining histori
 
 ## [Unreleased]
 
-- Planned v1.2 Retrieval Intelligence & Evaluation research experiments (literature review, chunking experiments, hybrid search evaluation).
+### KIP v1.2 Research — Controlled Gemini Embedding 2 Input-Formatting Experiment
+
+#### Added
+- **Asymmetric Formatting Hooks:**
+  - Added optional `doc_formatter: Callable[[str], str] | None` to `EmbeddingService.__init__` to format document text passed to embedding models while strictly preserving raw text in `EmbeddingInput.metadata["text"]` for Qdrant payloads and user provenance.
+  - Added optional `query_formatter: Callable[[str], str] | None` to `RetrievalService.__init__` to format query text passed to embedding models.
+- **Fine-Grained Retrieval Metrics:**
+  - Added `hit_at_1`, `hit_at_3`, `retrieved_chunk_ids`, and `expected_chunk_ids` to `RetrievalMetrics`.
+  - Added `hit_rate_at_1`, `hit_rate_at_3`, and `hit_rate_at_5` to `BenchmarkResult`.
+  - Added `expected_chunk_ids` to `BenchmarkCase` for chunk-level provenance evaluation.
+- **Evaluation Corpora & Datasets:**
+  - Added 18-document expanded reference corpus (`benchmarks/corpus_v1_2/`) containing 14 core architecture documents and 4 adversarial distractors with LF-only line endings.
+  - Added 25-case evaluation benchmark (`benchmarks/kip_v1_2_benchmark.json`) covering exact-token lookup, semantic paraphrase, and distractor disambiguation.
+- **Turnkey Experiment Runner:**
+  - Added `evaluation/run_v1_2_formatting_experiment.py` implementing end-to-end preflight verification, indexing of isolated collections (`kip_eval_v1_2_control` and `kip_eval_v1_2_formatted`), evaluation without LLM generation overhead, and paired delta analysis.
+- **Automated Tests:**
+  - Added unit tests in `tests/test_evaluation.py` for formatter hooks, v1.2 corpus/benchmark loading, and fine-grained hit rate metrics, bringing the test suite to 267 passing tests.
+
+#### Experimental Findings & Decision
+- **Empirical Results:** Evaluated live on Google Gemini `gemini-embedding-2` (768 dimensions) and Qdrant. Both Control (raw text) and Treatment (asymmetric formatting) yielded identical aggregate metrics: Hit Rate@1 = 0.8400, Hit Rate@3 = 1.0000, Hit Rate@5 = 1.0000, MRR = 0.9133.
+- **Paired Deltas:** 23/25 queries had identical ranks; 1 improved (`v12-017`: rank 2 -> rank 1), 1 degraded (`v12-010`: rank 1 -> rank 2). Latency delta (-20.38 ms) was within cloud network variance.
+- **Production Default:** Retained raw-text embedding as the production default to minimize token overhead. Formatter hooks preserved as extension points.
+- **Artifacts Recorded:**
+  - `benchmarks/kip_v1_2_formatting_control_20261014_094111.json`
+  - `benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`
+
 
 ---
 

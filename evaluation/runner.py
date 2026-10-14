@@ -144,16 +144,35 @@ class EvaluationRunner:
         retrieval_latency_ms = (t_ret_end - t_ret_start) * 1000
 
         # Compute retrieval metrics.
-        # Cases with empty expected_document_ids are unlabelled: hit=False,
-        # reciprocal_rank=0. They are excluded from aggregate Hit Rate and MRR
+        # Cases with empty expected_document_ids and expected_chunk_ids are unlabelled:
+        # hit=False, reciprocal_rank=0. They are excluded from aggregate Hit Rate/MRR
         # in BenchmarkResult.from_case_results() via expected_count == 0 check.
-        is_labelled = bool(case.expected_document_ids)
+        is_labelled = bool(case.expected_document_ids or case.expected_chunk_ids)
+        retrieved_chunk_ids = [c.id for c in chunks if hasattr(c, "id") and c.id]
+        hit_at_1 = False
+        hit_at_3 = False
         if is_labelled and retrieval_error is None:
-            hit = any(d in retrieved_doc_ids for d in case.expected_document_ids)
+            hit = any(
+                d in retrieved_doc_ids for d in case.expected_document_ids
+            ) or any(c in retrieved_chunk_ids for c in case.expected_chunk_ids)
             reciprocal_rank = 0.0
             for rank, chunk in enumerate(chunks, start=1):
-                if chunk.document_id in case.expected_document_ids:
+                doc_match = (
+                    chunk.document_id in case.expected_document_ids
+                    if case.expected_document_ids
+                    else False
+                )
+                chunk_match = (
+                    chunk.id in case.expected_chunk_ids
+                    if case.expected_chunk_ids
+                    else False
+                )
+                if doc_match or chunk_match:
                     reciprocal_rank = 1.0 / rank
+                    if rank == 1:
+                        hit_at_1 = True
+                    if rank <= 3:
+                        hit_at_3 = True
                     break
         else:
             # Unlabelled case or infrastructure failure: mark as miss so the
@@ -161,16 +180,23 @@ class EvaluationRunner:
             hit = False
             reciprocal_rank = 0.0
 
+        expected_count = max(
+            len(case.expected_document_ids), len(case.expected_chunk_ids)
+        )
         retrieval_metrics = RetrievalMetrics(
             case_id=case.id,
             hit=hit,
             reciprocal_rank=reciprocal_rank,
             retrieved_count=len(chunks),
-            expected_count=len(case.expected_document_ids),
+            expected_count=expected_count,
             retrieved_doc_ids=retrieved_doc_ids,
             expected_doc_ids=list(case.expected_document_ids),
             retrieval_latency_ms=retrieval_latency_ms,
             retrieval_error=retrieval_error,
+            hit_at_1=hit_at_1,
+            hit_at_3=hit_at_3,
+            retrieved_chunk_ids=retrieved_chunk_ids,
+            expected_chunk_ids=list(case.expected_chunk_ids),
         )
 
         # --- Generation phase ---
@@ -179,22 +205,27 @@ class EvaluationRunner:
         sources_count = 0
         has_context = False
 
-        try:
-            rag_request = RAGRequest(
-                query=case.question,
-                top_k=self._config.retrieval_top_k,
-                workspace_id=self._workspace_id,
-            )
-            rag_response = self._rag_service.answer(rag_request)
-            answer = rag_response.answer
-            sources_count = len(rag_response.sources)
+        if self._rag_service is not None:
+            try:
+                rag_request = RAGRequest(
+                    query=case.question,
+                    top_k=self._config.retrieval_top_k,
+                    workspace_id=self._workspace_id,
+                )
+                rag_response = self._rag_service.answer(rag_request)
+                answer = rag_response.answer
+                sources_count = len(rag_response.sources)
+                has_context = sources_count > 0
+            except Exception as exc:
+                # Generation failures are recorded in the answer string so that
+                # they appear in output without crashing the run.
+                gen_error = f"{type(exc).__name__}: {exc}"
+                answer = f"[Evaluation Error: {gen_error}]"
+                logger.warning("Generation failure for case %s: %s", case.id, gen_error)
+        else:
+            sources_count = len(chunks)
             has_context = sources_count > 0
-        except Exception as exc:
-            # Generation failures are recorded in the answer string so that
-            # they appear in output without crashing the run.
-            gen_error = f"{type(exc).__name__}: {exc}"
-            answer = f"[Evaluation Error: {gen_error}]"
-            logger.warning("Generation failure for case %s: %s", case.id, gen_error)
+            answer = ""
 
         t_gen_end = time.perf_counter()
         generation_latency_ms = (t_gen_end - t_gen_start) * 1000

@@ -1,0 +1,7 @@
+KIP uses a strict context-grounding prompt template to eliminate hallucinations in question answering.
+The prompt version is designated as v1 and instructs the model to answer only using the provided retrieved context.
+If the vector store returns no chunks meeting the similarity threshold, retrieval produces an empty context.
+When context is empty, RAGService short-circuits the pipeline without calling the LLM at all.
+It immediately returns the predefined message: I could not find relevant information in the knowledge base to answer your question.
+When context is present, ContextBuilder formats chunks with clear indices, document IDs, and filenames.
+The final RAGResponse bundles the generated answer alongside the complete list of source chunks for provenance inspection.

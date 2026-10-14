@@ -1,0 +1,7 @@
+The security threat model of KIP focuses primarily on cross-tenant data isolation and resource exhaustion defense.
+Tenant boundaries are enforced via multi-layer defense-in-depth rather than client-side promises.
+First, FastAPI dependency get_workspace_id validates that the incoming workspace header is non-empty and stripped.
+Second, Qdrant search requests apply mandatory payload filters requiring workspace_id equality.
+Third, RetrievalService inspects retrieved point metadata and discards any chunk whose workspace_id does not match the query.
+Fourth, per-workspace document and chunk quotas prevent malicious or runaway uploads from consuming shared storage.
+API keys and secrets are never returned in client API responses or serialized into evaluation reports.

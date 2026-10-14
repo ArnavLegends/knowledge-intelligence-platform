@@ -1,0 +1,8 @@
+KIP provides multi-tenancy isolation using workspace access tokens formatted as wksp_ followed by random hexadecimal characters.
+Every API request to document indexing, vector retrieval, or RAG must supply the X-KIP-Workspace-ID header.
+Workspaces are strictly enforced at the database level by tagging every indexed point payload with workspace_id in Qdrant.
+When searching, a Qdrant FieldCondition matches the workspace_id exactly, guaranteeing zero cross-tenant visibility.
+Free-tier safety quotas enforce a maximum of 50 documents per workspace (max_documents_per_workspace).
+Workspaces are also capped at a maximum of 1000 chunks per workspace (max_chunks_per_workspace).
+Exceeding either workspace limit causes the indexing service to reject uploads with HTTP 429 status codes.
+The Streamlit frontend clears session state and chat history whenever a user switches to a different workspace.

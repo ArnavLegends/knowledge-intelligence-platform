@@ -20,7 +20,7 @@ As of v1.1.0, the core functionality is **feature-complete and frozen**. Active 
 | Component | Technology | Provider / Environment | Configuration / Specs |
 |-----------|------------|------------------------|----------------------|
 | **LLM Provider** | Gemini 2.5 Flash (`gemini-2.5-flash`) | Google AI Studio | Free tier, grounded response generation |
-| **Embeddings** | Gemini Embedding 2 (`gemini-embedding-2`) | Google AI Studio | 768 dimensions, task-type aware embeddings |
+| **Embeddings** | Gemini Embedding 2 (`gemini-embedding-2`) | Google AI Studio | 768 dimensions, raw-text default with optional formatter hooks |
 | **Vector Database** | Qdrant Cloud Managed | Qdrant Cloud Free Tier | Collection `knowledge_base`, Cosine distance, 768 dims |
 | **Backend API** | FastAPI + Uvicorn | Render Free Web Service | Python 3.11, auto-reload dev / single worker prod |
 | **Frontend UI** | Streamlit | Streamlit Community Cloud | Multi-tenancy UI, provenance inspector, feedback box |
@@ -29,7 +29,7 @@ As of v1.1.0, the core functionality is **feature-complete and frozen**. Active 
 
 ---
 
-## 3. Implemented Capabilities (v1.1.0)
+## 3. Implemented Capabilities (v1.1.0 & v1.2 Research Preparation)
 
 - **Multi-Tenant Workspaces:**
   - Dynamic workspace access token creation (`wksp_...`)
@@ -57,31 +57,34 @@ As of v1.1.0, the core functionality is **feature-complete and frozen**. Active 
   - Transport to Google Apps Script via authenticated HTTPS GET (`doGet()`) using `requests.get()` with automatic HTTP 302 redirect handling
   - Automatic append to Google Sheets for evaluation and review
 
-- **Ground-Truth Evaluation Harness:**
-  - Dataset: `benchmarks/kip_v1_baseline.json` (ground truth Q&A pairs)
-  - Harness: `evaluation/runner.py` and `evaluation/models.py`
-  - Automated mechanical evaluation of retrieval hit rate, Mean Reciprocal Rank (MRR), keyword coverage, and stage latencies without external network dependencies
+- **Ground-Truth Evaluation Harness & Controlled Experimentation:**
+  - Datasets: `benchmarks/kip_v1_baseline.json` (v1.0 historical), `benchmarks/kip_v1_1_baseline.json` (7 cases, SHA-256 ground truth), `benchmarks/kip_v1_2_benchmark.json` (25 cases, chunk-level ground truth)
+  - Reference Corpora: `benchmarks/corpus/` (3 baseline docs) and `benchmarks/corpus_v1_2/` (18 docs, including 4 adversarial distractors)
+  - Harness: `evaluation/runner.py` and `evaluation/models.py` supporting fine-grained Hit Rate@1, Hit Rate@3, Hit Rate@5, MRR, latency profiling, and pure retrieval evaluation
+  - Formatting Hooks: Provider-neutral `doc_formatter` in `EmbeddingService` and `query_formatter` in `RetrievalService`
+  - Canonical Baseline: Live Gemini + Qdrant baseline verified (`benchmarks/kip_v1_1_baseline_result.json`, MRR 0.9048)
+  - Controlled Experiment: Asymmetric input-formatting experiment completed (`benchmarks/kip_v1_2_formatting_control_20261014_094111.json`, `benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`). Both control and treatment achieved Hit Rate@1: 0.8400, Hit Rate@3/5: 1.0000, MRR: 0.9133 on the 25-case benchmark. Raw-text embedding retained as production default.
 
 ---
 
 ## 4. Test Suite Metrics
 
-- **Total Test Count:** 245 automated tests
-- **Passing Rate:** 100% (245/245 passing)
+- **Total Test Count:** 267 automated tests
+- **Passing Rate:** 100% (267/267 passing)
 - **Subsystem Breakdown:**
   - Backend API endpoints (`tests/test_api.py`, `tests/test_feedback_api.py`): 38 tests
   - RAG Core (Chunking, Embeddings, Vector Store, LLM, Retrieval): 94 tests
   - Ingestion (PDF, DOCX, TXT, MD, Multi-Document, Workspaces): 62 tests
   - Workspace & Multi-Tenancy (Scoping, Isolation, Token Management): 31 tests
-  - Evaluation & Configuration (Settings, Validation, Runners): 20 tests
+  - Evaluation & Configuration (Settings, Validation, Runners, v1.2 Formatter Hooks & Metrics): 42 tests
 
 ---
 
-## 5. Explicitly Deferred Capabilities (Out of Scope for v1.1.0)
+## 5. Explicitly Deferred Capabilities & Research Status
 
-The following capabilities are **explicitly deferred** to future roadmap milestones and are not implemented in v1.1.0:
+The following capabilities are positioned on the forward-looking roadmap:
 
-- **v1.2 (Retrieval Intelligence):** Hybrid sparse/dense search (BM25 + Qdrant), cross-encoder reranking, adaptive chunking strategies.
+- **v1.2 (Retrieval Intelligence):** Initial input-formatting experiment completed (neutral outcome: raw-text default retained). Next research candidates: hybrid sparse/dense search (BM25 + Qdrant) and cross-encoder reranking, evaluated against an expanded, multi-topic benchmark.
 - **v1.3 (Performance Engineering):** Redis semantic caching, latency telemetry, rate limiting.
 - **v2.0 (AI Memory):** Persistent multi-turn conversation memory, session stores, user personalization.
 - **v2.1 (Tool Integration):** External tool calling, calculator, web search execution.

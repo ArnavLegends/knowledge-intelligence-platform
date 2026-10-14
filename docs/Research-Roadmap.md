@@ -266,7 +266,31 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Configuration:** `top_k = 5`, `llm_model = gemini-2.5-flash` / `gpt-4o-mini`, `rag_prompt_version = v1`  
 
 **Purpose:** Establish a reproducible end-to-end RAG baseline before optimization experiments.  
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(Canonical v1.1 live baseline achieved MRR 0.9048, Hit Rate 1.0000 on 7 cases).*
+
+### EXP-V12-INPUT-FORMAT-001
+
+**Status:** Completed (2026-10-14)
+**Title:** Controlled Gemini Embedding 2 Asymmetric Input Formatting Experiment
+**Strategy:** Compare raw-text inputs (Control) vs Google's documented asymmetric textual formatting (Treatment)
+**Configuration:**
+- Embedding Model: `gemini-embedding-2` (768 dimensions, cosine similarity)
+- Control: Raw query `{query}` and raw chunk `{chunk}` in Qdrant collection `kip_eval_v1_2_control`
+- Treatment: Query `task: question answering | query: {query}` and chunk `title: none | text: {chunk}` in Qdrant collection `kip_eval_v1_2_formatted`
+- API Constraint: `task_type` is unsupported by `gemini-embedding-2`; textual prefixes used exclusively
+- Corpus & Benchmark: 18 reference documents (`benchmarks/corpus_v1_2/`) and 25 labelled queries (`benchmarks/kip_v1_2_benchmark.json`)
+
+**Measured Results:**
+- Control: Hit Rate@1 = 0.8400, Hit Rate@3 = 1.0000, Hit Rate@5 = 1.0000, MRR = 0.9133, Mean Latency = 556.89 ms
+- Treatment: Hit Rate@1 = 0.8400, Hit Rate@3 = 1.0000, Hit Rate@5 = 1.0000, MRR = 0.9133, Mean Latency = 536.51 ms
+- Paired Deltas: 23/25 queries unchanged in rank (92%), 1 improved (`v12-017`: rank 2 -> rank 1), 1 degraded (`v12-010`: rank 1 -> rank 2). Net MRR delta = +0.0000.
+- Artifacts: [`benchmarks/kip_v1_2_formatting_control_20261014_094111.json`](../benchmarks/kip_v1_2_formatting_control_20261014_094111.json), [`benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`](../benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json)
+
+**Outcome & Engineering Decisions:**
+1. **Raw-Text Default Preserved:** Due to exactly neutral retrieval performance, raw-text embedding remains the production default, avoiding prefix token overhead.
+2. **Formatter Extension Hooks:** Provider-neutral `doc_formatter` in `EmbeddingService` and `query_formatter` in `RetrievalService` remain in the codebase for future experimentation.
+3. **Pilot Scope & Qualifications:** The evaluation covers 25 queries and 18 documents. Hit Rate@3 and Hit Rate@5 saturated at 1.0000 on this pilot; results do not establish general retrieval superiority. The ~20 ms latency difference is within normal network variance and not claimed as statistically meaningful.
+4. **Future Research Priority:** Developing a larger, more discriminative multi-domain evaluation benchmark is required for upcoming hybrid retrieval (BM25 + dense) and cross-encoder reranking research.
 
 ---
 
@@ -281,7 +305,7 @@ The research roadmap evolves alongside the product roadmap. Each product milesto
 | v0.3 | Document chunking, embedding strategies, vector indexing | ✅ Completed |
 | v1.0 | RAG pipeline, prompt engineering, evaluation harness (`runner.py`) | ✅ Completed |
 | v1.1 | Multi-tenant vector filtering (Qdrant), Gemini batching, user feedback persistence | ✅ Completed |
-| v1.2 | Hybrid retrieval (BM25 + dense), cross-encoder reranking, 14-step research lifecycle | 🔬 Planned Candidate |
+| v1.2 | Gemini Embedding 2 input formatting (neutral; raw-text default retained); hybrid retrieval (BM25 + dense) & reranking | 🔬 Active Research |
 | v1.3 | Performance optimization, caching, latency profiling, observability | 📅 Planned → Deferred |
 | v2.0 | Conversational memory, long-term memory architectures | 📅 Planned → Deferred |
 | v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned → Deferred |

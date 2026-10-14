@@ -1,0 +1,7 @@
+The KIP backend is built with FastAPI and exposes RESTful endpoints under the /api/v1 prefix.
+Document ingestion is handled via POST /api/v1/documents accepting multipart form uploads.
+Vector similarity search is exposed via POST /api/v1/retrieval/search with RetrievalQuery payloads.
+Grounded question answering is executed through POST /api/v1/rag/query with RAGRequest payloads.
+System health and readiness checks are exposed at GET /health, returning application name and version 1.1.0.
+All workspace-scoped endpoints require the X-KIP-Workspace-ID header and fail with missing_workspace_id if omitted.
+Common error responses return standard AppException JSON bodies with error codes, message details, and HTTP status codes.

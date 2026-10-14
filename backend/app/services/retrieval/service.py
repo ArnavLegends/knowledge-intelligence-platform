@@ -1,6 +1,7 @@
 """Application-facing retrieval service."""
 
 import logging
+from collections.abc import Callable
 
 from fastapi import Depends
 
@@ -24,10 +25,12 @@ class RetrievalService:
         embedding_service: EmbeddingService | None = None,
         vector_store_service: VectorStoreService | None = None,
         settings: Settings | None = None,
+        query_formatter: Callable[[str], str] | None = None,
     ) -> None:
         self._embedding_service = embedding_service or EmbeddingService()
         self._vector_store_service = vector_store_service or VectorStoreService()
         self._settings = settings or default_settings
+        self._query_formatter = query_formatter
 
     def search(self, query: RetrievalQuery) -> list[RetrievedChunk]:
         """Perform a semantic search strictly scoped to the query's workspace."""
@@ -39,8 +42,13 @@ class RetrievalService:
 
         # 1. Embed the query text
         try:
+            query_text_to_embed = (
+                self._query_formatter(query.text)
+                if self._query_formatter is not None
+                else query.text
+            )
             emb_req = EmbeddingRequest(
-                inputs=[EmbeddingInput(source_id="query", text=query.text)],
+                inputs=[EmbeddingInput(source_id="query", text=query_text_to_embed)],
                 model=self._settings.embedding_model,
             )
             embeddings = self._embedding_service.embed_texts(emb_req)

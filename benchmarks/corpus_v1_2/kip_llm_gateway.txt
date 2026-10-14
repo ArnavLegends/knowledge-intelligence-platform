@@ -1,0 +1,7 @@
+KIP abstracts language model interactions through the LLMManager gateway and application-facing LLMService.
+The primary production model is Google Gemini 2.5 Flash (gemini-2.5-flash) hosted on Google AI Studio.
+The gateway also supports OpenAI gpt-4o-mini as an alternate provider configured via LLM_PROVIDER=openai.
+Requests pass through LLMRequest containing an array of LLMMessage objects with user and system roles.
+The Gemini provider wraps the official google-genai SDK and handles API authentication using LLM_API_KEY.
+If the provider returns rate-limit or quota-exceeded responses (HTTP 429), the gateway translates them into LLMProviderError.
+The service normalizes completions into an LLMResponse containing generated content and token usage statistics.

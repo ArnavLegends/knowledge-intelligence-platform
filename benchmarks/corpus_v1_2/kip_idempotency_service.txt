@@ -1,0 +1,8 @@
+KIP implements content-addressed idempotency to avoid redundant chunking and embedding operations.
+When a file is ingested, DocumentIngestionService calculates document_id as the SHA-256 hash of raw file bytes.
+Two files with different filenames but identical binary content produce the exact same document ID.
+Before executing chunking or embedding, DocumentIndexingService calls document_exists on the vector store.
+If vectors with the given document_id already exist in the target workspace, the service halts immediately.
+The service returns an IndexingResult with chunks_indexed equal to 0, conserving external API quota.
+If a document is modified and re-uploaded, its SHA-256 hash changes, and the new version is indexed normally.
+Users can explicitly delete an existing document using its document_id to purge all associated vector points.

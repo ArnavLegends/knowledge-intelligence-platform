@@ -1,0 +1,7 @@
+KIP collects user feedback directly inside the Streamlit user interface to evaluate real-world answer quality.
+The feedback form presents a category dropdown and a free-text feedback message.
+To protect backend persistence and avoid spam, the user feedback message is strictly constrained to 30 words.
+Submissions are sent via HTTP POST to /api/v1/feedback with category, message, and optional workspace_id.
+The feedback service forwards entries to an authenticated Google Apps Script webhook backing Google Sheets.
+The webhook transport uses an authenticated HTTPS GET request (doGet) with automatic HTTP 302 redirect following.
+If feedback webhook credentials (FEEDBACK_WEBHOOK_URL and token) are not configured, submissions are logged and acknowledged.

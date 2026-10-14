@@ -1,0 +1,498 @@
+{
+  "version": "v1.2-benchmark",
+  "description": "KIP v1.2 retrieval benchmark: 25 labelled questions evaluated against an expanded 18-document reference corpus (including 4 adversarial distractor documents). Used to evaluate input formatting and retrieval intelligence.",
+  "cases": [
+    {
+      "id": "v12-001",
+      "question": "What is the maximum upload size limit in bytes supported by KIP document parsers?",
+      "reference_answer": "The max upload limit is 2097152 bytes (2 MB).",
+      "expected_document_ids": [
+        "717a9f50e6e87d50545083a0da382aaea9043e2fa7781941f449a01a97a17939"
+      ],
+      "expected_chunk_ids": [
+        "8840489e58a272b7e7d86165efec71b3187f2b7c1299008164b643a4b0716111"
+      ],
+      "expected_keywords": [
+        "2097152",
+        "2 MB",
+        "max_upload_bytes"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_document_parsers.txt"
+      }
+    },
+    {
+      "id": "v12-002",
+      "question": "What HTTP header must accompany every workspace-scoped API request in KIP?",
+      "reference_answer": "Every workspace-scoped request must supply the X-KIP-Workspace-ID header.",
+      "expected_document_ids": [
+        "f88a2b872f8703152c22f9e6d0ec0fc5c71e998e610ce2a2bcd170af13121817"
+      ],
+      "expected_chunk_ids": [
+        "89c21a7156c0b2585091ea82d9486d4d18835f382349c81bd0c048fea219c428"
+      ],
+      "expected_keywords": [
+        "X-KIP-Workspace-ID"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_multitenancy_architecture.txt"
+      }
+    },
+    {
+      "id": "v12-003",
+      "question": "What are the default limits for documents and chunks per workspace in KIP?",
+      "reference_answer": "The limits are 50 documents and 1000 chunks per workspace.",
+      "expected_document_ids": [
+        "f88a2b872f8703152c22f9e6d0ec0fc5c71e998e610ce2a2bcd170af13121817"
+      ],
+      "expected_chunk_ids": [
+        "89c21a7156c0b2585091ea82d9486d4d18835f382349c81bd0c048fea219c428"
+      ],
+      "expected_keywords": [
+        "50",
+        "1000"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_multitenancy_architecture.txt"
+      }
+    },
+    {
+      "id": "v12-004",
+      "question": "What is the word limit enforced on user feedback messages in the KIP interface?",
+      "reference_answer": "User feedback messages have a strict 30-word limit.",
+      "expected_document_ids": [
+        "90f1120fd93dba87c023f02cfa0b13726f46e95f8b23693f55e9c831a48cd9d7"
+      ],
+      "expected_chunk_ids": [
+        "286b046ea5453800b578055b43bf43abf67021f793b179e767947e92b3fa1dcc"
+      ],
+      "expected_keywords": [
+        "30-word",
+        "limit"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_feedback_webhook.txt"
+      }
+    },
+    {
+      "id": "v12-005",
+      "question": "What exact predefined response is returned when KIP finds no relevant context?",
+      "reference_answer": "The predefined response is: I could not find relevant information in the knowledge base to answer your question.",
+      "expected_document_ids": [
+        "9c2b2af9079f91e5bee81cf4a43dd0e6f405721e76a83dc519fb7042ab7ddb07"
+      ],
+      "expected_chunk_ids": [
+        "47378cd189f0ceb9822bdd000c26626af5a21b78d978c8c39fc0ff667f959e73"
+      ],
+      "expected_keywords": [
+        "could not find relevant information"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_grounded_rag_prompting.txt"
+      }
+    },
+    {
+      "id": "v12-006",
+      "question": "What FastAPI endpoint provides application readiness and health status?",
+      "reference_answer": "The GET /health endpoint provides system readiness and version 1.1.0.",
+      "expected_document_ids": [
+        "94537d50db3b489518a96a150e5ceca48062c1cacee542948be31c0b34e23f16"
+      ],
+      "expected_chunk_ids": [
+        "dc2f844105be647f8d021d7d125ca9fcc007cbf339db30eda9e7b697844def30"
+      ],
+      "expected_keywords": [
+        "/health",
+        "1.1.0"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_api_specifications.txt"
+      }
+    },
+    {
+      "id": "v12-007",
+      "question": "What deterministic algorithm computes chunk IDs during indexing in KIP?",
+      "reference_answer": "Chunk IDs are SHA-256 hashes of the document ID concatenated with a colon and chunk index.",
+      "expected_document_ids": [
+        "42fdd2502a96a31974aad6a476bdba4c28fe896cf126d25ca984f6cc7f551bd9"
+      ],
+      "expected_chunk_ids": [
+        "cc306271ba247662cd1517916ee6ebd6478189adc1628213e51fa982199c57b8"
+      ],
+      "expected_keywords": [
+        "SHA-256",
+        "colon",
+        "chunk index"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_chunking_and_embeddings.txt"
+      }
+    },
+    {
+      "id": "v12-008",
+      "question": "How are point IDs constructed in Qdrant to ensure idempotent chunk overwriting?",
+      "reference_answer": "Point IDs are deterministic UUIDs generated via uuid5 in the URL namespace from kip://workspace_id/chunk_id.",
+      "expected_document_ids": [
+        "8a37b15d83ff34d26a438dd4a57fcb6eb422fe6b5ec5e3ed57b2cc22175c4b83"
+      ],
+      "expected_chunk_ids": [
+        "2a6164418d5a2d9323c7ba0c7a5a954b2590e38d3f1440247b3c1d08e9b48b8b"
+      ],
+      "expected_keywords": [
+        "uuid5",
+        "kip://workspace_id/chunk_id"
+      ],
+      "metadata": {
+        "category": "exact_token",
+        "corpus_doc": "kip_vector_store_adapters.txt"
+      }
+    },
+    {
+      "id": "v12-009",
+      "question": "How does the system ensure that re-uploading an unchanged file does not waste external API calls?",
+      "reference_answer": "KIP checks document_exists using the content-addressed SHA-256 hash and immediately returns 0 indexed chunks.",
+      "expected_document_ids": [
+        "44635d7bb2910fd6538a43fbed5cc5b14713bad093370da182c29541bb326028"
+      ],
+      "expected_chunk_ids": [
+        "56393d5dc82bcc813f31316f5274104f22b9f33fbe0f8322f27c1bd4130c79f5"
+      ],
+      "expected_keywords": [
+        "document_exists",
+        "chunks_indexed equal to 0"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_idempotency_service.txt"
+      }
+    },
+    {
+      "id": "v12-010",
+      "question": "How does KIP prevent customer data leakage across different organizational tenants?",
+      "reference_answer": "KIP uses multi-layer security: header validation, mandatory Qdrant payload filters, and post-retrieval workspace verification.",
+      "expected_document_ids": [
+        "c23047dbd82181c11741ec45dfbb3e2304da4927e6f21afe361e3433df1a1fc7"
+      ],
+      "expected_chunk_ids": [
+        "f34b5add804d7bba24b0671dff4512991e58be1e563d14997ba8c371b42bcf15"
+      ],
+      "expected_keywords": [
+        "multi-layer",
+        "payload filters",
+        "workspace_id"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_security_threat_model.txt"
+      }
+    },
+    {
+      "id": "v12-011",
+      "question": "What prevents the evaluation harness from reporting an artificially perfect 100% hit rate?",
+      "reference_answer": "Cases with empty expected_document_ids are tracked as unlabelled and excluded from Hit Rate and MRR aggregation.",
+      "expected_document_ids": [
+        "61be0048f3bcc9b0032a5a14e636b8cd3fe3a079ef222039e49c1e95a2675248"
+      ],
+      "expected_chunk_ids": [
+        "ac828ddd444a54ce8137260c7efae9a99ad1479cc05194c303469349bdf409e6"
+      ],
+      "expected_keywords": [
+        "unlabelled",
+        "excluded"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_evaluation_framework.txt"
+      }
+    },
+    {
+      "id": "v12-012",
+      "question": "How does the platform handle Word document structures during document ingestion?",
+      "reference_answer": "DOCX files are processed with python-docx to extract paragraphs and tables into plain text.",
+      "expected_document_ids": [
+        "717a9f50e6e87d50545083a0da382aaea9043e2fa7781941f449a01a97a17939"
+      ],
+      "expected_chunk_ids": [
+        "8840489e58a272b7e7d86165efec71b3187f2b7c1299008164b643a4b0716111"
+      ],
+      "expected_keywords": [
+        "python-docx",
+        "paragraphs",
+        "tables"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_document_parsers.txt"
+      }
+    },
+    {
+      "id": "v12-013",
+      "question": "What mechanism does the web interface use to forward community user reviews to spreadsheets?",
+      "reference_answer": "The backend forwards feedback via an authenticated HTTPS GET request with automatic 302 redirect following to Google Apps Script.",
+      "expected_document_ids": [
+        "90f1120fd93dba87c023f02cfa0b13726f46e95f8b23693f55e9c831a48cd9d7"
+      ],
+      "expected_chunk_ids": [
+        "286b046ea5453800b578055b43bf43abf67021f793b179e767947e92b3fa1dcc"
+      ],
+      "expected_keywords": [
+        "Google Apps Script",
+        "doGet",
+        "302 redirect"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_feedback_webhook.txt"
+      }
+    },
+    {
+      "id": "v12-014",
+      "question": "What prompt version and grounding constraints guide the RAG answer synthesis?",
+      "reference_answer": "Prompt version v1 instructs the model to answer strictly using retrieved context and refuses ungrounded questions.",
+      "expected_document_ids": [
+        "9c2b2af9079f91e5bee81cf4a43dd0e6f405721e76a83dc519fb7042ab7ddb07"
+      ],
+      "expected_chunk_ids": [
+        "47378cd189f0ceb9822bdd000c26626af5a21b78d978c8c39fc0ff667f959e73"
+      ],
+      "expected_keywords": [
+        "v1",
+        "strict",
+        "context"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_grounded_rag_prompting.txt"
+      }
+    },
+    {
+      "id": "v12-015",
+      "question": "How are system configuration constraints validated upon startup?",
+      "reference_answer": "The Settings class validates that chunk_size is strictly positive and chunk_overlap is strictly less than chunk_size.",
+      "expected_document_ids": [
+        "f31afadf457b1b24713343f87f80b916c3f1b02511f854f8add8fddbbb96eb7d"
+      ],
+      "expected_chunk_ids": [
+        "ea5e7dad891526dd24e3d918e99092a52d3118bdc30d91c20a2d96e31bb2aedd"
+      ],
+      "expected_keywords": [
+        "chunk_size",
+        "chunk_overlap",
+        "Settings"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_configuration_settings.txt"
+      }
+    },
+    {
+      "id": "v12-016",
+      "question": "What language model drives generative responses in the deployed environment?",
+      "reference_answer": "KIP uses Google Gemini 2.5 Flash (gemini-2.5-flash) via Google AI Studio.",
+      "expected_document_ids": [
+        "792a97f6d3e29ba1334383183367a7954bfbc4cf5635d4a5381122be1049ee15"
+      ],
+      "expected_chunk_ids": [
+        "5ae283aa0a42b35a25e8304111e0c8163c7d31849e079fb553e82ed186c5d3e4"
+      ],
+      "expected_keywords": [
+        "gemini-2.5-flash",
+        "Google AI Studio"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_llm_gateway.txt"
+      }
+    },
+    {
+      "id": "v12-017",
+      "question": "What formats can users upload to populate their private enterprise knowledge repositories?",
+      "reference_answer": "KIP supports document ingestion in PDF, DOCX, TXT, and Markdown formats.",
+      "expected_document_ids": [
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "expected_chunk_ids": [
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "expected_keywords": [
+        "PDF",
+        "DOCX",
+        "TXT",
+        "Markdown"
+      ],
+      "metadata": {
+        "category": "semantic_paraphrase",
+        "corpus_doc": "kip_overview.txt"
+      }
+    },
+    {
+      "id": "v12-018",
+      "question": "What vector embedding model and output dimensionality does KIP actively use in production?",
+      "reference_answer": "Production KIP uses gemini-embedding-2 with 768 dimensions.",
+      "expected_document_ids": [
+        "07123957b17b180eef3505c6b2dc1f76a161cedcc618081eb882de99dbf2a324"
+      ],
+      "expected_chunk_ids": [
+        "7808a05433955539fe593a781a3d783e56b3abee58b17b4f5cf8fb8710f386af"
+      ],
+      "expected_keywords": [
+        "gemini-embedding-2",
+        "768 dimensions"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "kip_overview.txt",
+        "distractor": "distractor_legacy_chroma_settings.txt"
+      }
+    },
+    {
+      "id": "v12-019",
+      "question": "Why was character-based chunking selected instead of token-based or semantic chunking?",
+      "reference_answer": "Character chunking requires zero external tokenizer dependencies like tiktoken and operates in standard Python.",
+      "expected_document_ids": [
+        "6ff7d746e04a224f077f3f5d56a24d27897cb1937b239cae74cd88beb9862309"
+      ],
+      "expected_chunk_ids": [
+        "1f2dc7a044d6b9db66cf9e3446fb01389689ae2e5ef44b40a5d71c2c3f150a8c"
+      ],
+      "expected_keywords": [
+        "tiktoken",
+        "zero external tokenizer dependencies"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "distractor_alternative_chunkers.txt",
+        "distractor": "kip_chunking_and_embeddings.txt"
+      }
+    },
+    {
+      "id": "v12-020",
+      "question": "Why are external LLM-as-a-judge frameworks like RAGAS and DeepEval not used in the automated test runner?",
+      "reference_answer": "External LLM judge frameworks consume substantial API quota, introduce stochastic variance, and lack deterministic repeatability.",
+      "expected_document_ids": [
+        "8774fafef3374318b636ba522a75f6c1958114f67340e0cd4f3faf9bafee6007"
+      ],
+      "expected_chunk_ids": [
+        "698e280fcc958b58a4e5b4dc49abd74ff7ab0ee47b228a2b8701b53bdf18f9eb"
+      ],
+      "expected_keywords": [
+        "API quota",
+        "stochastic",
+        "deterministic"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "distractor_external_judge_evaluators.txt",
+        "distractor": "kip_evaluation_framework.txt"
+      }
+    },
+    {
+      "id": "v12-021",
+      "question": "What proposed hybrid retrieval algorithm and smoothing constant were evaluated for future versions?",
+      "reference_answer": "Future proposals evaluated Reciprocal Rank Fusion (RRF) with smoothing parameter k=60 combining dense and sparse BM25 vectors.",
+      "expected_document_ids": [
+        "bcae8ec7dcddee5cfda148a3f27a5b270940ff4a0792d2bd70d53092debbbaad"
+      ],
+      "expected_chunk_ids": [
+        "5ef667ce6af21d0d56e31a4276f06c4fcae3f20faa820e35648d4c4ce7caa45f"
+      ],
+      "expected_keywords": [
+        "Reciprocal Rank Fusion",
+        "RRF",
+        "k equal to 60"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "distractor_hybrid_search_proposals.txt",
+        "distractor": "kip_retrieval_and_rag.txt"
+      }
+    },
+    {
+      "id": "v12-022",
+      "question": "How did legacy test setups isolate OpenAI vector embeddings from Gemini collections?",
+      "reference_answer": "Legacy ChromaDB collections were named knowledge_base_openai to isolate 1536-dimensional vectors from 768-dim models.",
+      "expected_document_ids": [
+        "8b0226bcfa741d718ffcb4aed64b322e7378b3b79ec4c7a9562f5459183b6daf"
+      ],
+      "expected_chunk_ids": [
+        "6ce98a9727948b2b948cb5b36fc846bfd204136a352c36e7c4b386d9141cca0b"
+      ],
+      "expected_keywords": [
+        "knowledge_base_openai",
+        "1536-dim"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "distractor_legacy_chroma_settings.txt",
+        "distractor": "kip_vector_store_adapters.txt"
+      }
+    },
+    {
+      "id": "v12-023",
+      "question": "How does KIP calculate vector distance from cosine similarity scores in Qdrant?",
+      "reference_answer": "KIP converts cosine similarity to distance using distance = max(0, 1 - similarity_score).",
+      "expected_document_ids": [
+        "c018e2ecd67d7fae0592d751086f9ee5c5496ded23692bbbf1f74d112b14aa14"
+      ],
+      "expected_chunk_ids": [
+        "49821da4642403a25e4fe97f8b03816ebeb614f587c9d70c9ff7d16b1739f177"
+      ],
+      "expected_keywords": [
+        "max(0, 1 - similarity_score)",
+        "COSINE distance"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "kip_retrieval_and_rag.txt",
+        "distractor": "kip_vector_store_adapters.txt"
+      }
+    },
+    {
+      "id": "v12-024",
+      "question": "What distance metric and collection configuration are mandated when creating Qdrant collections?",
+      "reference_answer": "Qdrant collections mandate 768 dimensions for gemini-embedding-2 and COSINE distance.",
+      "expected_document_ids": [
+        "8a37b15d83ff34d26a438dd4a57fcb6eb422fe6b5ec5e3ed57b2cc22175c4b83"
+      ],
+      "expected_chunk_ids": [
+        "2a6164418d5a2d9323c7ba0c7a5a954b2590e38d3f1440247b3c1d08e9b48b8b"
+      ],
+      "expected_keywords": [
+        "768",
+        "COSINE"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "kip_vector_store_adapters.txt",
+        "distractor": "distractor_legacy_chroma_settings.txt"
+      }
+    },
+    {
+      "id": "v12-025",
+      "question": "How does KIP handle multi-tenant isolation during vector similarity searches?",
+      "reference_answer": "Searches apply a mandatory Qdrant FieldCondition payload filter matching the query workspace_id.",
+      "expected_document_ids": [
+        "f88a2b872f8703152c22f9e6d0ec0fc5c71e998e610ce2a2bcd170af13121817"
+      ],
+      "expected_chunk_ids": [
+        "89c21a7156c0b2585091ea82d9486d4d18835f382349c81bd0c048fea219c428"
+      ],
+      "expected_keywords": [
+        "FieldCondition",
+        "workspace_id"
+      ],
+      "metadata": {
+        "category": "distractor_disambiguation",
+        "corpus_doc": "kip_multitenancy_architecture.txt",
+        "distractor": "kip_security_threat_model.txt"
+      }
+    }
+  ]
+}

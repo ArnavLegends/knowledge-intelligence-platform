@@ -42,16 +42,14 @@ reserved for external judge configurations in v1.2+.
 |---------|------|-------------|-----|
 | v1.0 historical | `benchmarks/kip_v1_baseline.json` | No `expected_document_ids` (unlabelled) | Keyword coverage only; preserved as historical artifact |
 | **v1.1 baseline** | `benchmarks/kip_v1_1_baseline.json` | 7 cases, all with `expected_document_ids` | Hit Rate, MRR, Keyword Coverage |
+| **v1.2 experiment** | `benchmarks/kip_v1_2_benchmark.json` | 25 cases, all with `expected_document_ids` and `expected_chunk_ids` | Hit Rate@1/3/5, MRR, Input-Formatting Comparison |
 
-## Reference Corpus
+## Reference Corpora
 
-The v1.1 baseline uses a small, version-controlled reference corpus in
-`benchmarks/corpus/`. Document IDs are derived as `SHA-256(raw_file_bytes)`,
-matching KIP's `DocumentIngestionService`. Corpus files use LF line endings
-only to ensure stable IDs across platforms.
+- **v1.1 Baseline Corpus (`benchmarks/corpus/`):** 3 version-controlled text files (LF line endings only) covering overview, chunking, and retrieval topics. See [`benchmarks/corpus/README.md`](../benchmarks/corpus/README.md).
+- **v1.2 Expanded Corpus (`benchmarks/corpus_v1_2/`):** 18 version-controlled text files (14 KIP architecture documents + 4 adversarial distractors). Designed so top-5 retrieval covers ~28% of corpus candidates (18 chunks), eliminating the v1.1 Hit Rate@5 saturation. See [`benchmarks/corpus_v1_2/README.md`](../benchmarks/corpus_v1_2/README.md).
 
-See [`benchmarks/corpus/README.md`](../benchmarks/corpus/README.md) for full
-documentation.
+Document IDs in both corpora are derived as `SHA-256(raw_file_bytes)`, matching KIP's `DocumentIngestionService`.
 
 ## Evaluation Workspace
 
@@ -136,6 +134,56 @@ The genuine provider-backed baseline was executed and verified against live Goog
 
 Canonical result artifact: [`benchmarks/kip_v1_1_baseline_result.json`](../benchmarks/kip_v1_1_baseline_result.json)
 
+### 5. KIP v1.2 Controlled Input-Formatting Experiment (Gemini Embedding 2)
+
+A controlled empirical experiment was executed comparing KIP's baseline raw-text embedding inputs (**Control**) against Google's documented asymmetric question-answering textual input formatting (**Treatment**) using the production `gemini-embedding-2` model (768 dimensions), isolated Qdrant collections, and the 18-document reference corpus.
+
+#### Experimental Setup
+
+- **Control Condition:**
+  - Query: Raw query text (`{query}`)
+  - Document Chunks: Raw chunk text (`{chunk}`)
+  - Qdrant Collection: `kip_eval_v1_2_control`
+- **Treatment Condition:**
+  - Query: `task: question answering | query: {query}`
+  - Document Chunks: `title: none | text: {chunk}`
+  - Qdrant Collection: `kip_eval_v1_2_formatted`
+- **API Constraint:** Google's official documentation notes that `task_type` is unsupported for `gemini-embedding-2`. Formatting was applied exclusively via text prefixes; no `task_type` API parameter was passed.
+- **Payload Invariant:** In both conditions, Qdrant payload metadata retained the raw chunk text (`meta["text"] = chunk.text`) for provenance and display.
+- **Corpus & Benchmark:** 18 documents (~14 KB, LF line endings, 1 chunk/doc) in `benchmarks/corpus_v1_2/` and 25 labelled queries in `benchmarks/kip_v1_2_benchmark.json`. Top-5 retrieval evaluates 5 out of 18 chunks (~28% of corpus).
+- **Evaluation Scope:** Pure dense retrieval (LLM generation omitted to isolate retrieval quality and conserve quota).
+- **Execution Script:** `python evaluation/run_v1_2_formatting_experiment.py`
+
+#### Measured Results
+
+| Metric | Control (Raw Text) | Treatment (Formatted Text) | Absolute Delta |
+|---|---|---|---|
+| **Hit Rate @ 1** | **0.8400** (21/25) | **0.8400** (21/25) | `+0.0000` |
+| **Hit Rate @ 3** | **1.0000** (25/25) | **1.0000** (25/25) | `+0.0000` |
+| **Hit Rate @ 5** | **1.0000** (25/25) | **1.0000** (25/25) | `+0.0000` |
+| **Mean Reciprocal Rank (MRR)** | **0.9133** | **0.9133** | `+0.0000` |
+| **Mean Retrieval Latency** | 556.89 ms | 536.51 ms | `-20.38 ms` |
+
+#### Paired Query Behavior & Analysis
+
+- **23 of 25 queries (92.0%)** produced identical retrieval rankings across both conditions.
+- **1 query improved:** `v12-017` ("What formats can users upload to populate their private enterprise knowledge repositories?"): reciprocal rank improved from 0.5000 (rank 2) to 1.0000 (rank 1), converting a Hit@1 miss to a hit.
+- **1 query degraded:** `v12-010` ("How does KIP prevent customer data leakage across different organizational tenants?"): reciprocal rank dropped from 1.0000 (rank 1) to 0.5000 (rank 2), converting a Hit@1 hit to a miss.
+- Both changed cases represented rank-order swaps between two highly relevant documents (`kip_overview.txt` vs `kip_document_parsers.txt`, and `kip_security_threat_model.txt` vs `kip_multitenancy_architecture.txt`).
+
+#### Result Artifacts
+
+- Control Result: [`benchmarks/kip_v1_2_formatting_control_20261014_094111.json`](../benchmarks/kip_v1_2_formatting_control_20261014_094111.json)
+- Treatment Result: [`benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`](../benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json)
+
+#### Pilot Evaluation Qualifications & Engineering Decision
+
+1. **Benchmark Scale Limitations:** The evaluation covers 25 queries over an 18-document corpus. Hit Rate@3 and Hit Rate@5 reached 100% on this pilot benchmark. Because top-3 and top-5 retrieval saturated, these results cannot establish general retrieval superiority across broad, large-scale corpora.
+2. **Latency Interpretation:** The 20.38 ms latency difference is within standard cloud network variance and is not claimed as statistically meaningful.
+3. **Production Default Decision:** Because the aggregate retrieval performance was exactly neutral (MRR 0.9133 vs 0.9133, Hit@1 0.8400 vs 0.8400), **KIP retains raw-text embedding as the production default**. Adding task prefixes consumes additional prompt tokens without demonstrated retrieval gain on this benchmark.
+4. **Extension Hooks:** Provider-neutral `doc_formatter` in `EmbeddingService` and `query_formatter` in `RetrievalService` remain in the codebase as optional extension hooks for future research.
+5. **Future Research Need:** Larger, more diverse benchmark evaluation (more documents, distractor-heavy environments, cross-domain corpora) is identified as a necessary next step for future retrieval investigations (e.g. hybrid search, reranking).
+
 ## Remaining Limitations
 
 1. **Keyword coverage is substring match.** `kw.lower() in answer.lower()` does
@@ -146,8 +194,9 @@ Canonical result artifact: [`benchmarks/kip_v1_1_baseline_result.json`](../bench
 3. **Single-node latency.** Latency measurements are wall-clock and include
    embedding API network round-trips; not suitable for throughput profiling.
 
-4. **Corpus scale.** The v1.1 reference corpus contains 3 documents (~2.5 KB).
-   Future benchmarks will expand corpus size and distractor count.
+4. **Corpus scale.** The v1.1 reference corpus contains 3 documents (~2.5 KB);
+   the v1.2 pilot corpus contains 18 documents (~14 KB). Larger multi-topic
+   corpora are needed to avoid saturation on top-k retrieval metrics.
 
 ## Planned Role (v1.2+)
 
@@ -164,4 +213,5 @@ Planned enhancements for future versions:
 - [Benchmarking Strategy](../docs/Benchmarking.md)
 - [Research Roadmap](../docs/Research-Roadmap.md)
 - [Product Roadmap](../docs/Product-Roadmap.md)
-- [Corpus README](../benchmarks/corpus/README.md)
+- [Corpus v1.1 README](../benchmarks/corpus/README.md)
+- [Corpus v1.2 README](../benchmarks/corpus_v1_2/README.md)

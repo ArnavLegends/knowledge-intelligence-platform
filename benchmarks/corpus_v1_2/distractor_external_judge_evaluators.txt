@@ -1,0 +1,7 @@
+Several external LLM-as-a-judge evaluation frameworks exist for evaluating RAG pipelines, notably RAGAS and DeepEval.
+RAGAS measures answer relevance, context precision, context recall, and faithfulness using prompted judge models.
+DeepEval provides synthetic test data generation and G-Eval metric scoring based on LLM probability log-likelihoods.
+These external frameworks require continuous calls to high-capacity reasoning models such as GPT-4o or Claude 3.5 Sonnet.
+For KIP v1.1 and v1.2 baseline testing, external LLM judge frameworks were deliberately excluded from the evaluation runner.
+The rationale is that LLM judge calls consume substantial API quota, introduce stochastic evaluation variance,
+and cannot provide reproducible, deterministic mechanical metrics for continuous CI verification.

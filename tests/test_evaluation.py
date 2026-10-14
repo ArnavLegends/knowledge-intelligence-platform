@@ -767,3 +767,174 @@ def test_baseline_result_file_integrity():
         assert cr.retrieval.retrieval_error is None
         assert cr.retrieval.hit is True
         assert len(cr.retrieval.retrieved_doc_ids) > 0
+
+
+# ---------------------------------------------------------------------------
+# v1.2 input formatting and expanded benchmark tests
+# ---------------------------------------------------------------------------
+
+
+def test_v12_benchmark_dataset_loads():
+    """The v1.2 benchmark dataset must load cleanly with 25 labelled cases."""
+    import pathlib
+
+    path = pathlib.Path("benchmarks/kip_v1_2_benchmark.json")
+    assert path.exists(), "v1.2 benchmark file must exist"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+    assert ds.version == "v1.2-benchmark"
+    assert len(ds.cases) == 25
+    for case in ds.cases:
+        assert case.id
+        assert case.question
+        assert len(case.expected_document_ids) >= 1
+        assert len(case.expected_chunk_ids) >= 1
+
+
+def test_v12_benchmark_document_ids_match_corpus():
+    """Every expected document ID in v1.2 benchmark must match corpus_v1_2."""
+    import hashlib
+    import pathlib
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_2_benchmark.json")
+    actual_ids = {
+        hashlib.sha256(f.read_bytes()).hexdigest() for f in corpus_dir.glob("*.txt")
+    }
+    assert len(actual_ids) == 18
+
+    data = json.loads(dataset_path.read_text(encoding="utf-8"))
+    ds = BenchmarkDataset(**data)
+    for case in ds.cases:
+        for doc_id in case.expected_document_ids:
+            assert doc_id in actual_ids, f"Unknown document_id {doc_id} in {case.id}"
+
+
+def test_doc_formatter_hook_in_embedding_service():
+    """EmbeddingService applies doc_formatter while preserving raw text."""
+    from unittest.mock import MagicMock
+
+    from app.services.chunking.models import Chunk
+    from app.services.embeddings.service import EmbeddingService
+
+    mock_manager = MagicMock()
+    mock_manager.embed.return_value = []
+
+    def custom_doc_formatter(text: str) -> str:
+        return f"title: none | text: {text}"
+
+    service = EmbeddingService(manager=mock_manager, doc_formatter=custom_doc_formatter)
+    chunk = Chunk(
+        id="chunk-123",
+        document_id="doc-456",
+        text="raw chunk content",
+        character_count=len("raw chunk content"),
+        index=0,
+        metadata={"custom": "val"},
+    )
+    service.embed_chunks([chunk])
+
+    mock_manager.embed.assert_called_once()
+    req = mock_manager.embed.call_args[0][0]
+    assert len(req.inputs) == 1
+    assert req.inputs[0].text == "title: none | text: raw chunk content"
+    assert req.inputs[0].metadata["text"] == "raw chunk content"
+    assert req.inputs[0].metadata["document_id"] == "doc-456"
+
+
+def test_query_formatter_hook_in_retrieval_service():
+    """RetrievalService applies query_formatter to query text when embedding."""
+    from unittest.mock import MagicMock
+
+    from app.services.retrieval.models import RetrievalQuery
+    from app.services.retrieval.service import RetrievalService
+
+    mock_emb = MagicMock()
+    mock_emb.embed_texts.return_value = [MagicMock(vector=[0.1, 0.2])]
+    mock_vs = MagicMock()
+    mock_vs.search.return_value = []
+
+    def custom_query_formatter(text: str) -> str:
+        return f"task: question answering | query: {text}"
+
+    service = RetrievalService(
+        embedding_service=mock_emb,
+        vector_store_service=mock_vs,
+        query_formatter=custom_query_formatter,
+    )
+    query = RetrievalQuery(text="what is kip?", top_k=5, workspace_id="test-ws")
+    service.search(query)
+
+    mock_emb.embed_texts.assert_called_once()
+    req = mock_emb.embed_texts.call_args[0][0]
+    assert len(req.inputs) == 1
+    assert req.inputs[0].text == "task: question answering | query: what is kip?"
+
+
+def test_evaluation_runner_retrieval_only_and_fine_grained_hits():
+    """EvaluationRunner works with rag_service=None and computes hit_at_1/3/5."""
+    from unittest.mock import MagicMock
+
+    from evaluation.runner import EvaluationRunner
+
+    from app.services.retrieval.models import RetrievedChunk
+
+    mock_retrieval = MagicMock()
+    # Mock search returns 3 chunks: first is wrong doc, second is right doc
+    mock_retrieval.search.return_value = [
+        RetrievedChunk(id="c0", document_id="doc_wrong", text="chunk 0", score=0.9),
+        RetrievedChunk(id="c1", document_id="doc_target", text="chunk 1", score=0.8),
+    ]
+
+    config = BenchmarkRunConfig(
+        benchmark_version="v1.2-test",
+        evaluation_workspace_id="test-ws",
+        llm_provider="none",
+        llm_model="none",
+        embedding_provider="fake",
+        embedding_model="fake-embed",
+        retrieval_top_k=5,
+        chunk_size=1000,
+        chunk_overlap=200,
+        live_llm_available=False,
+    )
+    dataset = BenchmarkDataset(
+        version="v1.2-test",
+        cases=[
+            BenchmarkCase(
+                id="t1",
+                question="query text",
+                expected_document_ids=["doc_target"],
+                expected_chunk_ids=["c1"],
+            )
+        ],
+    )
+
+    runner = EvaluationRunner(
+        rag_service=None, retrieval_service=mock_retrieval, config=config
+    )
+    result = runner.evaluate_dataset(dataset)
+
+    assert result.total_cases == 1
+    assert result.labelled_cases == 1
+    # Matched at rank 2: hit=True, hit_at_1=False, hit_at_3=True, MRR=0.5
+    assert result.hit_rate == 1.0
+    assert result.hit_rate_at_1 == 0.0
+    assert result.hit_rate_at_3 == 1.0
+    assert result.hit_rate_at_5 == 1.0
+    assert result.mean_reciprocal_rank == 0.5
+    assert result.case_results[0].answer == ""
+
+
+def test_v12_preflight_check_valid():
+    """v1.2 preflight_check succeeds with the real corpus_v1_2 and v1.2 dataset."""
+    import pathlib
+
+    from evaluation.run_v1_2_formatting_experiment import preflight_check
+
+    corpus_dir = pathlib.Path("benchmarks/corpus_v1_2")
+    dataset_path = pathlib.Path("benchmarks/kip_v1_2_benchmark.json")
+    corpus_ids, dataset = preflight_check(corpus_dir, dataset_path, "test_api_key")
+
+    assert len(corpus_ids) == 18
+    assert len(dataset["cases"]) == 25

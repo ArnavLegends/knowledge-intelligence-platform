@@ -1,0 +1,8 @@
+KIP processes incoming file uploads through dedicated document parsers registered in ParserRegistry.
+Supported file formats are PDF, DOCX, TXT, and Markdown files.
+PDF documents are parsed using PyPDF to extract textual content across document pages.
+Word processing documents (.docx) are parsed using python-docx to extract paragraphs and tables.
+Plain text (.txt) and Markdown (.md) documents are parsed with UTF-8 decoding and line normalization.
+Uploads exceeding the max_upload_bytes limit of 2097152 bytes (2 MB) are rejected with a 413 error code.
+If a file has an unknown extension or unsupported MIME type, the registry raises an unsupported_format exception.
+Each parser returns a clean text string alongside structural metadata such as page counts or paragraph counts.

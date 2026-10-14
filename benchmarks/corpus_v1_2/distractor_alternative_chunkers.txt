@@ -1,0 +1,7 @@
+During early architectural research, alternative chunking strategies were evaluated and rejected for KIP v1.1.
+One considered approach was semantic boundary chunking, which splits text based on embedding similarity drops between sentences.
+Another proposal evaluated token-based chunking using the tiktoken library with cl100k_base byte-pair encoding.
+Token chunkers split on 512-token limits, but required heavy external C-extensions incompatible with minimal zero-cost setups.
+Sentence-level chunking using NLTK or spaCy was also evaluated but rejected due to language model package size overhead.
+Character-based fixed-size chunking (1000 characters with 200 overlap) was chosen because it operates in pure standard Python.
+Fixed character chunking ensures zero external tokenizer dependencies while maintaining deterministic chunk offsets.

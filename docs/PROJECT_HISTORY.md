@@ -38,6 +38,8 @@ Engineering Milestone — Cloud Cold-Start, UX Stabilization & Multi-File Indexi
 Engineering Milestone — Public Testing Readiness, Feedback API & Authenticated GET Transport
   │
 Current Frozen v1.1 State
+  │
+Engineering Milestone — KIP v1.2 Research Preparation & Controlled Input-Formatting Experiment
 ```
 
 ---
@@ -444,3 +446,52 @@ Documentation is established as a synchronized, verified engineering artifact re
 
 #### Result
 Complete repository documentation coherence achieved.
+
+---
+
+### Milestone 11: KIP v1.2 Research Preparation & Controlled Gemini Input-Formatting Experiment
+
+- **Category**: Engineering & Applied Research Milestone
+- **Status**: Completed
+- **Period**: 2026-10-14
+- **Related Commits**: Active Research Milestone / Working Tree
+
+#### Objective
+Establish a reproducible, scientifically disciplined research baseline for KIP v1.2, address degenerate top-5 evaluation metrics from the 3-document v1.1 baseline, and execute a controlled empirical evaluation of Gemini Embedding 2 input formatting (raw text vs Google's documented asymmetric question-answering task formatting).
+
+#### Implemented
+- **Evaluation Harness Modernization**:
+  - Derived deterministic SHA-256 ground-truth document IDs matching `DocumentIngestionService`.
+  - Added explicit workspace propagation in `EvaluationRunner` to prevent workspace leakage or default fallbacks.
+  - Added `retrieval_error` visibility in `RetrievalMetrics` to separate infrastructure failures from retrieval misses.
+  - Updated `BenchmarkResult` to exclude unlabelled cases from Hit Rate and MRR aggregation.
+  - Added fine-grained metrics: `hit_at_1`, `hit_at_3`, `retrieved_chunk_ids`, `expected_chunk_ids` in `RetrievalMetrics`, and `hit_rate_at_1`, `hit_rate_at_3`, `hit_rate_at_5` in `BenchmarkResult`.
+  - Enabled pure retrieval evaluation (`rag_service=None`) to isolate vector retrieval mechanics and eliminate redundant LLM generation calls.
+- **Provider-Neutral Ingestion & Query Formatting Hooks**:
+  - Implemented optional `doc_formatter` in `EmbeddingService` to format text passed to the embedding model while strictly preserving raw chunk text in payload metadata (`meta["text"]`) for storage and provenance.
+  - Implemented optional `query_formatter` in `RetrievalService` to format query text passed to the embedding model.
+- **Corpus & Benchmark Expansion**:
+  - Created expanded 18-document reference corpus in `benchmarks/corpus_v1_2/` (14 core architecture documents + 4 adversarial distractors) using LF-only line endings. Under 1000/200 fixed chunking, each document forms 1 chunk, allowing top-5 retrieval to evaluate ~28% of corpus candidates (resolving the v1.1 degenerate 5/3 coverage).
+  - Preserved original 3-document corpus in `benchmarks/corpus/` to protect v1.1 baseline reproducibility.
+  - Created 25-case evaluation benchmark in `benchmarks/kip_v1_2_benchmark.json` covering exact token lookup, semantic paraphrase, and distractor disambiguation.
+- **Controlled Experiment Execution (`evaluation/run_v1_2_formatting_experiment.py`)**:
+  - Executed controlled comparison using live `gemini-embedding-2` (768 dimensions) across isolated Qdrant collections:
+    - Control: `kip_eval_v1_2_control` (unmodified raw query and chunk text).
+    - Treatment: `kip_eval_v1_2_formatted` (asymmetric formatting: `task: question answering | query: {query}` and `title: none | text: {chunk}`).
+    - In accordance with Google's official documentation, no unsupported `task_type` API parameter was passed.
+  - Saved timestamped result artifacts:
+    - `benchmarks/kip_v1_2_formatting_control_20261014_094111.json`
+    - `benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`
+
+#### Empirical Results
+- **Control (Raw Text)**: Hit Rate@1: 0.8400 (21/25), Hit Rate@3: 1.0000 (25/25), Hit Rate@5: 1.0000 (25/25), MRR: 0.9133, Mean Latency: 556.89 ms.
+- **Treatment (Formatted Text)**: Hit Rate@1: 0.8400 (21/25), Hit Rate@3: 1.0000 (25/25), Hit Rate@5: 1.0000 (25/25), MRR: 0.9133, Mean Latency: 536.51 ms.
+- **Paired Query Comparison**: 23/25 queries (92%) exhibited identical ranks. 1 query improved (`v12-017`: rank 2 -> rank 1); 1 query degraded (`v12-010`: rank 1 -> rank 2). Net MRR delta: +0.0000.
+
+#### Architectural Impact & Engineering Decision
+- Because the aggregate retrieval performance was exactly neutral on this benchmark, **raw-text embedding is retained as the production default**, avoiding unnecessary prompt token overhead.
+- Formatter hooks remain in the production codebase as provider-neutral extension points.
+- **Pilot Limitations Recognized**: The evaluation covers 25 queries and 18 documents. Saturated top-3 and top-5 retrieval (1.0000) indicates that larger, multi-domain benchmarks are required to differentiate future retrieval enhancements (such as hybrid BM25 + dense search and cross-encoder reranking). The ~20 ms latency delta is within normal cloud network variance and is not claimed as statistically meaningful.
+
+#### Validation
+- Automated test suite expanded from 245 to **267 automated tests** (267/267 passing), verifying corpus integrity, benchmark loading, formatter hooks, and fine-grained metric computations.

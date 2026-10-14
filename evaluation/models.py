@@ -24,6 +24,7 @@ class BenchmarkCase(BaseModel):
     question: str
     reference_answer: str | None = None
     expected_document_ids: list[str] = Field(default_factory=list)
+    expected_chunk_ids: list[str] = Field(default_factory=list)
     expected_keywords: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -51,6 +52,10 @@ class RetrievalMetrics(BaseModel):
     # When non-None the hit/reciprocal_rank values are 0 due to the failure,
     # not because retrieval returned no results.
     retrieval_error: str | None = None
+    hit_at_1: bool = False
+    hit_at_3: bool = False
+    retrieved_chunk_ids: list[str] = Field(default_factory=list)
+    expected_chunk_ids: list[str] = Field(default_factory=list)
 
 
 class AnswerMetrics(BaseModel):
@@ -115,6 +120,9 @@ class BenchmarkResult(BaseModel):
     # Fraction of labelled cases with at least one expected doc retrieved.
     hit_rate: float | None
     mean_reciprocal_rank: float | None
+    hit_rate_at_1: float | None = None
+    hit_rate_at_3: float | None = None
+    hit_rate_at_5: float | None = None
 
     # Answer metrics — computed over all cases.
     keyword_coverage: float  # Mean keyword coverage across all cases
@@ -155,11 +163,21 @@ class BenchmarkResult(BaseModel):
             hit_rate: float | None = (
                 sum(1 for r in labelled if r.retrieval.hit) / n_labelled
             )
+            hit_rate_at_1: float | None = (
+                sum(1 for r in labelled if r.retrieval.hit_at_1) / n_labelled
+            )
+            hit_rate_at_3: float | None = (
+                sum(1 for r in labelled if r.retrieval.hit_at_3) / n_labelled
+            )
+            hit_rate_at_5: float | None = hit_rate
             mrr: float | None = (
                 sum(r.retrieval.reciprocal_rank for r in labelled) / n_labelled
             )
         else:
             hit_rate = None
+            hit_rate_at_1 = None
+            hit_rate_at_3 = None
+            hit_rate_at_5 = None
             mrr = None
 
         kw_cov = sum(r.answer_metrics.keyword_coverage for r in results) / n
@@ -175,6 +193,9 @@ class BenchmarkResult(BaseModel):
             labelled_cases=n_labelled,
             hit_rate=hit_rate,
             mean_reciprocal_rank=mrr,
+            hit_rate_at_1=hit_rate_at_1,
+            hit_rate_at_3=hit_rate_at_3,
+            hit_rate_at_5=hit_rate_at_5,
             keyword_coverage=kw_cov,
             mean_retrieval_latency_ms=mean_ret_lat,
             mean_total_latency_ms=mean_total_lat,

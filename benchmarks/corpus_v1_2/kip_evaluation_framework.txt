@@ -1,0 +1,7 @@
+The KIP evaluation harness provides deterministic mechanical measurement of retrieval and RAG stages.
+Core schemas defined in evaluation.models include BenchmarkCase, BenchmarkDataset, RetrievalMetrics, and BenchmarkResult.
+Retrieval Hit Rate and Mean Reciprocal Rank (MRR) are computed exclusively across labelled cases.
+Cases with empty expected_document_ids are tracked as unlabelled and excluded from Hit Rate calculation.
+This design prevents empty ground-truth arrays from artificially inflating Hit Rate to 1.0.
+Infrastructure failures during search are captured in retrieval_error, distinguishing outages from genuine misses.
+The runner executes against direct Python service interfaces rather than HTTP to eliminate network latency noise.
