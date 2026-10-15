@@ -60,7 +60,9 @@ def test_fastapi_openapi_version_is_1_3_0() -> None:
     """Ensure the OpenAPI schema version reflects the configured application version."""
     from app.main import app
 
-    assert app.version == "1.3.0", (
-        f"Expected OpenAPI version '1.3.0', got '{app.version}'. "
+    openapi_schema = app.openapi()
+    schema_version = openapi_schema.get("info", {}).get("version")
+    assert openapi_schema["info"]["version"] == "1.3.0", (
+        f"Expected OpenAPI info.version '1.3.0', got '{schema_version}'. "
         "Update app_version in backend/app/core/config.py."
     )

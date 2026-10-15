@@ -29,7 +29,7 @@ Core engineering principles include:
 - **Claims must match evidence:** Distinguish implemented functionality, automated test results, offline benchmarks, controlled experiments, live smoke tests, and realistic workload validation.
 - **Security and workspace isolation are invariants:** Feature development must not weaken workspace scoping, source provenance, or data boundaries.
 - **Small, incremental batches:** Group related changes into coherent, reviewable work batches.
-- **Continuous testing:** Validate with automated unit, integration, and performance tests (396 passing tests as of v1.3.0).
+- **Continuous testing:** Validate with automated unit, integration, and performance tests (397 passing tests as of v1.3.0).
 
 ---
 

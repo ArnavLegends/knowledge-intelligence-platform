@@ -80,8 +80,8 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
 
 ## 4. Test Suite Metrics
 
-- **Total Test Count:** 396 automated tests
-- **Passing Rate:** 100% (396/396 passing)
+- **Total Test Count:** 397 automated tests
+- **Passing Rate:** 100% (397/397 passing)
 - **Subsystem Breakdown:**
   - Caching & Performance (`tests/test_cache.py`, `tests/test_cache_benchmark.py`, `tests/test_async_executor.py`): 72 tests
   - Benchmark Auditing & Historical Verification (`tests/test_benchmark_audit.py`): 8 tests
@@ -89,7 +89,7 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
   - RAG Core (Chunking, Embeddings, Vector Store, LLM, Retrieval): 135 tests
   - Ingestion (PDF, DOCX, TXT, MD, Multi-Document, Workspaces): 62 tests
   - Workspace & Multi-Tenancy (Scoping, Isolation, Token Management): 31 tests
-  - Evaluation & Configuration (Settings, Validation, Runners, v1.2 Formatter Hooks & Metrics): 43 tests
+  - Evaluation & Configuration (Settings, Validation, Runners, v1.2 Formatter Hooks & Metrics): 44 tests
 
 ---
 
@@ -114,7 +114,7 @@ The following capabilities are positioned on the forward-looking roadmap:
 2. **Synchronous Chunk Embedding:** Document ingestion is synchronous per upload batch; very large documents (>50 pages) should be split or indexed with patience on free-tier rate limits.
 3. **Apps Script Redirects:** Google Apps Script web apps return HTTP 302 redirects to `script.googleusercontent.com`. The KIP backend dispatches requests via `requests.get()`, which follows HTTP redirects automatically by default.
 4. **Single-Node In-Memory Workspace Session:** Streamlit manages workspace credentials in browser session state; closing the browser requires reconnecting via the workspace access token.
-5. **Workload and Concurrency Validation Guardrail:** While thread-pool executor offloading (`max_workers=4`) prevents blocking FastAPI's async event loop, a configured worker ceiling is not evidence of unbounded queueing capacity or high-concurrency production throughput. Realistic multi-tenant workload testing and saturation profiling remain intentionally scheduled for the v1.7 development checkpoint (~50–60% mark). Do not extrapolate 396 passing tests to mean production-scale reliability.
+5. **Workload and Concurrency Validation Guardrail:** While thread-pool executor offloading (`max_workers=4`) prevents blocking FastAPI's async event loop, a configured worker ceiling is not evidence of unbounded queueing capacity or high-concurrency production throughput. Realistic multi-tenant workload testing and saturation profiling remain intentionally scheduled for the v1.7 development checkpoint (~50–60% mark). Do not extrapolate 397 passing tests to mean production-scale reliability.
 
 ---
 

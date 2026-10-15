@@ -4,7 +4,7 @@ This directory contains the full automated test suite for the Knowledge Intellig
 
 ## Current Status (v1.3.0)
 
-**396 tests — 100% passing** across all subsystems. Last recorded run: 396 passed, 0 failed, 3 non-fatal warnings. Ruff lint/format clean.
+**397 tests — 100% passing** across all subsystems. Last recorded run: 397 passed, 0 failed, 3 non-fatal warnings. Ruff lint/format clean.
 
 ## Test Coverage by Subsystem
 
@@ -50,7 +50,7 @@ pytest tests/test_cache.py -v
 - **v1.0:** Evaluation harness tests, multi-format parser tests, and API endpoint tests added. Test count reached ~116.
 - **v1.1:** Multi-tenancy isolation tests, Qdrant integration tests, workspace quota tests, feedback API tests added (245 tests).
 - **v1.2:** Retrieval research tests: expanded corpus integrity, 80-case benchmark validation, candidate algorithm tests (285+ tests).
-- **v1.3 (Current):** Performance engineering tests: in-memory LRU search and embedding caching, thread-pool offloading, timeout handling, latency telemetry, and concurrency safety. Full suite: **396 tests (100% passing)**.
+- **v1.3 (Current):** Performance engineering tests: in-memory LRU search and embedding caching, thread-pool offloading, timeout handling, latency telemetry, and concurrency safety. Full suite: **397 tests (100% passing)**.
 
 ## Related Documentation
 

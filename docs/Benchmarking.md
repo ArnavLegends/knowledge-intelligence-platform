@@ -11,7 +11,7 @@
 This document defines the benchmarking and evaluation methodology for the Knowledge Intelligence Platform.
 
 > **Evaluation & Benchmark Status (v1.3.0):**
-> The full test suite contains 396 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, in-memory caching, executor offloading, timeouts, and evaluation).
+> The full test suite contains 397 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, in-memory caching, executor offloading, timeouts, and evaluation).
 > In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`).
 > The frozen dense whole-document baseline recorded: **MRR: 0.7623**, **Hit@1: 0.6875**, **Hit@3: 0.8375**, **Hit@5: 0.8750**, P95 Latency: 643.0 ms.
 > Five candidate techniques were systematically evaluated: asymmetric input formatting (25-case pilot, neutral MRR 0.9133), cross-encoder reranking (MRR 0.7762, latency +1,048 ms), hybrid BM25+dense RRF (MRR 0.7094), sentence-boundary chunking (MRR 0.7471), and context optimization (MRR 0.7542). All candidates failed preregistered adoption targets (MRR ≥ 0.8200) or safety invariants; dense whole-document retrieval remains the production default.
@@ -322,7 +322,7 @@ Every release should include benchmark comparisons against previous versions.
 | v1.0 | Dense (ChromaDB + OpenAI) | Baseline | Mechanical Baseline (Hit Rate, MRR, Keyword Coverage) | ✅ Verified (`evaluation/runner.py`) |
 | v1.1 | Dense (Qdrant Cloud + Gemini) | Baseline | Multi-Tenant Isolation & Live Baseline Verified | ✅ Verified (Cloud & Local) |
 | v1.2 | Dense Whole-Doc (Baseline MRR 0.7623) vs 5 Candidates (Formatting, Reranking, Hybrid, Chunking, Context Optimization) | 643 ms P95 baseline | Candidates Failed Targets (MRR 0.7094–0.7762); Dense Retained | ✅ Completed — Candidates Rejected |
-| v1.3 | Dense Whole-Doc + In-Memory LRU Caching & Thread Offloading | ~0.03 ms cache hit / 504 timeout bounds | Retrieval Correctness & Concurrency Safety Verified | ✅ Completed (396 tests passing) |
+| v1.3 | Dense Whole-Doc + In-Memory LRU Caching & Thread Offloading | ~0.03 ms cache hit / 504 timeout bounds | Retrieval Correctness & Concurrency Safety Verified | ✅ Completed (397 tests passing) |
 | v1.4 | Dense Whole-Doc + Workspace-Safe Document Operations | Monitored | Workspace Isolation & Provenance Bounds | 📅 Proposed |
 | v1.5 | Retrieval Generalization on 2nd Independent Corpus | Evaluated | Grounding, Citation Correctness, Cross-Doc | 📅 Proposed |
 | v1.6 | Evidence-Grounded Knowledge Workflows | Workflow latency | Multi-Document Comparison Verification | 📅 Proposed |
@@ -343,7 +343,7 @@ Historical benchmark data should never be deleted. Once established, newer resul
 - **Benchmark Suites:**
   - 18-doc / 25-case formatting pilot dataset (`benchmarks/kip_v1_2_benchmark.json`).
   - 50-doc / 80-case expanded retrieval benchmark across six query categories (`benchmarks/kip_v1_2_expanded_benchmark.json`, corpus in `benchmarks/corpus_v1_2_expanded/`).
-- **Automated Pytest Suite:** 396 unit, integration, and performance tests asserting component-level correctness across ingestion, caching, concurrency, vector stores, API routes, and multitenancy.
+- **Automated Pytest Suite:** 397 unit, integration, and performance tests asserting component-level correctness across ingestion, caching, concurrency, vector stores, API routes, and multitenancy.
 - **Latency Telemetry & Cache Observers:** Integrated execution timers and cache hit/miss/eviction counters in backend services.
 
 ---

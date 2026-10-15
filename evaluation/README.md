@@ -10,7 +10,7 @@ stage latencies across the Knowledge Intelligence Platform.
 
 The evaluation harness is fully implemented, provider-backed baselines have been
 executed (v1.1, v1.2 experiments, and expanded baseline), and all 5 candidate
-retrieval evaluations were completed and documented. All tests pass (396 tests).
+retrieval evaluations were completed and documented. All tests pass (397 tests).
 See **Benchmark Datasets** for the full dataset inventory.
 
 ### Implemented Components

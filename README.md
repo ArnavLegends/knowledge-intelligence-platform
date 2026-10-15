@@ -1,11 +1,11 @@
 # Knowledge Intelligence Platform (KIP)
 
-> A modular AI Knowledge Intelligence Platform for Retrieval-Augmented Generation (RAG) with multi-tenant cloud storage, reproducible evaluation, and zero-cost cloud deployment.
+> A modular AI Knowledge Intelligence Platform for Retrieval-Augmented Generation (RAG) with multi-tenant cloud storage, reproducible evaluation, and free-tier cloud deployment.
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version: 1.3.0](https://img.shields.io/badge/version-1.3.0-green.svg)](https://github.com/ArnavLegends/knowledge-intelligence-platform)
-[![Tests: 396 Passed](https://img.shields.io/badge/tests-396%20passed-brightgreen.svg)](https://github.com/ArnavLegends/knowledge-intelligence-platform)
+[![CI](https://github.com/ArnavLegends/knowledge-intelligence-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ArnavLegends/knowledge-intelligence-platform/actions/workflows/ci.yml)
 
 ---
 
@@ -13,9 +13,18 @@
 
 The **Knowledge Intelligence Platform (KIP)** is a robust, production-oriented knowledge assistant capable of retrieving, understanding, and synthesizing information from uploaded documents.
 
-Designed with modern AI engineering practices, KIP implements a complete FastAPI-based Retrieval-Augmented Generation (RAG) backend engine, a Streamlit frontend, and a multi-tenant vector storage architecture supporting both local development and zero-cost cloud deployments.
+Designed with modern AI engineering practices, KIP implements a complete FastAPI-based Retrieval-Augmented Generation (RAG) backend engine, a Streamlit frontend, and a multi-tenant vector storage architecture supporting both local development and free-tier cloud deployments.
 
 The `/rag/answer` endpoint grounds every response in retrieved passages with explicit provenance tracking back to original source documents and chunk ranks. When questions cannot be answered from the uploaded knowledge base, KIP declines honestly rather than hallucinating answers. The separate `/api/v1/llm/generate` endpoint provides direct LLM generation and bypasses document retrieval.
+
+### Quick Navigation
+| Question / Goal | Location |
+|---|---|
+| **What does KIP do & what is implemented?** | [Implemented Capabilities (v1.3 Reality)](#implemented-capabilities-v13-reality) & [CURRENT_STATUS.md](docs/CURRENT_STATUS.md) |
+| **How do I run KIP locally?** | [Quick Start & Local Development](#13-quick-start--local-development) (`git clone` → `pip install` → `.env` → `run`) |
+| **What empirical evidence backs retrieval claims?** | [v1.2 Research Outcomes](#10-evaluation-harness--benchmark-integrity) & [Research Synthesis](docs/evaluation/v1.2_research_synthesis.md) |
+| **Where are the architecture & REST APIs?** | [High-Level Architecture](#4-high-level-architecture), [REST API Reference](#15-rest-api-reference), [deployment.md](docs/deployment.md) |
+| **Where are the project history & future roadmap?** | [PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md), [Product-Roadmap.md](docs/Product-Roadmap.md), [Research-Roadmap.md](docs/Research-Roadmap.md) |
 
 ---
 
@@ -25,7 +34,7 @@ The repository provides a complete, production-oriented RAG application currentl
 
 - **Completed Milestones**:
   - **v1.1**: Multi-Tenant Cloud Knowledge Layer (bearer tokens, Qdrant Cloud, Render deployment, Google Sheets feedback)
-  - **v1.2**: Retrieval Intelligence Research (5 candidate techniques evaluated on 50-doc/80-case benchmark; dense baseline retained)
+  - **v1.2**: Retrieval Intelligence Research (5 candidate techniques evaluated across 18-doc pilot and 50-doc/80-case expanded benchmark; dense baseline retained)
   - **v1.3**: Performance Engineering (in-memory LRU caching, thread-pool offloading, timeout enforcement, structured latency telemetry)
 - **Current Milestone**: [v1.4 Knowledge Workspace & Evidence Trust](docs/Product-Roadmap.md) (Enhanced document operations, error feedback, evidence inspection)
 
@@ -54,7 +63,7 @@ The repository provides a complete, production-oriented RAG application currentl
 - **Semantic Retrieval**: Top-k similarity search (configurable 1–20) with distance thresholds and cross-tenant leakage protection.
 - **REST APIs**: Full OpenAPI/Swagger documentation with workspace authentication headers.
 - **Streamlit Frontend**: Multi-tenant UI with workspace creation, token resumption, multi-file upload progress tracking, document listing, grounded Q&A, and citation viewing.
-- **Zero-Cost Cloud Deployment**: Streamlit Community Cloud + Render Free FastAPI + Qdrant Free Cloud + Gemini Free Tier.
+- **Free-Tier Cloud Deployment**: Streamlit Community Cloud + Render Free FastAPI + Qdrant Free Cloud + Gemini Free Tier (subject to provider quotas and availability).
 - **Public Feedback Pipeline**: Ingests user feedback via `POST /api/v1/feedback` and persists submissions directly to Google Sheets via authenticated HTTPS GET transport to Google Apps Script `doGet()`.
 - **Evaluation Harness & Auditing**: Mechanical evaluation runner (`evaluation/runner.py`) and automated benchmark metric auditor (`evaluation/validate_benchmark_metrics.py`).
 
@@ -175,7 +184,9 @@ KIP includes a deterministic evaluation harness and automated metric validation:
   - `benchmarks/corpus_v1_2/` & `benchmarks/corpus_v1_2_expanded/`: 50 documents (including adversarial distractors) and 80 labelled cases across six query categories.
 - **Frozen Dense Baseline**: Evaluated live on Gemini `gemini-embedding-2` + Qdrant (`benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json`):
   - MRR: **0.7623** | Hit@1: **0.6875** | Hit@3: **0.8375** | Hit@5: **0.8750**
-- **v1.2 Research Outcomes**: Across 5 candidate techniques (input formatting, cross-encoder reranking, hybrid BM25+dense retrieval, sentence-boundary chunking, and context optimization), none satisfied the preregistered adoption criteria. Dense whole-document retrieval is retained as the production standard.
+- **v1.2 Research Outcomes**: Across five evaluated candidate techniques in the v1.2 research cycle, none satisfied preregistered adoption criteria over the dense control baseline:
+  - *Input Formatting Pilot* (18 documents, 25 labelled cases): Evaluated asymmetric prompt prefixes; yielded a neutral ranking outcome (MRR 0.9133, net change 0.0000).
+  - *Expanded Benchmark Treatments* (50 documents, 80 labelled cases): Cross-encoder reranking, hybrid BM25+dense retrieval, sentence-boundary chunking, and context optimization were evaluated against the frozen dense baseline (MRR 0.7623, Hit@1 0.6875, Hit@3 0.8375, Hit@5 0.8750) and rejected under documented criteria. Dense whole-document retrieval is retained as the production standard.
 
 ---
 
@@ -193,7 +204,7 @@ The user interface (`frontend/app.py`) provides:
 
 ## 12. Deployment Architecture
 
-KIP is architected for zero-cost ($0 / ₹0) operation:
+KIP is architected for zero-cost ($0 / ₹0) operation leveraging available provider free tiers:
 
 ```text
 Streamlit Community Cloud (frontend/app.py)
@@ -204,6 +215,8 @@ FastAPI on Render Free Tier (backend/app/main.py)
         ├── Google Gemini API Free Tier (gemini-2.5-flash / gemini-embedding-2)
         └── Authenticated HTTPS GET ──> Google Apps Script (doGet) ──> Google Sheet
 ```
+
+> **Free-Tier Operational Context**: KIP's cloud deployment runs entirely on free-tier allocations (Render Free FastAPI, Streamlit Community Cloud, Qdrant Cloud Free, Google Gemini Free Tier, and Google Apps Script). Operation is zero-cost within these tiers, subject to provider quotas, rate limits, sleep/cold-start behavior (e.g., Render 15-minute spin-down), and upstream provider pricing changes.
 
 For step-by-step instructions, see [deployment.md](docs/deployment.md).
 
@@ -252,7 +265,7 @@ UI available at: `http://localhost:8501`
 
 The automated test suite runs offline and deterministically without cloud credentials:
 
-- **Tests**: `pytest` (current suite: **396 passed** tests, 100% pass rate)
+- **Tests**: `pytest` (current suite: **397 passed** tests, 100% pass rate)
 - **Coverage**: `pytest --cov=backend/app --cov-report=term-missing`
 - **Linting**: `ruff check .`
 - **Formatting**: `ruff format --check .`
@@ -280,7 +293,7 @@ Detailed schemas and error responses are documented in [API-Reference.md](docs/A
 
 ## 16. Public Testing Guide
 
-KIP is open for public testing via the deployed Streamlit application. To try it:
+KIP is designed for interactive testing via deployed Streamlit instances or locally via `streamlit run frontend/app.py` (see [Quick Start](#13-quick-start--local-development)). When testing an active instance:
 
 1. Upload one or more TXT, Markdown, PDF, or DOCX files.
 2. Ask a question about the uploaded documents.
@@ -335,7 +348,7 @@ Set these in your Render environment variables or in `.env` for local testing. L
 
 ## 18. Research & Roadmap Direction
 
-KIP is engineered as an empirical AI systems platform. The **v1.2** research cycle systematically evaluated candidate techniques against the frozen 50-document, 80-case benchmark:
+KIP is engineered as an empirical AI systems platform. The **v1.2** research cycle systematically evaluated candidate techniques across a 25-case pilot and the frozen 50-document, 80-case expanded benchmark:
 - Negative and neutral findings were preserved; dense whole-document retrieval remains the production baseline.
 - Next research milestones focus on **v1.5 Retrieval Generalization** (testing dense retrieval on an independent second corpus) and **v1.6 Evidence-Grounded Workflows** (multi-document comparison).
 - Future capabilities (memory, tool-use, agents, knowledge graphs) are strictly conditional and require demonstrated value over deterministic orchestration.

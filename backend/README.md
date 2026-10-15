@@ -24,8 +24,8 @@ This directory contains the FastAPI backend and AI service layer for the Knowled
 - **v0.3:** Core RAG foundation: chunking, embedding abstraction, Chroma vector store, semantic search, and RAG prompt assembly.
 - **v1.0:** Productization: multi-format parsers (.txt, .md, .pdf, .docx), Gemini provider integration, mechanical evaluation harness, Streamlit UI.
 - **v1.1:** Multi-tenant workspace isolation, Qdrant Cloud vector storage, Gemini batching fix, workspace quotas, Streamlit public UX, authenticated GET feedback persistence.
-- **v1.2:** Retrieval research cycle: evaluated 5 candidate techniques against 50-doc/80-case expanded benchmark; dense whole-document baseline retained.
-- **v1.3 (Current):** Performance engineering: in-memory thread-safe LRU caching, thread-pool offloading, timeout enforcement (HTTP 504), and latency telemetry. All 396 tests passing.
+- **v1.2:** Retrieval research cycle: evaluated 5 candidate techniques across 18-doc pilot and 50-doc/80-case expanded benchmark; dense whole-document baseline retained.
+- **v1.3 (Current):** Performance engineering: in-memory thread-safe LRU caching, thread-pool offloading, timeout enforcement (HTTP 504), and latency telemetry. All 397 tests passing.
 
 ## Related Documentation
 
