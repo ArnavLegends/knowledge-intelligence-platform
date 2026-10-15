@@ -206,10 +206,9 @@ class BenchmarkResult(BaseModel):
             r for r in labelled if r.retrieval.candidate_hit_at_20 is not None
         ]
         if cand_labelled:
-            candidate_hit_rate_at_20: float | None = (
-                sum(1 for r in cand_labelled if r.retrieval.candidate_hit_at_20)
-                / len(cand_labelled)
-            )
+            candidate_hit_rate_at_20: float | None = sum(
+                1 for r in cand_labelled if r.retrieval.candidate_hit_at_20
+            ) / len(cand_labelled)
         else:
             candidate_hit_rate_at_20 = None
 
@@ -217,16 +216,13 @@ class BenchmarkResult(BaseModel):
             r for r in results if r.retrieval.reranking_latency_ms is not None
         ]
         if has_rerank_lat:
-            mean_rerank_lat: float | None = (
-                sum(r.retrieval.reranking_latency_ms or 0.0 for r in has_rerank_lat)
-                / len(has_rerank_lat)
-            )
+            mean_rerank_lat: float | None = sum(
+                r.retrieval.reranking_latency_ms or 0.0 for r in has_rerank_lat
+            ) / len(has_rerank_lat)
         else:
             mean_rerank_lat = None
 
-        has_dense_lat = [
-            r for r in results if r.retrieval.dense_latency_ms is not None
-        ]
+        has_dense_lat = [r for r in results if r.retrieval.dense_latency_ms is not None]
         mean_dense_lat = (
             sum(r.retrieval.dense_latency_ms or 0.0 for r in has_dense_lat)
             / len(has_dense_lat)

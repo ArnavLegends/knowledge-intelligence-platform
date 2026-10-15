@@ -38,17 +38,25 @@ def test_sentence_chunker_basic_splitting():
 
 def test_sentence_chunker_parameter_validation():
     """Verify invalid constructor parameters raise ChunkingError."""
-    with pytest.raises(ChunkingError, match="target_chunk_size must be strictly greater than 0"):
+    with pytest.raises(
+        ChunkingError, match="target_chunk_size must be strictly greater than 0"
+    ):
         SentenceBoundaryChunker(target_chunk_size=0)
 
-    with pytest.raises(ChunkingError, match="min_chunk_size must be strictly greater than 0"):
+    with pytest.raises(
+        ChunkingError, match="min_chunk_size must be strictly greater than 0"
+    ):
         SentenceBoundaryChunker(target_chunk_size=400, min_chunk_size=0)
 
-    with pytest.raises(ChunkingError, match="min_chunk_size cannot exceed target_chunk_size"):
+    with pytest.raises(
+        ChunkingError, match="min_chunk_size cannot exceed target_chunk_size"
+    ):
         SentenceBoundaryChunker(target_chunk_size=200, min_chunk_size=300)
 
     with pytest.raises(ChunkingError, match="overlap_sentences must be non-negative"):
-        SentenceBoundaryChunker(target_chunk_size=400, min_chunk_size=100, overlap_sentences=-1)
+        SentenceBoundaryChunker(
+            target_chunk_size=400, min_chunk_size=100, overlap_sentences=-1
+        )
 
 
 def test_sentence_chunker_empty_and_short_text():

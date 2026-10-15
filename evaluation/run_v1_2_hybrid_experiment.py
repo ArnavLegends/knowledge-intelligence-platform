@@ -95,9 +95,7 @@ def preflight_check(
         )
 
     if not dataset_path.exists():
-        raise ValueError(
-            f"Preflight failed: Dataset file not found at {dataset_path}"
-        )
+        raise ValueError(f"Preflight failed: Dataset file not found at {dataset_path}")
 
     txt_files = list(corpus_dir.glob("*.txt"))
     if len(txt_files) != 50:
@@ -141,7 +139,9 @@ def preflight_check(
     found_sensitive = SENSITIVE_CASE_IDS.intersection(set(case_ids))
     if len(found_sensitive) != len(SENSITIVE_CASE_IDS):
         missing = SENSITIVE_CASE_IDS - found_sensitive
-        raise ValueError(f"Preflight failed: Sensitive cases missing from dataset: {missing}")
+        raise ValueError(
+            f"Preflight failed: Sensitive cases missing from dataset: {missing}"
+        )
 
     return corpus_ids, dataset_data
 
@@ -223,9 +223,7 @@ def _aggregate_by_category(case_results, dataset_cases) -> dict[str, Any]:
             "mean_fusion_latency_ms": (
                 sum(r.retrieval.fusion_latency_ms or 0.0 for r in labelled) / n
             ),
-            "mean_total_latency_ms": (
-                sum(r.total_latency_ms for r in labelled) / n
-            ),
+            "mean_total_latency_ms": (sum(r.total_latency_ms for r in labelled) / n),
             "errors": [
                 {"case_id": r.case_id, "error": r.retrieval.retrieval_error}
                 for r in labelled
@@ -252,8 +250,13 @@ def run_hybrid_experiment() -> pathlib.Path:
     logger.info("Control Baseline: %s", CONTROL_BASELINE_PATH)
     logger.info("Collection: %s", COLLECTION_NAME)
     logger.info("Workspace: %s", EVAL_WORKSPACE)
-    logger.info("Dense Top-K: %d | Sparse Top-K: %d | RRF k: %d | Final Top-K: %d",
-                CANDIDATE_TOP_K, CANDIDATE_TOP_K, RRF_K, FINAL_TOP_K)
+    logger.info(
+        "Dense Top-K: %d | Sparse Top-K: %d | RRF k: %d | Final Top-K: %d",
+        CANDIDATE_TOP_K,
+        CANDIDATE_TOP_K,
+        RRF_K,
+        FINAL_TOP_K,
+    )
     logger.info("=" * 70)
 
     # -----------------------------------------------------------------------
@@ -261,8 +264,11 @@ def run_hybrid_experiment() -> pathlib.Path:
     # -----------------------------------------------------------------------
     logger.info("Phase 0: Preflight validation...")
     corpus_ids, raw_dataset = preflight_check(CORPUS_DIR, DATASET_PATH, api_key)
-    logger.info("Preflight passed. %d corpus files, %d benchmark cases.",
-                len(corpus_ids), len(raw_dataset["cases"]))
+    logger.info(
+        "Preflight passed. %d corpus files, %d benchmark cases.",
+        len(corpus_ids),
+        len(raw_dataset["cases"]),
+    )
 
     # -----------------------------------------------------------------------
     # Phase 1: Initialize services and build indexes
@@ -326,8 +332,11 @@ def run_hybrid_experiment() -> pathlib.Path:
     # -----------------------------------------------------------------------
     # Phase 2: Index corpus into Qdrant & build BM25 lexical index
     # -----------------------------------------------------------------------
-    logger.info("Phase 2: Indexing %d documents into workspace '%s'...",
-                len(corpus_ids), EVAL_WORKSPACE)
+    logger.info(
+        "Phase 2: Indexing %d documents into workspace '%s'...",
+        len(corpus_ids),
+        EVAL_WORKSPACE,
+    )
 
     bm25_chunks: list[RetrievedChunk] = []
     total_indexed = 0
@@ -359,15 +368,23 @@ def run_hybrid_experiment() -> pathlib.Path:
                     document_id=doc_id,
                     text=c.text,
                     score=0.0,
-                    metadata={"filename": txt_file.name, "workspace_id": EVAL_WORKSPACE},
+                    metadata={
+                        "filename": txt_file.name,
+                        "workspace_id": EVAL_WORKSPACE,
+                    },
                 )
             )
 
-    logger.info("Indexing complete: %d newly indexed, %d present.", total_indexed, total_skipped)
+    logger.info(
+        "Indexing complete: %d newly indexed, %d present.", total_indexed, total_skipped
+    )
     logger.info("Building BM25 index over %d chunks...", len(bm25_chunks))
     bm25_index = BM25Index(k1=1.5, b=0.75)
     bm25_index.index_chunks(bm25_chunks)
-    logger.info("BM25 index built. Unique vocabulary: %d terms.", len(bm25_index.doc_frequencies))
+    logger.info(
+        "BM25 index built. Unique vocabulary: %d terms.",
+        len(bm25_index.doc_frequencies),
+    )
 
     # -----------------------------------------------------------------------
     # Phase 3: Execute Two-Channel Hybrid Evaluation Run
@@ -474,13 +491,19 @@ def run_hybrid_experiment() -> pathlib.Path:
     labelled_cases = [r for r in result.case_results if r.retrieval.expected_count > 0]
     dense_cand_hits = sum(1 for r in labelled_cases if r.retrieval.dense_hit_at_depth)
     sparse_cand_hits = sum(1 for r in labelled_cases if r.retrieval.sparse_hit_at_depth)
-    combined_cand_hits = sum(1 for r in labelled_cases if r.retrieval.candidate_hit_at_20)
+    combined_cand_hits = sum(
+        1 for r in labelled_cases if r.retrieval.candidate_hit_at_20
+    )
     n_labelled = len(labelled_cases)
 
     candidate_recall_summary = {
         "dense_hit_rate_at_20": dense_cand_hits / n_labelled if n_labelled > 0 else 0.0,
-        "sparse_hit_rate_at_20": sparse_cand_hits / n_labelled if n_labelled > 0 else 0.0,
-        "combined_candidate_hit_rate_at_20": combined_cand_hits / n_labelled if n_labelled > 0 else 0.0,
+        "sparse_hit_rate_at_20": sparse_cand_hits / n_labelled
+        if n_labelled > 0
+        else 0.0,
+        "combined_candidate_hit_rate_at_20": combined_cand_hits / n_labelled
+        if n_labelled > 0
+        else 0.0,
     }
 
     # -----------------------------------------------------------------------
@@ -536,46 +559,94 @@ def run_hybrid_experiment() -> pathlib.Path:
     t_h5 = result.hit_rate_at_5 or 0.0
     t_p95_lat = latency_profiling["end_to_end_ms"]["p95"]
 
-    c_hard_neg_mrr = control_data.get("category_metrics", {}).get("hard_negative", {}).get("mean_reciprocal_rank", 0.0)
-    t_hard_neg_mrr = category_summary.get("hard_negative", {}).get("mean_reciprocal_rank", 0.0)
+    c_hard_neg_mrr = (
+        control_data.get("category_metrics", {})
+        .get("hard_negative", {})
+        .get("mean_reciprocal_rank", 0.0)
+    )
+    t_hard_neg_mrr = category_summary.get("hard_negative", {}).get(
+        "mean_reciprocal_rank", 0.0
+    )
 
-    c_multi_mrr = control_data.get("category_metrics", {}).get("multi_concept", {}).get("mean_reciprocal_rank", 0.0)
-    t_multi_mrr = category_summary.get("multi_concept", {}).get("mean_reciprocal_rank", 0.0)
+    c_multi_mrr = (
+        control_data.get("category_metrics", {})
+        .get("multi_concept", {})
+        .get("mean_reciprocal_rank", 0.0)
+    )
+    t_multi_mrr = category_summary.get("multi_concept", {}).get(
+        "mean_reciprocal_rank", 0.0
+    )
 
-    c_exact_h1 = control_data.get("category_metrics", {}).get("exact_terminology", {}).get("hit_rate_at_1", 0.0)
+    c_exact_h1 = (
+        control_data.get("category_metrics", {})
+        .get("exact_terminology", {})
+        .get("hit_rate_at_1", 0.0)
+    )
     t_exact_h1 = category_summary.get("exact_terminology", {}).get("hit_rate_at_1", 0.0)
 
     print("\n" + "=" * 78)
     print("KIP v1.2 HYBRID RETRIEVAL EXPERIMENT: TREATMENT VS CONTROL")
     print("=" * 78)
-    print(f"{'Metric':<32} {'Control (Dense)':<18} {'Treatment (Hybrid)':<20} {'Delta':<10}")
+    print(
+        f"{'Metric':<32} {'Control (Dense)':<18} {'Treatment (Hybrid)':<20} {'Delta':<10}"
+    )
     print("-" * 78)
     print(f"{'Overall MRR':<32} {c_mrr:<18.4f} {t_mrr:<20.4f} {t_mrr - c_mrr:+.4f}")
     print(f"{'Hit Rate @ 1':<32} {c_h1:<18.4f} {t_h1:<20.4f} {t_h1 - c_h1:+.4f}")
     print(f"{'Hit Rate @ 3':<32} {c_h3:<18.4f} {t_h3:<20.4f} {t_h3 - c_h3:+.4f}")
     print(f"{'Hit Rate @ 5':<32} {c_h5:<18.4f} {t_h5:<20.4f} {t_h5 - c_h5:+.4f}")
-    print(f"{'Pre-Fusion Dense Hit@20':<32} {'N/A':<18} {candidate_recall_summary['dense_hit_rate_at_20']:<20.4f} {'-':<10}")
-    print(f"{'Pre-Fusion Sparse Hit@20':<32} {'N/A':<18} {candidate_recall_summary['sparse_hit_rate_at_20']:<20.4f} {'-':<10}")
-    print(f"{'Pre-Fusion Combined Hit@20':<32} {'N/A':<18} {candidate_recall_summary['combined_candidate_hit_rate_at_20']:<20.4f} {'-':<10}")
-    print(f"{'Hard Negative MRR':<32} {c_hard_neg_mrr:<18.4f} {t_hard_neg_mrr:<20.4f} {t_hard_neg_mrr - c_hard_neg_mrr:+.4f}")
-    print(f"{'Multi-Concept MRR':<32} {c_multi_mrr:<18.4f} {t_multi_mrr:<20.4f} {t_multi_mrr - c_multi_mrr:+.4f}")
-    print(f"{'Exact Terminology Hit@1':<32} {c_exact_h1:<18.4f} {t_exact_h1:<20.4f} {t_exact_h1 - c_exact_h1:+.4f}")
-    print(f"{'P95 Latency (ms)':<32} {c_p95_lat:<18.1f} {t_p95_lat:<20.1f} {t_p95_lat - c_p95_lat:+.1f}")
+    print(
+        f"{'Pre-Fusion Dense Hit@20':<32} {'N/A':<18} {candidate_recall_summary['dense_hit_rate_at_20']:<20.4f} {'-':<10}"
+    )
+    print(
+        f"{'Pre-Fusion Sparse Hit@20':<32} {'N/A':<18} {candidate_recall_summary['sparse_hit_rate_at_20']:<20.4f} {'-':<10}"
+    )
+    print(
+        f"{'Pre-Fusion Combined Hit@20':<32} {'N/A':<18} {candidate_recall_summary['combined_candidate_hit_rate_at_20']:<20.4f} {'-':<10}"
+    )
+    print(
+        f"{'Hard Negative MRR':<32} {c_hard_neg_mrr:<18.4f} {t_hard_neg_mrr:<20.4f} {t_hard_neg_mrr - c_hard_neg_mrr:+.4f}"
+    )
+    print(
+        f"{'Multi-Concept MRR':<32} {c_multi_mrr:<18.4f} {t_multi_mrr:<20.4f} {t_multi_mrr - c_multi_mrr:+.4f}"
+    )
+    print(
+        f"{'Exact Terminology Hit@1':<32} {c_exact_h1:<18.4f} {t_exact_h1:<20.4f} {t_exact_h1 - c_exact_h1:+.4f}"
+    )
+    print(
+        f"{'P95 Latency (ms)':<32} {c_p95_lat:<18.1f} {t_p95_lat:<20.1f} {t_p95_lat - c_p95_lat:+.1f}"
+    )
     print("=" * 78)
 
     print("\nCategory Comparison (MRR):")
-    print(f"{'Category':<22} {'Cases':<8} {'Control MRR':<15} {'Treatment MRR':<15} {'Delta':<10}")
+    print(
+        f"{'Category':<22} {'Cases':<8} {'Control MRR':<15} {'Treatment MRR':<15} {'Delta':<10}"
+    )
     print("-" * 70)
     for cat in sorted(category_summary.keys()):
-        c_cat_mrr = control_data.get("category_metrics", {}).get(cat, {}).get("mean_reciprocal_rank", 0.0)
+        c_cat_mrr = (
+            control_data.get("category_metrics", {})
+            .get(cat, {})
+            .get("mean_reciprocal_rank", 0.0)
+        )
         t_cat_mrr = category_summary[cat]["mean_reciprocal_rank"]
-        print(f"{cat:<22} {category_summary[cat]['labelled_cases']:<8} {c_cat_mrr:<15.4f} {t_cat_mrr:<15.4f} {t_cat_mrr - c_cat_mrr:+.4f}")
+        print(
+            f"{cat:<22} {category_summary[cat]['labelled_cases']:<8} {c_cat_mrr:<15.4f} {t_cat_mrr:<15.4f} {t_cat_mrr - c_cat_mrr:+.4f}"
+        )
 
     print("\nStage Latency Breakdown (Mean ms):")
-    print(f"  Dense Retrieval:  {latency_profiling['dense_retrieval_ms']['mean']:.2f} ms (P95: {latency_profiling['dense_retrieval_ms']['p95']:.2f} ms)")
-    print(f"  Sparse Retrieval: {latency_profiling['sparse_retrieval_ms']['mean']:.2f} ms (P95: {latency_profiling['sparse_retrieval_ms']['p95']:.2f} ms)")
-    print(f"  RRF Fusion:       {latency_profiling['rrf_fusion_ms']['mean']:.2f} ms (P95: {latency_profiling['rrf_fusion_ms']['p95']:.2f} ms)")
-    print(f"  End-to-End Total: {latency_profiling['end_to_end_ms']['mean']:.2f} ms (P95: {latency_profiling['end_to_end_ms']['p95']:.2f} ms)")
+    print(
+        f"  Dense Retrieval:  {latency_profiling['dense_retrieval_ms']['mean']:.2f} ms (P95: {latency_profiling['dense_retrieval_ms']['p95']:.2f} ms)"
+    )
+    print(
+        f"  Sparse Retrieval: {latency_profiling['sparse_retrieval_ms']['mean']:.2f} ms (P95: {latency_profiling['sparse_retrieval_ms']['p95']:.2f} ms)"
+    )
+    print(
+        f"  RRF Fusion:       {latency_profiling['rrf_fusion_ms']['mean']:.2f} ms (P95: {latency_profiling['rrf_fusion_ms']['p95']:.2f} ms)"
+    )
+    print(
+        f"  End-to-End Total: {latency_profiling['end_to_end_ms']['mean']:.2f} ms (P95: {latency_profiling['end_to_end_ms']['p95']:.2f} ms)"
+    )
 
     # Evaluation targets check
     primary_pass = t_mrr >= 0.8500
@@ -585,11 +656,21 @@ def run_hybrid_experiment() -> pathlib.Path:
     latency_guardrail_pass = (t_p95_lat - c_p95_lat) <= 300.0
 
     print("\nSuccess and Rejection Criteria Assessment:")
-    print(f"  [1] Primary Target (Overall MRR >= 0.8500):       {t_mrr:.4f} -> {'PASSED' if primary_pass else 'FAILED'}")
-    print(f"  [2] Secondary Target (Hard Neg MRR >= 0.6500):     {t_hard_neg_mrr:.4f} -> {'PASSED' if hard_neg_pass else 'FAILED'}")
-    print(f"  [3] Safety Target (Multi-Concept MRR == 1.0000):   {t_multi_mrr:.4f} -> {'PASSED' if multi_concept_pass else 'FAILED'}")
-    print(f"  [4] Secondary Target (Exact Term Hit@1 > {c_exact_h1:.4f}): {t_exact_h1:.4f} -> {'PASSED' if exact_term_pass else 'FAILED'}")
-    print(f"  [5] Latency Guardrail (Delta P95 <= +300ms):       {t_p95_lat - c_p95_lat:+.1f} ms -> {'PASSED' if latency_guardrail_pass else 'REJECTED'}")
+    print(
+        f"  [1] Primary Target (Overall MRR >= 0.8500):       {t_mrr:.4f} -> {'PASSED' if primary_pass else 'FAILED'}"
+    )
+    print(
+        f"  [2] Secondary Target (Hard Neg MRR >= 0.6500):     {t_hard_neg_mrr:.4f} -> {'PASSED' if hard_neg_pass else 'FAILED'}"
+    )
+    print(
+        f"  [3] Safety Target (Multi-Concept MRR == 1.0000):   {t_multi_mrr:.4f} -> {'PASSED' if multi_concept_pass else 'FAILED'}"
+    )
+    print(
+        f"  [4] Secondary Target (Exact Term Hit@1 > {c_exact_h1:.4f}): {t_exact_h1:.4f} -> {'PASSED' if exact_term_pass else 'FAILED'}"
+    )
+    print(
+        f"  [5] Latency Guardrail (Delta P95 <= +300ms):       {t_p95_lat - c_p95_lat:+.1f} ms -> {'PASSED' if latency_guardrail_pass else 'REJECTED'}"
+    )
 
     return out_path
 

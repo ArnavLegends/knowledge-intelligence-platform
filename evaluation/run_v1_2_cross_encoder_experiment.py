@@ -93,9 +93,7 @@ def preflight_check(
         )
 
     if not dataset_path.exists():
-        raise ValueError(
-            f"Preflight failed: Dataset file not found at {dataset_path}"
-        )
+        raise ValueError(f"Preflight failed: Dataset file not found at {dataset_path}")
 
     txt_files = list(corpus_dir.glob("*.txt"))
     if len(txt_files) != 50:
@@ -183,9 +181,7 @@ def _aggregate_by_category(case_results, dataset_cases) -> dict[str, Any]:
                 sum(r.retrieval.retrieval_latency_ms for r in labelled) / n
             ),
             "mean_rerank_latency_ms": mean_rerank_lat,
-            "mean_total_latency_ms": (
-                sum(r.total_latency_ms for r in labelled) / n
-            ),
+            "mean_total_latency_ms": (sum(r.total_latency_ms for r in labelled) / n),
             "errors": [
                 {"case_id": r.case_id, "error": r.retrieval.retrieval_error}
                 for r in labelled
@@ -199,7 +195,14 @@ def _aggregate_by_category(case_results, dataset_cases) -> dict[str, Any]:
 def _compute_distribution(values: list[float]) -> dict[str, float]:
     """Compute distribution statistics for latency values."""
     if not values:
-        return {"min": 0.0, "median": 0.0, "mean": 0.0, "p90": 0.0, "p95": 0.0, "max": 0.0}
+        return {
+            "min": 0.0,
+            "median": 0.0,
+            "mean": 0.0,
+            "p90": 0.0,
+            "p95": 0.0,
+            "max": 0.0,
+        }
 
     s = sorted(values)
     n = len(s)
@@ -294,7 +297,9 @@ def run_cross_encoder_experiment() -> pathlib.Path:
     # Initialize cross-encoder reranker and record cold-start duration
     t_load_start = time.perf_counter()
     reranker = CrossEncoderReranker(model_name=CROSS_ENCODER_MODEL)
-    model_load_ms = reranker.cold_start_load_ms or ((time.perf_counter() - t_load_start) * 1000)
+    model_load_ms = reranker.cold_start_load_ms or (
+        (time.perf_counter() - t_load_start) * 1000
+    )
     logger.info("Cross-encoder model loaded in %.2f ms", model_load_ms)
 
     # -----------------------------------------------------------------------
@@ -473,26 +478,44 @@ def run_cross_encoder_experiment() -> pathlib.Path:
     print("=" * 78)
     print(f"Run ID:                  {result.run_id}")
     print(f"Treatment Model:         {CROSS_ENCODER_MODEL}")
-    print(f"Pipeline:                Dense Top-{CANDIDATE_TOP_K} -> Cross-Encoder Top-{FINAL_TOP_K}")
+    print(
+        f"Pipeline:                Dense Top-{CANDIDATE_TOP_K} -> Cross-Encoder Top-{FINAL_TOP_K}"
+    )
     print(f"Benchmark Cases:         {result.total_cases} ({n_labelled} labelled)")
     print(f"Model Cold-Start:        {model_load_ms:.1f} ms")
     print("-" * 78)
-    print(f"{'Metric':<25} {'Control Baseline':>18} {'Treatment (Reranked)':>22} {'Delta':>10}")
+    print(
+        f"{'Metric':<25} {'Control Baseline':>18} {'Treatment (Reranked)':>22} {'Delta':>10}"
+    )
     print("-" * 78)
 
     def _diff(treat: float, ctrl: float, fmt: str = "+.4f") -> str:
         d = treat - ctrl
         return f"{d:{fmt}}"
 
-    print(f"{'Candidate Hit@20':<25} {'N/A (single-stage)':>18} {cand_h20:>21.4f} {'-':>10}")
-    print(f"{'Hit Rate @ 1':<25} {ctrl_hr1:>18.4f} {treat_hr1:>21.4f} {_diff(treat_hr1, ctrl_hr1):>10}")
-    print(f"{'Hit Rate @ 3':<25} {ctrl_hr3:>18.4f} {treat_hr3:>21.4f} {_diff(treat_hr3, ctrl_hr3):>10}")
-    print(f"{'Hit Rate @ 5':<25} {ctrl_hr5:>18.4f} {treat_hr5:>21.4f} {_diff(treat_hr5, ctrl_hr5):>10}")
-    print(f"{'Mean Reciprocal Rank':<25} {ctrl_mrr:>18.4f} {treat_mrr:>21.4f} {_diff(treat_mrr, ctrl_mrr):>10}")
-    print(f"{'P95 Latency (ms)':<25} {ctrl_p95:>18.1f} {treat_p95:>21.1f} {_diff(treat_p95, ctrl_p95, '+.1f'):>10}")
+    print(
+        f"{'Candidate Hit@20':<25} {'N/A (single-stage)':>18} {cand_h20:>21.4f} {'-':>10}"
+    )
+    print(
+        f"{'Hit Rate @ 1':<25} {ctrl_hr1:>18.4f} {treat_hr1:>21.4f} {_diff(treat_hr1, ctrl_hr1):>10}"
+    )
+    print(
+        f"{'Hit Rate @ 3':<25} {ctrl_hr3:>18.4f} {treat_hr3:>21.4f} {_diff(treat_hr3, ctrl_hr3):>10}"
+    )
+    print(
+        f"{'Hit Rate @ 5':<25} {ctrl_hr5:>18.4f} {treat_hr5:>21.4f} {_diff(treat_hr5, ctrl_hr5):>10}"
+    )
+    print(
+        f"{'Mean Reciprocal Rank':<25} {ctrl_mrr:>18.4f} {treat_mrr:>21.4f} {_diff(treat_mrr, ctrl_mrr):>10}"
+    )
+    print(
+        f"{'P95 Latency (ms)':<25} {ctrl_p95:>18.1f} {treat_p95:>21.1f} {_diff(treat_p95, ctrl_p95, '+.1f'):>10}"
+    )
     print("-" * 78)
     print("Category Breakdown Comparison (MRR):")
-    print(f"  {'Category':<22} {'Cases':>5} {'Candidate@20':>13} {'Control MRR':>12} {'Treat MRR':>10} {'Delta':>9}")
+    print(
+        f"  {'Category':<22} {'Cases':>5} {'Candidate@20':>13} {'Control MRR':>12} {'Treat MRR':>10} {'Delta':>9}"
+    )
     print("  " + "-" * 74)
 
     ctrl_cats = control_data.get("category_metrics", {})
@@ -509,8 +532,12 @@ def run_cross_encoder_experiment() -> pathlib.Path:
     print("Latency Quantiles (Treatment End-to-End):")
     e2e = latency_stats["end_to_end_ms"]
     rr_lat = latency_stats["cross_encoder_rerank_ms"]
-    print(f"  Steady-State Rerank Latency: Median={rr_lat['median']:.1f}ms, Mean={rr_lat['mean']:.1f}ms, P95={rr_lat['p95']:.1f}ms")
-    print(f"  Total End-to-End Latency:    Median={e2e['median']:.1f}ms, Mean={e2e['mean']:.1f}ms, P95={e2e['p95']:.1f}ms")
+    print(
+        f"  Steady-State Rerank Latency: Median={rr_lat['median']:.1f}ms, Mean={rr_lat['mean']:.1f}ms, P95={rr_lat['p95']:.1f}ms"
+    )
+    print(
+        f"  Total End-to-End Latency:    Median={e2e['median']:.1f}ms, Mean={e2e['mean']:.1f}ms, P95={e2e['p95']:.1f}ms"
+    )
     print("=" * 78)
     print(f"Treatment Artifact: {treatment_file.name}")
     print("=" * 78 + "\n")

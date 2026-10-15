@@ -152,7 +152,9 @@ def test_reranker_preserves_candidate_attributes_and_dense_rank():
 def test_reranker_does_not_mutate_original_candidates():
     """Reranking must not alter or mutate the original RetrievedChunk instances."""
     candidates = [
-        _make_candidate("c1", "d1", "Original text", score=0.75, metadata={"flag": True})
+        _make_candidate(
+            "c1", "d1", "Original text", score=0.75, metadata={"flag": True}
+        )
     ]
     original_dict = {
         "id": candidates[0].id,
@@ -176,7 +178,9 @@ def test_reranker_does_not_mutate_original_candidates():
 
 def test_reranker_handles_missing_or_malformed_metadata():
     """Reranker handles chunks with None text, None metadata, or None score gracefully."""
-    chunk_empty = RetrievedChunk(id="c_none", document_id=None, text=None, score=None, metadata={})
+    chunk_empty = RetrievedChunk(
+        id="c_none", document_id=None, text=None, score=None, metadata={}
+    )
     chunk_normal = _make_candidate("c_norm", "d_norm", "Valid passage", score=0.5)
 
     reranker = _make_mock_reranker([-2.0, 1.0])
@@ -261,7 +265,17 @@ def test_evaluation_runner_two_stage_retrieval_and_metrics():
     # Candidate metrics
     assert ret.candidate_count == 4
     assert ret.candidate_hit_at_20 is True
-    assert ret.candidate_doc_ids == ["d_distractor1", "d_distractor2", "d_distractor3", "d_target"] or set(ret.candidate_doc_ids) == {"d_distractor1", "d_distractor2", "d_distractor3", "d_target"}
+    assert ret.candidate_doc_ids == [
+        "d_distractor1",
+        "d_distractor2",
+        "d_distractor3",
+        "d_target",
+    ] or set(ret.candidate_doc_ids) == {
+        "d_distractor1",
+        "d_distractor2",
+        "d_distractor3",
+        "d_target",
+    }
 
     # Final reranked metrics: target chunk c4 was elevated to rank 1
     assert ret.hit is True

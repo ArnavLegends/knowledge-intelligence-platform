@@ -423,9 +423,7 @@ def run_expanded_baseline() -> pathlib.Path:
     corpus_sha256 = hashlib.sha256(
         json.dumps(sorted(corpus_ids.items()), sort_keys=True).encode()
     ).hexdigest()
-    dataset_sha256 = hashlib.sha256(
-        DATASET_PATH.read_bytes()
-    ).hexdigest()
+    dataset_sha256 = hashlib.sha256(DATASET_PATH.read_bytes()).hexdigest()
 
     output: dict[str, Any] = {
         **json.loads(result.model_dump_json()),
@@ -479,9 +477,7 @@ def run_expanded_baseline() -> pathlib.Path:
     # Phase 7: Display summary
     # -----------------------------------------------------------------------
     n_labelled = result.labelled_cases
-    n_errors = sum(
-        1 for cr in result.case_results if cr.retrieval.retrieval_error
-    )
+    n_errors = sum(1 for cr in result.case_results if cr.retrieval.retrieval_error)
 
     print("\n" + "=" * 75)
     print("KIP v1.2 EXPANDED RETRIEVAL BASELINE RESULTS")
@@ -506,12 +502,18 @@ def run_expanded_baseline() -> pathlib.Path:
     def _fmt(val: float | None, fmt: str = ".4f") -> str:
         return f"{val:{fmt}}" if val is not None else "N/A"
 
-    print(f"Hit Rate @ 1:          {_fmt(result.hit_rate_at_1)}"
-          f"  ({int((result.hit_rate_at_1 or 0) * n_labelled)}/{n_labelled})")
-    print(f"Hit Rate @ 3:          {_fmt(result.hit_rate_at_3)}"
-          f"  ({int((result.hit_rate_at_3 or 0) * n_labelled)}/{n_labelled})")
-    print(f"Hit Rate @ 5:          {_fmt(result.hit_rate_at_5)}"
-          f"  ({int((result.hit_rate_at_5 or 0) * n_labelled)}/{n_labelled})")
+    print(
+        f"Hit Rate @ 1:          {_fmt(result.hit_rate_at_1)}"
+        f"  ({int((result.hit_rate_at_1 or 0) * n_labelled)}/{n_labelled})"
+    )
+    print(
+        f"Hit Rate @ 3:          {_fmt(result.hit_rate_at_3)}"
+        f"  ({int((result.hit_rate_at_3 or 0) * n_labelled)}/{n_labelled})"
+    )
+    print(
+        f"Hit Rate @ 5:          {_fmt(result.hit_rate_at_5)}"
+        f"  ({int((result.hit_rate_at_5 or 0) * n_labelled)}/{n_labelled})"
+    )
     print(f"Mean Reciprocal Rank:  {_fmt(result.mean_reciprocal_rank)}")
     print(f"Mean Retrieval Latency:{result.mean_retrieval_latency_ms:.2f} ms")
     print("-" * 75)

@@ -91,7 +91,9 @@ def preflight_check(
         )
 
     if not corpus_dir.exists() or not corpus_dir.is_dir():
-        raise ValueError(f"Preflight failed: Corpus directory not found at {corpus_dir}")
+        raise ValueError(
+            f"Preflight failed: Corpus directory not found at {corpus_dir}"
+        )
 
     if not dataset_path.exists():
         raise ValueError(f"Preflight failed: Dataset file not found at {dataset_path}")
@@ -183,8 +185,12 @@ def run_chunking_experiment() -> pathlib.Path:
     logger.info("KIP v1.2 CHUNKING EXPERIMENT (SENTENCE BOUNDARY SEGMENTATION)")
     logger.info("Corpus: %s", CORPUS_DIR)
     logger.info("Benchmark: %s", DATASET_PATH)
-    logger.info("Target Chunk Size: %d | Min Chunk Size: %d | Overlap Sentences: %d",
-                TARGET_CHUNK_SIZE, MIN_CHUNK_SIZE, OVERLAP_SENTENCES)
+    logger.info(
+        "Target Chunk Size: %d | Min Chunk Size: %d | Overlap Sentences: %d",
+        TARGET_CHUNK_SIZE,
+        MIN_CHUNK_SIZE,
+        OVERLAP_SENTENCES,
+    )
     logger.info("Collection: %s | Workspace: %s", COLLECTION_NAME, EVAL_WORKSPACE)
     logger.info("=" * 70)
 
@@ -193,8 +199,11 @@ def run_chunking_experiment() -> pathlib.Path:
     # -----------------------------------------------------------------------
     logger.info("Phase 0: Preflight validation...")
     corpus_ids, raw_dataset = preflight_check(CORPUS_DIR, DATASET_PATH, api_key)
-    logger.info("Preflight passed. %d corpus files, %d benchmark cases.",
-                len(corpus_ids), len(raw_dataset["cases"]))
+    logger.info(
+        "Preflight passed. %d corpus files, %d benchmark cases.",
+        len(corpus_ids),
+        len(raw_dataset["cases"]),
+    )
 
     # -----------------------------------------------------------------------
     # Phase 1: Initialize services
@@ -325,12 +334,18 @@ def run_chunking_experiment() -> pathlib.Path:
         )
     )
     warmup_latency_ms = (time.perf_counter() - warmup_start) * 1000
-    logger.info("Warmup query completed in %.2fms. Ready for benchmark evaluation.", warmup_latency_ms)
+    logger.info(
+        "Warmup query completed in %.2fms. Ready for benchmark evaluation.",
+        warmup_latency_ms,
+    )
 
     # -----------------------------------------------------------------------
     # Phase 4: Execute Benchmark Evaluation
     # -----------------------------------------------------------------------
-    logger.info("Phase 4: Running 80-case benchmark (measuring raw and deduped top-%d)...", FINAL_TOP_K)
+    logger.info(
+        "Phase 4: Running 80-case benchmark (measuring raw and deduped top-%d)...",
+        FINAL_TOP_K,
+    )
 
     cases = raw_dataset["cases"]
     case_results: list[dict[str, Any]] = []
@@ -402,28 +417,30 @@ def run_chunking_experiment() -> pathlib.Path:
             dedup_doc_ids, expected_doc_ids
         )
 
-        case_results.append({
-            "case_id": cid,
-            "category": cat,
-            "question": question,
-            "expected_doc_ids": expected_doc_ids,
-            "query_latency_ms": query_latency_ms,
-            "retrieval_error": retrieval_error,
-            # Raw results
-            "raw_retrieved_chunk_ids": [c.id for c in raw_top_5_chunks],
-            "raw_retrieved_doc_ids": raw_doc_ids,
-            "raw_hit": h5_raw,
-            "raw_hit_at_1": h1_raw,
-            "raw_hit_at_3": h3_raw,
-            "raw_reciprocal_rank": rr_raw,
-            # Deduped results
-            "dedup_retrieved_chunk_ids": [c.id for c in dedup_chunks],
-            "dedup_retrieved_doc_ids": dedup_doc_ids,
-            "dedup_hit": h5_dedup,
-            "dedup_hit_at_1": h1_dedup,
-            "dedup_hit_at_3": h3_dedup,
-            "dedup_reciprocal_rank": rr_dedup,
-        })
+        case_results.append(
+            {
+                "case_id": cid,
+                "category": cat,
+                "question": question,
+                "expected_doc_ids": expected_doc_ids,
+                "query_latency_ms": query_latency_ms,
+                "retrieval_error": retrieval_error,
+                # Raw results
+                "raw_retrieved_chunk_ids": [c.id for c in raw_top_5_chunks],
+                "raw_retrieved_doc_ids": raw_doc_ids,
+                "raw_hit": h5_raw,
+                "raw_hit_at_1": h1_raw,
+                "raw_hit_at_3": h3_raw,
+                "raw_reciprocal_rank": rr_raw,
+                # Deduped results
+                "dedup_retrieved_chunk_ids": [c.id for c in dedup_chunks],
+                "dedup_retrieved_doc_ids": dedup_doc_ids,
+                "dedup_hit": h5_dedup,
+                "dedup_hit_at_1": h1_dedup,
+                "dedup_hit_at_3": h3_dedup,
+                "dedup_reciprocal_rank": rr_dedup,
+            }
+        )
 
     # -----------------------------------------------------------------------
     # Phase 5: Aggregate metrics and profiling
@@ -542,40 +559,71 @@ def run_chunking_experiment() -> pathlib.Path:
     print("\n" + "=" * 85)
     print("KIP v1.2 CHUNKING EXPERIMENT: TREATMENT VS CONTROL BASELINE")
     print("=" * 85)
-    print(f"{'Metric':<32} {'Control (1000ch)':<18} {'Treatment (Raw)':<18} {'Treatment (Dedup)':<18}")
+    print(
+        f"{'Metric':<32} {'Control (1000ch)':<18} {'Treatment (Raw)':<18} {'Treatment (Dedup)':<18}"
+    )
     print("-" * 85)
-    print(f"{'Overall MRR':<32} {c_mrr:<18.4f} {mean_rr_raw:<18.4f} {mean_rr_dedup:<18.4f}")
+    print(
+        f"{'Overall MRR':<32} {c_mrr:<18.4f} {mean_rr_raw:<18.4f} {mean_rr_dedup:<18.4f}"
+    )
     print(f"{'Hit Rate @ 1':<32} {c_h1:<18.4f} {hit_1_raw:<18.4f} {hit_1_dedup:<18.4f}")
     print(f"{'Hit Rate @ 3':<32} {c_h3:<18.4f} {hit_3_raw:<18.4f} {hit_3_dedup:<18.4f}")
     print(f"{'Hit Rate @ 5':<32} {c_h5:<18.4f} {hit_5_raw:<18.4f} {hit_5_dedup:<18.4f}")
-    print(f"{'Total Index Chunks':<32} {'50 (1.0/doc)':<18} {f'{total_chunks_indexed} (3.5/doc)':<18} {f'{total_chunks_indexed} (3.5/doc)':<18}")
-    print(f"{'Indexing Duration':<32} {'~28.0s':<18} {f'{indexing_duration_seconds:.1f}s':<18} {f'{indexing_duration_seconds:.1f}s':<18}")
-    print(f"{'P95 Query Latency (ms)':<32} {c_p95_lat:<18.1f} {latency_profiling['p95']:<18.1f} {latency_profiling['p95']:<18.1f}")
+    print(
+        f"{'Total Index Chunks':<32} {'50 (1.0/doc)':<18} {f'{total_chunks_indexed} (3.5/doc)':<18} {f'{total_chunks_indexed} (3.5/doc)':<18}"
+    )
+    print(
+        f"{'Indexing Duration':<32} {'~28.0s':<18} {f'{indexing_duration_seconds:.1f}s':<18} {f'{indexing_duration_seconds:.1f}s':<18}"
+    )
+    print(
+        f"{'P95 Query Latency (ms)':<32} {c_p95_lat:<18.1f} {latency_profiling['p95']:<18.1f} {latency_profiling['p95']:<18.1f}"
+    )
     print("=" * 85)
 
     print("\nCategory Comparison (MRR):")
-    print(f"{'Category':<22} {'Cases':<8} {'Control MRR':<15} {'Raw MRR':<15} {'Dedup MRR':<15} {'Delta (Dedup)':<12}")
+    print(
+        f"{'Category':<22} {'Cases':<8} {'Control MRR':<15} {'Raw MRR':<15} {'Dedup MRR':<15} {'Delta (Dedup)':<12}"
+    )
     print("-" * 87)
     for cat in sorted(category_summary.keys()):
         c_cat_mrr = c_cats.get(cat, {}).get("mean_reciprocal_rank", 0.0)
         raw_mrr = category_summary[cat]["raw_mrr"]
         dedup_mrr = category_summary[cat]["dedup_mrr"]
         delta = dedup_mrr - c_cat_mrr
-        print(f"{cat:<22} {category_summary[cat]['total_cases']:<8} {c_cat_mrr:<15.4f} {raw_mrr:<15.4f} {dedup_mrr:<15.4f} {delta:+.4f}")
+        print(
+            f"{cat:<22} {category_summary[cat]['total_cases']:<8} {c_cat_mrr:<15.4f} {raw_mrr:<15.4f} {dedup_mrr:<15.4f} {delta:+.4f}"
+        )
 
     # Evaluate criteria against deduped treatment
     primary_pass = mean_rr_dedup >= 0.8200
-    exact_term_pass = category_summary.get("exact_terminology", {}).get("dedup_hit_at_1", 0.0) >= 0.7500
-    boundary_pass = category_summary.get("boundary_handling", {}).get("dedup_mrr", 0.0) >= 0.6500
-    multi_concept_pass = category_summary.get("multi_concept", {}).get("dedup_mrr", 0.0) >= 1.0000
+    exact_term_pass = (
+        category_summary.get("exact_terminology", {}).get("dedup_hit_at_1", 0.0)
+        >= 0.7500
+    )
+    boundary_pass = (
+        category_summary.get("boundary_handling", {}).get("dedup_mrr", 0.0) >= 0.6500
+    )
+    multi_concept_pass = (
+        category_summary.get("multi_concept", {}).get("dedup_mrr", 0.0) >= 1.0000
+    )
     latency_pass = (latency_profiling["p95"] - c_p95_lat) <= 100.0
 
     print("\nSuccess and Rejection Criteria Assessment (Treatment vs Control):")
-    print(f"  [1] Primary Target (Overall MRR >= 0.8200):        {mean_rr_dedup:.4f} -> {'PASSED' if primary_pass else 'FAILED'}")
-    print(f"  [2] Secondary (Exact Term Hit@1 >= 0.7500):        {category_summary.get('exact_terminology', {}).get('dedup_hit_at_1', 0.0):.4f} (Control: {c_cats.get('exact_terminology', {}).get('hit_rate_at_1', 0.0):.4f}) -> {'PASSED' if exact_term_pass else 'FAILED'}")
-    print(f"  [3] Secondary (Boundary Handling MRR >= 0.6500):   {category_summary.get('boundary_handling', {}).get('dedup_mrr', 0.0):.4f} (Control: {c_cats.get('boundary_handling', {}).get('mean_reciprocal_rank', 0.0):.4f}) -> {'PASSED' if boundary_pass else 'FAILED'}")
-    print(f"  [4] Safety Target (Multi-Concept MRR == 1.0000):    {category_summary.get('multi_concept', {}).get('dedup_mrr', 0.0):.4f} (Control: {c_cats.get('multi_concept', {}).get('mean_reciprocal_rank', 0.0):.4f}) -> {'PASSED' if multi_concept_pass else 'FAILED'}")
-    print(f"  [5] Latency Guardrail (Delta P95 <= +100ms):        {latency_profiling['p95'] - c_p95_lat:+.1f} ms -> {'PASSED' if latency_pass else 'FAILED'}")
+    print(
+        f"  [1] Primary Target (Overall MRR >= 0.8200):        {mean_rr_dedup:.4f} -> {'PASSED' if primary_pass else 'FAILED'}"
+    )
+    print(
+        f"  [2] Secondary (Exact Term Hit@1 >= 0.7500):        {category_summary.get('exact_terminology', {}).get('dedup_hit_at_1', 0.0):.4f} (Control: {c_cats.get('exact_terminology', {}).get('hit_rate_at_1', 0.0):.4f}) -> {'PASSED' if exact_term_pass else 'FAILED'}"
+    )
+    print(
+        f"  [3] Secondary (Boundary Handling MRR >= 0.6500):   {category_summary.get('boundary_handling', {}).get('dedup_mrr', 0.0):.4f} (Control: {c_cats.get('boundary_handling', {}).get('mean_reciprocal_rank', 0.0):.4f}) -> {'PASSED' if boundary_pass else 'FAILED'}"
+    )
+    print(
+        f"  [4] Safety Target (Multi-Concept MRR == 1.0000):    {category_summary.get('multi_concept', {}).get('dedup_mrr', 0.0):.4f} (Control: {c_cats.get('multi_concept', {}).get('mean_reciprocal_rank', 0.0):.4f}) -> {'PASSED' if multi_concept_pass else 'FAILED'}"
+    )
+    print(
+        f"  [5] Latency Guardrail (Delta P95 <= +100ms):        {latency_profiling['p95'] - c_p95_lat:+.1f} ms -> {'PASSED' if latency_pass else 'FAILED'}"
+    )
 
     return out_path
 

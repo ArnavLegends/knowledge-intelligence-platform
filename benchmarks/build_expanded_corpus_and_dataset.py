@@ -601,5 +601,8 @@ print(f"\nSuccessfully wrote {len(corpus_ids)} documents.")
 
 # Save corpus_ids mapping for building benchmark cases
 mapping_path = REPO_ROOT / "benchmarks" / "corpus_v1_2_expanded_ids.json"
-mapping_path.write_text(json.dumps({"doc_ids": corpus_ids, "chunk_ids": chunk_ids}, indent=2), encoding="utf-8")
+mapping_path.write_text(
+    json.dumps({"doc_ids": corpus_ids, "chunk_ids": chunk_ids}, indent=2),
+    encoding="utf-8",
+)
 print(f"Saved ID mappings to {mapping_path}")

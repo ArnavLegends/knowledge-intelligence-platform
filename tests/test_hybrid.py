@@ -284,9 +284,7 @@ def test_evaluation_runner_hybrid_integration():
         RetrievedChunk(
             id="chk-d1", document_id="target-doc", text="Target", score=0.85
         ),
-        RetrievedChunk(
-            id="chk-d2", document_id="other-doc", text="Other", score=0.75
-        ),
+        RetrievedChunk(id="chk-d2", document_id="other-doc", text="Other", score=0.75),
     ]
     mock_ret_service = MockRetrievalService(dense_chunks)
 

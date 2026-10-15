@@ -148,8 +148,7 @@ class SentenceBoundaryChunker(DocumentChunker):
         return chunks
 
     def _slice_oversized_unit(self, text: str) -> list[str]:
-        """Deterministically slice text exceeding target size into overlapping chunks.
-        """
+        """Deterministically slice text exceeding target size into overlapping chunks."""  # noqa: E501
         slices: list[str] = []
         step = max(50, self.target_chunk_size - self.min_chunk_size)
         for i in range(0, len(text), step):

@@ -1018,8 +1018,7 @@ def test_v12_expanded_benchmark_document_ids_match_corpus():
 
     corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
     actual_ids = {
-        hashlib.sha256(f.read_bytes()).hexdigest()
-        for f in corpus_dir.glob("*.txt")
+        hashlib.sha256(f.read_bytes()).hexdigest() for f in corpus_dir.glob("*.txt")
     }
     data = json.loads(
         pathlib.Path("benchmarks/kip_v1_2_expanded_benchmark.json").read_text(
@@ -1074,9 +1073,7 @@ def test_v12_expanded_benchmark_corpus_size():
 
     corpus_dir = pathlib.Path("benchmarks/corpus_v1_2_expanded")
     txt_files = list(corpus_dir.glob("*.txt"))
-    assert len(txt_files) == 50, (
-        f"Expected 50 corpus documents, found {len(txt_files)}"
-    )
+    assert len(txt_files) == 50, f"Expected 50 corpus documents, found {len(txt_files)}"
 
 
 def test_v12_expanded_ids_json_consistency():
@@ -1264,8 +1261,12 @@ def test_expanded_baseline_category_aggregation():
         )
 
     dataset_cases = [
-        BenchmarkCase(id="a1", question="Q?", metadata={"category": "exact_terminology"}),
-        BenchmarkCase(id="a2", question="Q?", metadata={"category": "exact_terminology"}),
+        BenchmarkCase(
+            id="a1", question="Q?", metadata={"category": "exact_terminology"}
+        ),
+        BenchmarkCase(
+            id="a2", question="Q?", metadata={"category": "exact_terminology"}
+        ),
         BenchmarkCase(id="b1", question="Q?", metadata={"category": "paraphrase"}),
     ]
     case_results = [

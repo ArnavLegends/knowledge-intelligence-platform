@@ -101,9 +101,7 @@ class BM25Index:
                 self.doc_frequencies[term] += 1
 
         self.num_docs = len(self.documents)
-        self.avg_doc_len = (
-            (total_tokens / self.num_docs) if self.num_docs > 0 else 0.0
-        )
+        self.avg_doc_len = (total_tokens / self.num_docs) if self.num_docs > 0 else 0.0
 
     def idf(self, term: str) -> float:
         """Calculate Robertson-Spärck Jones IDF with Lucene smoothing.
@@ -161,9 +159,7 @@ class BM25Index:
                 if f_q == 0:
                     continue
                 idf_val = self.idf(term)
-                term_score = idf_val * (
-                    (f_q * (k1 + 1.0)) / (f_q + k1 * len_norm)
-                )
+                term_score = idf_val * ((f_q * (k1 + 1.0)) / (f_q + k1 * len_norm))
                 score += term_score
 
             if score > 0.0:

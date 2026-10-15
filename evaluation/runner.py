@@ -201,14 +201,10 @@ class EvaluationRunner:
                 if is_labelled_cand:
                     dense_hit_at_depth = any(
                         d in dense_doc_ids for d in case.expected_document_ids
-                    ) or any(
-                        c in dense_chunk_id_set for c in case.expected_chunk_ids
-                    )
+                    ) or any(c in dense_chunk_id_set for c in case.expected_chunk_ids)
                     sparse_hit_at_depth = any(
                         d in sparse_doc_ids for d in case.expected_document_ids
-                    ) or any(
-                        c in sparse_chunk_id_set for c in case.expected_chunk_ids
-                    )
+                    ) or any(c in sparse_chunk_id_set for c in case.expected_chunk_ids)
                     candidate_hit_at_20 = dense_hit_at_depth or sparse_hit_at_depth
                 else:
                     dense_hit_at_depth = False
@@ -308,24 +304,34 @@ class EvaluationRunner:
             len(case.expected_document_ids), len(case.expected_chunk_ids)
         )
 
-        dense_scores = [
-            float(c.metadata["dense_score"])
-            for c in chunks
-            if c.metadata and "dense_score" in c.metadata and c.metadata["dense_score"] is not None
-        ] if self._sparse_retriever is not None else [
-            float(c.score)
-            for c in chunks
-            if hasattr(c, "score") and c.score is not None
-        ]
+        dense_scores = (
+            [
+                float(c.metadata["dense_score"])
+                for c in chunks
+                if c.metadata
+                and "dense_score" in c.metadata
+                and c.metadata["dense_score"] is not None
+            ]
+            if self._sparse_retriever is not None
+            else [
+                float(c.score)
+                for c in chunks
+                if hasattr(c, "score") and c.score is not None
+            ]
+        )
         sparse_scores = [
             float(c.metadata["sparse_score"])
             for c in chunks
-            if c.metadata and "sparse_score" in c.metadata and c.metadata["sparse_score"] is not None
+            if c.metadata
+            and "sparse_score" in c.metadata
+            and c.metadata["sparse_score"] is not None
         ]
         rrf_scores = [
             float(c.metadata["rrf_score"])
             for c in chunks
-            if c.metadata and "rrf_score" in c.metadata and c.metadata["rrf_score"] is not None
+            if c.metadata
+            and "rrf_score" in c.metadata
+            and c.metadata["rrf_score"] is not None
         ]
         rerank_scores = [
             float(c.rerank_score)
@@ -368,7 +374,6 @@ class EvaluationRunner:
             dense_hit_at_depth=dense_hit_at_depth,
             sparse_hit_at_depth=sparse_hit_at_depth,
         )
-
 
         # --- Generation phase ---
         t_gen_start = time.perf_counter()
