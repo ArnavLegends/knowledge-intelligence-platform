@@ -1,6 +1,7 @@
 """RAG orchestration service."""
 
 import logging
+import time
 
 from fastapi import Depends
 
@@ -46,6 +47,7 @@ class RAGService:
             request.top_k,
         )
 
+        t_total = time.perf_counter()
         # 1. Retrieve context scoped strictly to workspace_id
         try:
             retrieval_query = RetrievalQuery(
@@ -66,6 +68,7 @@ class RAGService:
         except Exception as e:
             raise RAGError(f"Retrieval step failed: {e}") from e
 
+        retrieve_ms = (time.perf_counter() - t_total) * 1000
         # Defensive check: ensure no cross-tenant contamination in retrieved chunks
         filtered_chunks = []
         for chunk in retrieved_chunks:
@@ -114,13 +117,25 @@ class RAGService:
                 model=self._settings.llm_model,
                 temperature=0.0,
             )
+            t_gen = time.perf_counter()
             llm_response = self._llm_service.generate(llm_request)
+            generate_ms = (time.perf_counter() - t_gen) * 1000
         except Exception as e:
             raise RAGError(f"LLM generation failed: {e}") from e
 
         if not llm_response.content:
             raise RAGError("LLM returned an empty response.")
 
+        total_ms = (time.perf_counter() - t_total) * 1000
+        logger.info(
+            "RAG complete: retrieve_ms=%.1f generate_ms=%.1f total_ms=%.1f "
+            "workspace=%s chunks=%d",
+            retrieve_ms,
+            generate_ms,
+            total_ms,
+            request.workspace_id[:8],
+            len(filtered_chunks),
+        )
         return RAGResponse(
             answer=llm_response.content,
             sources=context_items,

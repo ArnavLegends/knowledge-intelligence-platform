@@ -91,7 +91,12 @@ def test_retrieval_service_flow():
     # Verify delegations
     mock_emb_service.embed_texts.assert_called_once()
     mock_vs_service.search.assert_called_once_with(
-        query_vector=[0.1, 0.2], top_k=2, workspace_id="default", threshold=None
+        query_vector=[0.1, 0.2],
+        top_k=2,
+        workspace_id="default",
+        threshold=None,
+        document_id=None,
+        filters=None,
     )
 
 

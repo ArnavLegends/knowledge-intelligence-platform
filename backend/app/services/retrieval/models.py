@@ -12,6 +12,8 @@ class RetrievalQuery(BaseModel):
     workspace_id: str = "default"
     top_k: int = Field(default=5, gt=0)
     threshold: float | None = None
+    document_id: str | None = None
+    filters: dict[str, Any] | None = None
 
 
 class RetrievedChunk(BaseModel):

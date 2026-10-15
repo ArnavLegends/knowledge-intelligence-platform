@@ -346,23 +346,40 @@ class QdrantVectorStoreProvider(VectorStoreProvider):
         top_k: int,
         workspace_id: str,
         threshold: float | None = None,
+        document_id: str | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[VectorSearchResult]:
         if not workspace_id or not workspace_id.strip():
             raise VectorStoreError("workspace_id is required for vector search.")
         if not query_vector or top_k <= 0:
             return []
 
-        filter_ = qmodels.Filter(
-            must=[
+        must_conditions: list[Any] = [
+            qmodels.FieldCondition(
+                key="workspace_id",
+                match=qmodels.MatchValue(value=workspace_id),
+            )
+        ]
+        if document_id and document_id.strip():
+            must_conditions.append(
                 qmodels.FieldCondition(
-                    key="workspace_id",
-                    match=qmodels.MatchValue(value=workspace_id),
+                    key="document_id",
+                    match=qmodels.MatchValue(value=document_id.strip()),
                 )
-            ]
-        )
+            )
+        if filters:
+            for k, v in sorted(filters.items()):
+                must_conditions.append(
+                    qmodels.FieldCondition(
+                        key=str(k),
+                        match=qmodels.MatchValue(value=v),
+                    )
+                )
+
+        filter_ = qmodels.Filter(must=must_conditions)
 
         try:
-            # Query points in Qdrant with workspace filter
+            # Query Qdrant with workspace and optional document/payload filters
             search_results = self._client.query_points(
                 collection_name=self._collection_name,
                 query=query_vector,
@@ -379,6 +396,12 @@ class QdrantVectorStoreProvider(VectorStoreProvider):
             payload = hit.payload or {}
             # Defensive check: ensure returned hit belongs to the requested workspace
             if payload.get("workspace_id") != workspace_id:
+                continue
+            if (
+                document_id
+                and document_id.strip()
+                and payload.get("document_id") != document_id.strip()
+            ):
                 continue
 
             chunk_id = payload.get("chunk_id", str(hit.id))

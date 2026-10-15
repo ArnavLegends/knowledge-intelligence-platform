@@ -13,9 +13,12 @@ from app.middleware.request_logging import RequestLoggingMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize application services on startup."""
+    """Initialize application services on startup and clean up on shutdown."""
     setup_logging()
     yield
+    from app.core.async_executor import shutdown_executor
+
+    shutdown_executor(wait=False)
 
 
 app = FastAPI(

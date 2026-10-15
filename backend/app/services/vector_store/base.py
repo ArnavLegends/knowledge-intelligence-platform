@@ -54,5 +54,7 @@ class VectorStoreProvider(ABC):
         top_k: int,
         workspace_id: str = "default",
         threshold: float | None = None,
+        document_id: str | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[VectorSearchResult]:
         """Perform similarity search scoped strictly to workspace_id."""

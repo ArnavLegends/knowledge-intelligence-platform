@@ -40,6 +40,15 @@ class Settings(BaseSettings):
     max_chunks_per_workspace: int = 1000
     retrieval_default_top_k: int = 5
     retrieval_default_threshold: float | None = None
+    # Cache configuration
+    embedding_cache_capacity: int = 256
+    search_cache_capacity: int = 256
+    search_cache_ttl_seconds: float = 60.0
+    # Timeout configuration (seconds)
+    embedding_timeout_seconds: float = 15.0
+    llm_timeout_seconds: float = 30.0
+    # Thread-pool executor for offloading blocking I/O from the event loop
+    retrieval_executor_workers: int = 4
     rag_prompt_version: str = "v1"
     rag_empty_context_message: str = (
         "I could not find relevant information in the knowledge "

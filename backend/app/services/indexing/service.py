@@ -9,6 +9,7 @@ from app.core.config import Settings
 from app.core.config import settings as default_settings
 from app.core.exceptions import AppException
 from app.core.workspace import get_workspace_id
+from app.services.cache.search_cache import SearchCache, get_default_search_cache
 from app.services.chunking.chunkers.fixed_size import FixedSizeChunker
 from app.services.chunking.service import ChunkingService
 from app.services.documents.models import Document
@@ -28,11 +29,15 @@ class DocumentIndexingService:
         embedding_service: EmbeddingService,
         vector_store_service: VectorStoreService,
         settings: Settings | None = None,
+        search_cache: SearchCache | None = None,
     ) -> None:
         self._chunking_service = chunking_service
         self._embedding_service = embedding_service
         self._vector_store_service = vector_store_service
         self._settings = settings or default_settings
+        self._search_cache = (
+            search_cache if search_cache is not None else get_default_search_cache()
+        )
 
     def document_exists(self, document_id: str, workspace_id: str = "default") -> bool:
         """Return True if vectors for document_id exist in workspace_id."""
@@ -108,7 +113,9 @@ class DocumentIndexingService:
             )
 
         logger.debug(
-            "Chunking complete: document_id=%s chunks=%d", document.id, len(chunks)
+            "Chunking complete: document_id=%s chunks=%d",
+            document.id,
+            len(chunks),
         )
 
         for chunk in chunks:
@@ -150,6 +157,17 @@ class DocumentIndexingService:
                 )
             raise e
 
+        # Invalidate search cache for this workspace on successful index mutation
+        if self._search_cache is not None:
+            invalidated = self._search_cache.invalidate_workspace(workspace_id)
+            if invalidated:
+                logger.info(
+                    "search_cache invalidated workspace=%s entries_removed=%d "
+                    "(after document indexing)",
+                    workspace_id[:8],
+                    invalidated,
+                )
+
         logger.info(
             "Indexing complete: document_id=%s chunks_indexed=%d",
             document.id,
@@ -184,4 +202,5 @@ def get_indexing_service(
         chunking_service=chunking_service,
         embedding_service=embedding_service,
         vector_store_service=vector_store_service,
+        search_cache=get_default_search_cache(),
     )

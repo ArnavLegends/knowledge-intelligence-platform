@@ -7,6 +7,9 @@ from app.core.exceptions import EmbeddingProviderError
 from app.services.embeddings.base import EmbeddingProvider
 from app.services.embeddings.models import Embedding, EmbeddingRequest
 
+# Default per-request HTTP timeout for Gemini embedding calls (seconds)
+_DEFAULT_TIMEOUT_S: float = 15.0
+
 
 class GeminiEmbeddingProvider(EmbeddingProvider):
     """Adapter for Google Gemini's embedding API with configurable dimensionality."""
@@ -17,12 +20,19 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         model: str = "gemini-embedding-2",
         output_dimensionality: int | None = None,
         client: object | None = None,
+        timeout_seconds: float = _DEFAULT_TIMEOUT_S,
     ) -> None:
         if not api_key and client is None:
             raise EmbeddingProviderError(
                 "Embedding API key is not configured for Gemini."
             )
-        self._client = client or genai.Client(api_key=api_key)
+        if client is not None:
+            self._client = client
+        else:
+            http_opts = types.HttpOptions(
+                timeout=int(timeout_seconds * 1000)  # SDK expects milliseconds
+            )
+            self._client = genai.Client(api_key=api_key, http_options=http_opts)
         self._default_model = model
         self._output_dimensionality = output_dimensionality
 

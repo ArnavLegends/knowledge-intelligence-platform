@@ -1,17 +1,15 @@
-# KIP Current Status (v1.1.0)
+# KIP Current Status (v1.3.0)
 
-**Document Version:** 1.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
+**Document Version:** 1.3  
+**Project Version:** v1.3.0  
 **Status:** Canonical System State  
-**Last Updated:** 2026-10-08  
+**Last Updated:** 2026-10-15  
 
 ---
 
 ## 1. Executive Summary
 
-Knowledge Intelligence Platform (KIP) v1.1.0 is an end-to-end, zero-cost, multi-tenant RAG (Retrieval-Augmented Generation) platform. It provides document ingestion across four file formats (PDF, DOCX, TXT, MD), semantic vector search with backend-validated, workspace-scoped Qdrant filtering, grounded question-answering with strict citations and provenance, an interactive Streamlit UI, and authenticated feedback collection persisted to Google Sheets.
-
-As of v1.1.0, the core functionality is **feature-complete and frozen**. Active development is focused on public testing, community feedback collection, and documentation reconciliation prior to planning v1.2 retrieval intelligence experiments.
+Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (Retrieval-Augmented Generation) platform engineered for low latency, event-loop concurrency, and bounded resource consumption. It provides document ingestion across four file formats (PDF, DOCX, TXT, MD), semantic vector search with backend-validated, workspace-scoped Qdrant filtering, grounded question-answering with strict citations and provenance, an interactive Streamlit UI, authenticated feedback collection persisted to Google Sheets, zero-cost thread-safe in-memory LRU caching (embedding and search), bounded thread-pool executor offloading (`run_blocking`), deadline timeout enforcement with HTTP 504 mapping, and structured wall-clock latency telemetry.
 
 ---
 
@@ -69,23 +67,25 @@ As of v1.1.0, the core functionality is **feature-complete and frozen**. Active 
 
 ## 4. Test Suite Metrics
 
-- **Total Test Count:** 267 automated tests
-- **Passing Rate:** 100% (267/267 passing)
+- **Total Test Count:** 396 automated tests
+- **Passing Rate:** 100% (396/396 passing)
 - **Subsystem Breakdown:**
-  - Backend API endpoints (`tests/test_api.py`, `tests/test_feedback_api.py`): 38 tests
-  - RAG Core (Chunking, Embeddings, Vector Store, LLM, Retrieval): 94 tests
+  - Caching & Performance (`tests/test_cache.py`, `tests/test_cache_benchmark.py`, `tests/test_async_executor.py`): 72 tests
+  - Benchmark Auditing & Historical Verification (`tests/test_benchmark_audit.py`): 8 tests
+  - Backend API endpoints (`tests/test_api.py`, `tests/test_feedback_api.py`, `tests/test_retrieval_api.py`, `tests/test_rag_api.py`, `tests/test_documents_api.py`): 45 tests
+  - RAG Core (Chunking, Embeddings, Vector Store, LLM, Retrieval): 135 tests
   - Ingestion (PDF, DOCX, TXT, MD, Multi-Document, Workspaces): 62 tests
   - Workspace & Multi-Tenancy (Scoping, Isolation, Token Management): 31 tests
-  - Evaluation & Configuration (Settings, Validation, Runners, v1.2 Formatter Hooks & Metrics): 42 tests
+  - Evaluation & Configuration (Settings, Validation, Runners, v1.2 Formatter Hooks & Metrics): 43 tests
 
 ---
 
-## 5. Explicitly Deferred Capabilities & Research Status
+## 5. Explicitly Deferred Capabilities & Roadmap Status
 
 The following capabilities are positioned on the forward-looking roadmap:
 
-- **v1.2 (Retrieval Intelligence):** Initial input-formatting experiment completed (neutral outcome: raw-text default retained). Next research candidates: hybrid sparse/dense search (BM25 + Qdrant) and cross-encoder reranking, evaluated against an expanded, multi-topic benchmark.
-- **v1.3 (Performance Engineering):** Redis semantic caching, latency telemetry, rate limiting.
+- **v1.2 (Retrieval Intelligence):** Research complete. Dense retrieval baseline retained.
+- **v1.3 (Performance Engineering):** Complete. Zero-cost thread-safe LRU caching (embedding & search), async thread-pool offloading, timeout enforcement with HTTP 504 handling, and structured latency telemetry.
 - **v2.0 (AI Memory):** Persistent multi-turn conversation memory, session stores, user personalization.
 - **v2.1 (Tool Integration):** External tool calling, calculator, web search execution.
 - **v2.2 (Agentic AI):** Autonomous multi-step planning, LangGraph/CrewAI agents.

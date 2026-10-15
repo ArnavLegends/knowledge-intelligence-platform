@@ -3,6 +3,7 @@
 from collections.abc import Sequence
 from typing import Any
 
+from app.services.cache.search_cache import SearchCache, get_default_search_cache
 from app.services.embeddings.models import Embedding
 from app.services.vector_store.manager import VectorStoreManager
 from app.services.vector_store.models import StoredVector, VectorSearchResult
@@ -11,8 +12,15 @@ from app.services.vector_store.models import StoredVector, VectorSearchResult
 class VectorStoreService:
     """Provides high-level vector storage operations scoped to workspaces."""
 
-    def __init__(self, manager: VectorStoreManager | None = None) -> None:
+    def __init__(
+        self,
+        manager: VectorStoreManager | None = None,
+        search_cache: SearchCache | None = None,
+    ) -> None:
         self._manager = manager or VectorStoreManager()
+        self._search_cache = (
+            search_cache if search_cache is not None else get_default_search_cache()
+        )
 
     def store_embeddings(
         self, embeddings: Sequence[Embedding], workspace_id: str = "default"
@@ -58,6 +66,8 @@ class VectorStoreService:
         self._manager.provider.delete_document(
             document_id=document_id, workspace_id=workspace_id
         )
+        if self._search_cache is not None:
+            self._search_cache.invalidate_workspace(workspace_id)
 
     def list_documents(self, workspace_id: str = "default") -> list[dict[str, Any]]:
         """List documents and metadata belonging to workspace_id."""
@@ -69,6 +79,8 @@ class VectorStoreService:
         top_k: int,
         workspace_id: str = "default",
         threshold: float | None = None,
+        document_id: str | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[VectorSearchResult]:
         """Perform a similarity search scoped to workspace_id."""
         return self._manager.provider.search(
@@ -76,4 +88,6 @@ class VectorStoreService:
             top_k=top_k,
             workspace_id=workspace_id,
             threshold=threshold,
+            document_id=document_id,
+            filters=filters,
         )

@@ -217,17 +217,30 @@ class ChromaVectorStoreProvider(VectorStoreProvider):
         top_k: int,
         workspace_id: str,
         threshold: float | None = None,
+        document_id: str | None = None,
+        filters: dict[str, Any] | None = None,
     ) -> list[VectorSearchResult]:
         if not workspace_id or not workspace_id.strip():
             raise VectorStoreError("workspace_id is required for vector search.")
         if not query_vector or top_k <= 0:
             return []
 
+        where_clauses: list[dict[str, Any]] = [{"workspace_id": workspace_id}]
+        if document_id and document_id.strip():
+            where_clauses.append({"document_id": document_id.strip()})
+        if filters:
+            for k, v in sorted(filters.items()):
+                where_clauses.append({str(k): v})
+
+        where: dict[str, Any] = (
+            where_clauses[0] if len(where_clauses) == 1 else {"$and": where_clauses}
+        )
+
         try:
             result = self._collection.query(
                 query_embeddings=[query_vector],
                 n_results=top_k,
-                where={"workspace_id": workspace_id},
+                where=where,
                 include=["embeddings", "metadatas", "distances"],
             )
         except Exception as e:

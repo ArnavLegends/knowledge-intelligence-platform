@@ -42,6 +42,7 @@ class LLMManager:
             return GeminiProvider(
                 api_key=settings.llm_api_key,
                 model=settings.llm_model,
+                timeout_seconds=settings.llm_timeout_seconds,
             )
         raise AppException(
             f"Unsupported LLM provider: {provider_name}",

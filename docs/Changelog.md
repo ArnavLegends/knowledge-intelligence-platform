@@ -64,6 +64,57 @@ Each release documents significant engineering changes while maintaining histori
   - `benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`
 
 
+# [v1.3.0] — Performance Engineering & Concurrency Hardening
+
+**Release Date:** 2026-10-15  
+**Theme:** Performance Engineering, Bounded Zero-Cost Caching, Async Thread Offloading, Timeout Resilience & Observability
+
+### Added
+
+#### In-Memory Zero-Infrastructure Caching Foundation
+- **Thread-Safe Bounded LRU Cache Foundation (`app.services.cache.lru_cache.LRUCache`)**:
+  - Pure Python thread-safe generic LRU cache using `collections.OrderedDict` protected by `threading.RLock`.
+  - Zero external infrastructure cost (no Redis/Memcached required, free-tier friendly).
+  - Explicit size capacity enforcement and LRU eviction tracking.
+- **Embedding Cache (`app.services.cache.embedding_cache.EmbeddingCache`)**:
+  - In-memory cache keyed by SHA-256 of `(normalized_text, model, dimensions)`.
+  - Integrated into `EmbeddingManager`: transparent lookup on single-input requests (queries) while bulk batch ingestion safely bypasses cache.
+  - Reduces upstream provider latency from ~1.8 ms to 0.01 ms on cache hits (100% reduction in provider calls for repeated queries).
+- **Multi-Tenant Search Cache (`app.services.cache.search_cache.SearchCache`)**:
+  - In-memory TTL-backed cache keyed by SHA-256 of all query-affecting parameters: `(workspace_id, collection, vector_hash, top_k, threshold, document_id, canonical_filters)`.
+  - Strict tenant isolation: every key embeds `workspace_id`.
+  - Workspace-level (`invalidate_workspace`) and document-level (`invalidate_document`) invalidation indexes.
+  - Automatically triggered on document indexing and document deletion.
+  - Reduces vector store query latency from simulated network time to 0.04 ms on cache hits.
+
+#### Bounded Async Thread Offloading & Timeout Protection
+- **Async Blocking Executor (`app.core.async_executor`)**:
+  - Process-level `ThreadPoolExecutor` with bounded worker ceiling (`RETRIEVAL_EXECUTOR_WORKERS`, default: 4).
+  - `run_blocking(fn, *args, timeout=...)` helper offloading CPU/synchronous I/O from FastAPI's async event loop.
+  - Graceful pool shutdown (`shutdown_executor`) registered with application lifespan in `app.main`.
+- **Endpoint-Level Timeout Resilience & HTTP 504 Protection**:
+  - `POST /api/v1/retrieval/search`: Offloaded to thread pool with overall timeout `embedding_timeout_seconds + qdrant_timeout_seconds + 2.0s`. Translates timeouts to HTTP 504 Gateway Timeout.
+  - `POST /api/v1/rag/answer`: Offloaded to thread pool with overall timeout `embedding_timeout_seconds + qdrant_timeout_seconds + llm_timeout_seconds + 3.0s`. Translates timeouts to HTTP 504 Gateway Timeout.
+- **Client-Side Timeout Settings**:
+  - `EMBEDDING_TIMEOUT_SECONDS` (default: 15.0s)
+  - `LLM_TIMEOUT_SECONDS` (default: 30.0s)
+  - `QDRANT_TIMEOUT_SECONDS` (default: 10.0s)
+  - `RETRIEVAL_EXECUTOR_WORKERS` (default: 4)
+
+#### Observability & Telemetry
+- Structured wall-clock performance instrumentation logged at `INFO` level:
+  - Retrieval: `search_cache=hit|miss embed_ms=%.1f search_ms=%.1f total_ms=%.1f workspace=%s top_k=%d doc_scope=%s`
+  - RAG: `RAG complete: retrieve_ms=%.1f generate_ms=%.1f total_ms=%.1f workspace=%s chunks=%d`
+  - Zero PII or query text logged, preserving data privacy and security invariants.
+
+### Changed
+- Promoted performance latency logs from `DEBUG` to `INFO` so telemetry is visible under Render's production `LOG_LEVEL=INFO`.
+- Standardized pytest temporary directory handling via `--basetemp=.pytest_temp` in `pyproject.toml` and `.gitignore` to resolve Windows symlink unlinking permission issues.
+
+### Verified
+- Automated test suite expanded to 396 tests with 100% pass rate (0 failures).
+- Historical benchmark audit verified 8/8 suites passing with zero material discrepancies.
+
 ---
 
 # [v1.1.0] — Multi-Tenant Cloud Knowledge Layer & Public Testing

@@ -10,15 +10,30 @@ from app.services.llm.models import LLMRequest, LLMResponse, LLMUsage
 
 logger = get_logger("app.services.llm.providers.gemini")
 
+# Default per-request HTTP timeout for Gemini API calls (seconds)
+_DEFAULT_TIMEOUT_S: float = 30.0
+
 
 class GeminiProvider(LLMProvider):
     """Invokes Gemini models and returns normalized results."""
 
-    def __init__(self, api_key: str, model: str, client: object | None = None) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        client: object | None = None,
+        timeout_seconds: float = _DEFAULT_TIMEOUT_S,
+    ) -> None:
         if not api_key and client is None:
             raise LLMProviderError("LLM API key is not configured for Gemini.")
         self._model = model
-        self._client = client or genai.Client(api_key=api_key)
+        if client is not None:
+            self._client = client
+        else:
+            http_opts = types.HttpOptions(
+                timeout=int(timeout_seconds * 1000)  # SDK expects milliseconds
+            )
+            self._client = genai.Client(api_key=api_key, http_options=http_opts)
 
     @property
     def name(self) -> str:
