@@ -8,7 +8,7 @@ def test_settings_default_values(monkeypatch) -> None:
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     settings = Settings(_env_file=None)
     assert settings.app_name == "Knowledge Intelligence Platform"
-    assert settings.app_version == "1.1.0"
+    assert settings.app_version == "1.3.0"
     assert settings.environment == "development"
     assert settings.debug is False
     assert settings.log_level == "INFO"
@@ -54,3 +54,13 @@ def test_fastapi_app_uses_settings() -> None:
 
     assert app.title == settings.app_name
     assert app.version == settings.app_version
+
+
+def test_fastapi_openapi_version_is_1_3_0() -> None:
+    """Ensure the OpenAPI schema version reflects the configured application version."""
+    from app.main import app
+
+    assert app.version == "1.3.0", (
+        f"Expected OpenAPI version '1.3.0', got '{app.version}'. "
+        "Update app_version in backend/app/core/config.py."
+    )

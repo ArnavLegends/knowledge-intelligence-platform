@@ -22,7 +22,7 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
 | **Vector Database** | Qdrant Cloud Managed | Qdrant Cloud Free Tier | Collection `knowledge_base`, Cosine distance, 768 dims |
 | **Backend API** | FastAPI + Uvicorn | Render Free Web Service | Python 3.11, auto-reload dev / single worker prod |
 | **Async Offloading** | Process ThreadPoolExecutor | In-process (`app.core.async_executor`) | Bounded 4 workers, wall-clock timeout protection & HTTP 504 mapping |
-| **In-Memory Caching** | Thread-safe LRU Cache | In-process (`app.services.cache`) | EmbeddingCache (256 cap) + SearchCache (20 cap, 60s TTL, auto-evict) |
+| **In-Memory Caching** | Thread-safe LRU Cache | In-process (`app.services.cache`) | EmbeddingCache (256 cap) + SearchCache (256 cap, 60s TTL, auto-evict) |
 | **Frontend UI** | Streamlit | Streamlit Community Cloud | Multi-tenancy UI, provenance inspector, feedback box |
 | **Feedback Persistence** | Google Apps Script (`doGet()`) + Google Sheets | Google Workspace | Authenticated HTTPS GET webhook with automatic redirect handling |
 | **Document Parsers** | PyPDF, python-docx, UTF-8 text parser | In-process | PDF, DOCX, TXT, MD support |

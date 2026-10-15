@@ -29,7 +29,7 @@ The platform emphasizes applied AI systems research, where experimental findings
 Research activities should prioritize reproducibility, objectivity, and practical impact over novelty alone.
 
 > **Research Infrastructure Status (v1.2):**
-> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0. In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`). Four controlled retrieval experiments were executed against this frozen benchmark under the 14-step research lifecycle. **All four candidates were rejected** — none reached the preregistered primary MRR target of ≥ 0.8200. Dense whole-document retrieval (MRR 0.7623) remains the production default pending a synthesis approach.
+> The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0. In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`). Four controlled retrieval experiments were executed against this frozen benchmark under the 14-step research lifecycle. **All four candidates were rejected** — none reached the preregistered primary MRR target of ≥ 0.8200. Dense whole-document retrieval (MRR 0.7623) remains the production default. The v1.2 research synthesis is complete and published at [`docs/evaluation/v1.2_research_synthesis.md`](evaluation/v1.2_research_synthesis.md).
 
 ---
 
@@ -210,7 +210,7 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Variables:** chunk size, overlap
 
 **Purpose:** Establish a deterministic baseline for future chunking experiments.
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(Chunking strategy was held constant during v1.2 experiments; no comparative chunking sweep was performed in v1.2.)*
 
 ### EMBED-BASELINE-001
 
@@ -220,7 +220,7 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Variables:** embedding model, dimensionality, batch/input size
 
 **Purpose:** Establish a reproducible embedding baseline for retrieval experiments.
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(This baseline was superseded by Gemini embedding (EMBED-BASELINE-002) before v1.2 experiments; no comparative sweep was performed against this baseline in v1.2.)*
 
 ### EMBED-BASELINE-002
 
@@ -230,7 +230,7 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Variables:** batch size, truncation behavior, token usage
 
 **Purpose:** Establish a high-throughput, zero-cost embedding baseline for production testing.
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(Embedding model held constant at `gemini-embedding-2` during v1.2 experiments; no embedding model comparison was performed in v1.2.)*
 
 ### VECTOR-BASELINE-001
 
@@ -239,7 +239,7 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Configuration:** `provider = chroma`, `collection = knowledge_base`, `persistence = local directory`
 
 **Purpose:** Establish a reproducible storage baseline for local unit testing and development.
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(ChromaDB held constant as development-only store; no comparative storage sweep performed in v1.2.)*
 
 ### VECTOR-BASELINE-002
 
@@ -248,7 +248,7 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Configuration:** `provider = qdrant`, `collection = knowledge_base`, `filter = workspace_id`, `distance = COSINE`
 
 **Purpose:** Establish a scalable, multi-tenant cloud storage baseline.
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(Qdrant Cloud held constant as production vector store during all v1.2 experiments; no comparative storage sweep was performed in v1.2.)*
 
 ### RETRIEVAL-BASELINE-001
 
@@ -257,7 +257,7 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 **Configuration:** `top_k = 5`, `threshold = None`
 
 **Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.
-*(Comparative benchmark sweeps scheduled for v1.2).*
+*(Comparative retrieval sweeps executed in v1.2: four candidates evaluated — Cross-Encoder, Hybrid BM25+RRF, Sentence Chunking, Context Optimization. All rejected. Dense baseline retained. See [`docs/evaluation/v1.2_research_synthesis.md`](evaluation/v1.2_research_synthesis.md).)*
 
 ### RAG-BASELINE-001
 

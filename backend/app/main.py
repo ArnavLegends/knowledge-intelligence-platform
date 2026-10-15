@@ -24,8 +24,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     description=(
-        "A production-grade AI Knowledge Intelligence Platform for RAG, "
-        "Agentic AI, and Knowledge Graphs."
+        "Workspace-scoped document retrieval and Retrieval-Augmented Generation (RAG) "
+        "platform with multi-tenant isolation, semantic vector search, "
+        "source-grounded question answering, and structured citation provenance."
     ),
     version=settings.app_version,
     lifespan=lifespan,

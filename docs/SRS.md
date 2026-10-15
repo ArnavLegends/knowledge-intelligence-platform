@@ -475,22 +475,6 @@ Requirement identifiers shall remain stable across future versions to preserve i
 
 ---
 
-# Document Governance
-
-| Item | Value |
-|------|-------|
-| Document Owner | Project Maintainer |
-| Document Version | 3.0 |
-| Project Version | v1.3.0 |
-| Status | Complete / Active |
-| Last Reviewed | 2026-10-15 |
-
-## Review Policy
-
-The SRS shall be reviewed whenever new capabilities are introduced, existing requirements change, or architectural revisions impact system behavior. All changes should preserve traceability between requirements, implementation, testing, and benchmarking.
-
----
-
 # Error Handling Requirements
 
 The platform shall provide consistent and predictable error handling across all components.

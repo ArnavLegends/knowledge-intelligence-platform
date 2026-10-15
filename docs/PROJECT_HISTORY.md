@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document provides a durable, chronological engineering history of the Knowledge Intelligence Platform (KIP) from initial inception through the current v1.1 state.
+This document provides a durable, chronological engineering history of the Knowledge Intelligence Platform (KIP) from initial inception through v1.3.0.
 
 It serves as the definitive historical record of architectural decisions, implementation milestones, bug fixes, deployment evolutions, and validation records.
 

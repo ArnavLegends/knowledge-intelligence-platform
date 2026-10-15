@@ -1,4 +1,4 @@
-"""KIP v1.1.0 Streamlit Frontend with Multi-Tenant Workspaces.
+"""KIP v1.3.0 Streamlit Frontend with Multi-Tenant Workspaces.
 
 Minimal, functional interface for the Knowledge Intelligence Platform.
 

@@ -4,7 +4,7 @@ This directory contains the full automated test suite for the Knowledge Intellig
 
 ## Current Status (v1.3.0)
 
-**396 tests — 100% passing** across all subsystems, with zero warnings and Ruff lint/format cleanliness.
+**396 tests — 100% passing** across all subsystems. Last recorded run: 396 passed, 0 failed, 3 non-fatal warnings. Ruff lint/format clean.
 
 ## Test Coverage by Subsystem
 
@@ -39,7 +39,7 @@ pytest --cov --cov-report=term-missing
 Targeted (example — single module):
 
 ```bash
-pytest tests/test_caching.py -v
+pytest tests/test_cache.py -v
 ```
 
 ## Development Milestone

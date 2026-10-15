@@ -923,7 +923,7 @@ The architecture is technology-agnostic wherever practical. Individual technolog
 | Concurrency & Offloading | Thread-pool offloading (`run_blocking`) & timeout bounds | Synchronous blocking (v1.0–v1.2) | Celery, Temporal, Async Workers |
 | Orchestration | Modular Custom Pipeline (`rag/pipeline.py`) | Procedural script (v0.1) | LangChain, LangGraph, AutoGen |
 | Language Models | Google Gemini (`gemini-2.5-flash`), OpenAI (`gpt-4o-mini`) | Mock / Echo (v0.1) | Anthropic Claude, Local LLMs (Ollama, vLLM) |
-| Embeddings | Google Gemini (`text-embedding-004`), OpenAI (`text-embedding-3-small`) | Deterministic Mock (v0.1) | Sentence Transformers, BGE, E5, Jina |
+| Embeddings | Google Gemini (`gemini-embedding-2`, 768-d), OpenAI (`text-embedding-3-small`) | Deterministic Mock (v0.1) | Sentence Transformers, BGE, E5, Jina |
 | Vector Storage | Qdrant Cloud (Managed Serverless) | ChromaDB (Local SQLite) | FAISS, Pinecone, Weaviate, Milvus |
 | Workspace Isolation | Qdrant Payload Filter (`workspace_id`) | In-Memory (v0.1) | PostgreSQL Schema Isolation, Row-Level Security |
 | Feedback Persistence | Google Apps Script (`doGet`) + Google Sheet | Direct POST Webhook (Deprecated) | PostgreSQL, Supabase, Airtable |
