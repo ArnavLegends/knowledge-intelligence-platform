@@ -164,3 +164,24 @@ def in_memory_qdrant_provider():
         url=":memory:",
         embedding_dimensions=_EMBEDDING_DIMS,
     )
+
+
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:  # noqa: ARG001
+    """Close the huggingface_hub HTTP client before Python interpreter teardown.
+
+    huggingface_hub 1.33+ registers an atexit handler that calls close_session().
+    That handler closes an httpx Client, which triggers httpcore debug-level
+    logging during connection-pool teardown. On Python 3.11/3.12, if the logging
+    stream has already been closed when atexit fires, a ValueError escapes
+    close_session and Py_FinalizeEx returns -1 (process exit code 1).
+
+    Calling close_session() here, while logging and all streams are still open,
+    sets _GLOBAL_CLIENT to None. The atexit call then becomes a no-op and the
+    process exits cleanly with whatever code pytest sets.
+    """
+    try:
+        from huggingface_hub.utils._http import close_session
+
+        close_session()
+    except Exception:  # noqa: BLE001
+        pass  # huggingface_hub not present or already cleaned up
