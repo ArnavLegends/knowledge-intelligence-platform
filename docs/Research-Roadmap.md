@@ -70,7 +70,7 @@ The Knowledge Intelligence Platform investigates multiple areas of modern AI sys
 ### Retrieval Systems
 
 - Dense Retrieval (Implemented: Gemini `gemini-embedding-2`, OpenAI `text-embedding-3-small`)
-- Sparse Retrieval (Evaluated: BM25 + RRF — Rejected in v1.2, MRR 0.6554 vs baseline 0.7623)
+- Sparse Retrieval (Evaluated: BM25 + RRF — Rejected in v1.2, MRR 0.7094 vs baseline 0.7623)
 - Hybrid Retrieval (Evaluated: BM25 + Dense RRF — Rejected in v1.2; see `docs/evaluation/v1.2_hybrid_retrieval_experiment.md`)
 - Query Expansion (Planned: HyDE / multi-query)
 - Metadata Filtering (Implemented: `workspace_id` payload filter)
@@ -345,12 +345,14 @@ P95 query latency: 643.0 ms. This is the **frozen control baseline** for all v1.
 **Report:** [`docs/evaluation/v1.2_hybrid_retrieval_experiment.md`](evaluation/v1.2_hybrid_retrieval_experiment.md)
 
 **Measured Results (80 cases):**
-- Overall MRR: **0.6554** (-0.1069 vs control 0.7623) — **Failed primary target (≥ 0.8200)**
-- `multi_concept` MRR: **0.8750** — **Failed safety invariant (must be 1.0000)**
-- `paraphrase` MRR: **0.8281** (marginal improvement)
-- P95 Latency: **670.2 ms** (+27.2 ms) — Passed guardrail
+- Overall MRR: **0.7094** (-0.0529 vs control 0.7623) — **Failed primary target (≥ 0.8200)**
+- `multi_concept` MRR: **0.9688** — **Failed safety invariant (must be 1.0000)**
+- `paraphrase` MRR: **0.6979** (-0.2396 vs control 0.9375) — Severe regression
+- `hard_negative` MRR: **0.3906** (-0.0521 vs control 0.4427) — Regression
+- `exact_terminology` Hit@1: **0.7500** (+0.0625 vs control 0.6875) — Improvement
+- P95 Latency: **618.9 ms** (-24.1 ms) — Passed guardrail
 
-**Decision:** REJECTED. BM25 on dense technical documents with short, whole-document chunks caused severe vocabulary mismatch, harming `multi_concept` and `hard_negative` categories significantly. No production integration.
+**Decision:** REJECTED. BM25 on dense technical documents with short, whole-document chunks caused severe vocabulary mismatch, harming `paraphrase`, `multi_concept`, and `hard_negative` categories. No production integration.
 
 ---
 
@@ -373,7 +375,30 @@ P95 query latency: 643.0 ms. This is the **frozen control baseline** for all v1.
 
 **Decision:** REJECTED. While sentence segmentation improves exact-terminology and boundary-handling categories, it fragments semantic context for paraphrase and multi-concept queries and fails the primary MRR target. Document-level deduplication is confirmed necessary for sub-document chunk indexing. No production integration.
 
-**v1.2 Research Conclusion:** All four evaluated candidates failed the preregistered primary target (MRR ≥ 0.8200). The existing dense whole-document retrieval baseline (MRR 0.7623) remains the production default. Identified path forward: hierarchical parent-child chunking combined with hybrid retrieval, evaluated as a unified architecture in a future milestone.
+---
+
+### EXP-V12-CONTEXT-OPTIMIZATION-001
+
+**Status:** Completed — **REJECTED** (2026-10-15)
+**Title:** Controlled Context Optimization & Dynamic Prompt Budget Allocation Experiment
+**Strategy:** Dynamic prompt budget allocation (target 2,500 characters), document deduplication, and extractive keyword-salience compression evaluated against frozen baseline top-5
+**Artifact:** [`benchmarks/kip_v1_2_context_optimization_treatment_20261015_062231.json`](../benchmarks/kip_v1_2_context_optimization_treatment_20261015_062231.json)
+**Report:** [`docs/evaluation/v1.2_context_optimization_experiment.md`](evaluation/v1.2_context_optimization_experiment.md)
+**Synthesis:** [`docs/evaluation/v1.2_research_synthesis.md`](evaluation/v1.2_research_synthesis.md)
+
+**Measured Results (80 cases, dynamic budget cap 2,500 chars):**
+- Overall MRR: **0.7542** (-0.0081 vs control 0.7623) — **Failed primary target (≥ 0.8200)**
+- Hit Rate @ 1: **0.6875** (+0.0000 vs control 0.6875) — Preserved
+- Hit Rate @ 5: **0.8375** (-0.0375 vs control 0.8750) — Regression (-3 cases at ranks 4–5 truncated)
+- `multi_concept` MRR: **1.0000** — Passed safety invariant
+- `paraphrase` MRR: **0.9375** — Preserved
+- `cross_document` MRR: **0.7500** — Preserved
+- Context Compression: **45.96% reduction** (mean context 2,449.4 chars vs control 4,532.6 chars)
+- P95 Optimization Latency: **0.042 ms** — Passed guardrail (≤ +20 ms)
+
+**Decision:** REJECTED for standalone retrieval modification. While dynamic budgeting compressed prompt tokens by ~46%, standalone static character budget allocation penalizes queries where the correct evidence resides at rank 4 or 5. Production RAG pipeline retains static uncompressed context assembly.
+
+**v1.2 Research Conclusion:** All five evaluated candidates failed the preregistered primary target (MRR ≥ 0.8200). The existing dense whole-document retrieval baseline (MRR 0.7623, Hit@5 0.8750) remains the production default. Comprehensive evaluation synthesis published in [`docs/evaluation/v1.2_research_synthesis.md`](evaluation/v1.2_research_synthesis.md). Identified path forward: hierarchical parent-child chunking combined with hybrid retrieval, evaluated as a unified architecture in a future milestone.
 
 ---
 
@@ -388,7 +413,7 @@ The research roadmap evolves alongside the product roadmap. Each product milesto
 | v0.3 | Document chunking, embedding strategies, vector indexing | ✅ Completed |
 | v1.0 | RAG pipeline, prompt engineering, evaluation harness (`runner.py`) | ✅ Completed |
 | v1.1 | Multi-tenant vector filtering (Qdrant), Gemini batching, user feedback persistence | ✅ Completed |
-| v1.2 | Embedding formatting (neutral); cross-encoder reranking (rejected); hybrid BM25+dense RRF (rejected); sentence-boundary chunking (rejected) — dense whole-document retrieval retained as production default | ✅ Research Complete — All Candidates Rejected |
+| v1.2 | Embedding formatting (neutral); cross-encoder reranking (rejected); hybrid BM25+dense RRF (rejected); sentence-boundary chunking (rejected); context optimization (rejected) — dense whole-document retrieval retained as production default | ✅ Research Complete — All Candidates Rejected |
 | v1.3 | Performance optimization, caching, latency profiling, observability | 📅 Planned → Deferred |
 | v2.0 | Conversational memory, long-term memory architectures | 📅 Planned → Deferred |
 | v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned → Deferred |

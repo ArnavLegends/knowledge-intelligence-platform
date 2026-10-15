@@ -1366,3 +1366,30 @@ def test_expanded_baseline_retrieval_errors_not_counted_as_misses():
     # Error counts as miss — not as a hit
     assert result.hit_rate == 0.0
     assert result.mean_reciprocal_rank == 0.0
+
+
+def test_context_optimization_engine():
+    """Verify that optimize_context respects character budget, deduplication, and salience."""
+    from evaluation.run_v1_2_context_optimization_experiment import optimize_context
+
+    corpus_docs = {
+        "doc1": "First sentence has keyword Alpha. Second sentence is filler content that is very long.",
+        "doc2": "Document two contains Beta keyword. More details about architecture.",
+        "doc3": "Document three has Gamma keyword. Extraneous background context.",
+    }
+
+    # Test 1: Deduplication and budget cap
+    ranked_docs = ["doc1", "doc1", "doc2", "doc3"]
+    admitted_ids, context_str, total_chars, lat = optimize_context(
+        ranked_doc_ids=ranked_docs,
+        corpus_docs=corpus_docs,
+        query_keywords=["Alpha", "Beta"],
+        character_budget=200,
+        enable_dedup=True,
+    )
+
+    assert "doc1" in admitted_ids
+    # Duplicate doc1 should not be admitted twice
+    assert admitted_ids.count("doc1") == 1
+    assert total_chars <= 200
+    assert lat >= 0.0

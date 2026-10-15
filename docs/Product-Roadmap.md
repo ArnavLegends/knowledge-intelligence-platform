@@ -45,7 +45,7 @@ The development of the Knowledge Intelligence Platform is organized into a serie
 | **v1.1** | Multi-Tenant Cloud | Workspace bearer tokens, Qdrant Cloud, Render deployment, public testing, authenticated GET feedback | ✅ Complete & Frozen |
 | **Current** | Documentation Reconciliation | Complete project history audit, synchronizing all docs with live code | 🚧 In Progress |
 | **Active** | Public Testing & Feedback | Community testing on deployed cloud, feedback collection via Google Sheets | ⚡ Active / Available |
-| **v1.2** | Retrieval Intelligence | Research-driven retrieval: formatting experiment (neutral), cross-encoder reranking (rejected), hybrid BM25+dense (rejected), sentence-boundary chunking (rejected) — dense retrieval retained as default | ✅ Research Complete — All Candidates Rejected |
+| **v1.2** | Retrieval Intelligence | Research-driven retrieval: formatting experiment (neutral), cross-encoder reranking (rejected), hybrid BM25+dense (rejected), sentence-boundary chunking (rejected), context optimization (rejected) — dense retrieval retained as default | ✅ Research Complete — All Candidates Rejected |
 | **v1.3** | Performance Engineering | Caching, optimization, monitoring, scalability | 📅 Planned |
 | **v2.0** | AI Memory | Persistent memory, conversation history, personalization | 📅 Planned → Deferred |
 | **v2.1** | Tool Integration | Tool calling, external services, automation | 📅 Planned → Deferred |
@@ -513,7 +513,7 @@ Gather qualitative and quantitative user feedback from public community testing 
 
 Improve retrieval quality through advanced information retrieval techniques, systematic experimentation, and reproducible benchmarking, resulting in more relevant context, reduced noise, and higher-quality AI responses.
 
-v1.2 transitioned KIP into an empirical research-driven phase. Four controlled retrieval experiments were executed against a frozen 50-document, 80-case benchmark. All four candidates failed the preregistered primary target (MRR ≥ 0.8200). **The existing dense whole-document retrieval baseline (MRR 0.7623) remains the production default.**
+v1.2 transitioned KIP into an empirical research-driven phase. Five controlled retrieval experiments were executed against a frozen 50-document, 80-case benchmark. All five candidates failed the preregistered primary target (MRR ≥ 0.8200). **The existing dense whole-document retrieval baseline (MRR 0.7623) remains the production default.** Comprehensive synthesis is documented in [`docs/evaluation/v1.2_research_synthesis.md`](evaluation/v1.2_research_synthesis.md).
 
 > **Research Integrity Outcome:** No experimental technique was integrated without meeting preregistered success criteria. All experiment decisions are documented in `docs/evaluation/`.
 
@@ -521,24 +521,24 @@ v1.2 transitioned KIP into an empirical research-driven phase. Four controlled r
 
 ## Research Methodology & Experiment Progression
 
-Every candidate technique evaluated in v1.2 will progress through a disciplined 14-step lifecycle:
+Every candidate technique evaluated in v1.2 progressed through a disciplined 14-step lifecycle:
 
 1. **Literature Review**: ✅ Surveyed dense retrieval failure modes, semantic chunking, and lexical-dense fusion.
 2. **Gap Identification**: ✅ Characterized retrieval failures via failure analysis on v1.1 public testing data.
-3. **Research Question Selection**: ✅ Formulated falsifiable research questions for chunking, hybrid retrieval, and reranking.
+3. **Research Question Selection**: ✅ Formulated falsifiable research questions for chunking, hybrid retrieval, reranking, and context optimization.
 4. **Benchmark & Test-Set Definition**: ✅ Constructed 50-document / 80-case expanded benchmark (`kip_v1_2_expanded_benchmark.json`) with six ground-truth category labels.
 5. **Dense Retrieval Baseline**: ✅ Executed and frozen (Run ID `02d492c76c7343aaaeb78506fa4b0395`): Overall MRR 0.7623, Hit@5 0.8750, P95 643.0 ms.
 6. **Chunking / Segmentation Experiment**: ✅ `SentenceBoundaryChunker(400, 150, 1)` — **REJECTED**. MRR 0.7471 (failed ≥ 0.8200); `multi_concept` safety violation (0.9688 vs 1.0000). See `docs/evaluation/v1.2_chunking_experiment.md`.
-7. **Hybrid Retrieval Experiment**: ✅ BM25 + Dense RRF (k=60) — **REJECTED**. MRR 0.6554 (-0.1069 vs baseline); severe vocabulary mismatch on technical corpus. See `docs/evaluation/v1.2_hybrid_retrieval_experiment.md`.
+7. **Hybrid Retrieval Experiment**: ✅ BM25 + Dense RRF (k=60) — **REJECTED**. MRR 0.7094 (-0.0529 vs baseline); severe vocabulary mismatch on technical corpus. See `docs/evaluation/v1.2_hybrid_retrieval_experiment.md`.
 8. **Reranking Experiment**: ✅ `cross-encoder/ms-marco-MiniLM-L-6-v2` ONNX — **REJECTED**. P95 latency +1,048 ms; `multi_concept` safety violation (0.9062 vs 1.0000). See `docs/evaluation/v1.2_cross_encoder_experiment.md`.
-9. **Context Optimization Experiment**: 📅 Not started — deferred pending a synthesis architecture.
+9. **Context Optimization Experiment**: ✅ Dynamic prompt budget allocation & deduplication — **REJECTED**. MRR 0.7542 (failed ≥ 0.8200); 45.96% context compression, but truncates rank 4–5 tail recall. See `docs/evaluation/v1.2_context_optimization_experiment.md`.
 10. **Measured Comparison**: ✅ All experiments compared against frozen control baseline across MRR, Hit@K, category breakdown, and P95 latency.
 11. **Analysis**: ✅ Query-level regression/improvement analysis documented for each experiment.
 12. **Evidence-Based Decision**: ✅ All candidates rejected based on preregistered criteria; no subjective integration.
 13. **Integration of Winning Approach**: ❌ No winning approach — integration deferred. Production behavior unchanged.
-14. **Research Documentation**: ✅ Four evaluation reports in `docs/evaluation/`; Research-Roadmap.md updated with all experiment records.
+14. **Research Documentation**: ✅ Five evaluation reports and unified synthesis in `docs/evaluation/`; Research-Roadmap.md updated with all experiment records.
 
-> **Research Integrity Principle**: No experimental claims (e.g., "chunking improved retrieval by X%") will be published until experiments are executed and data is recorded. All four v1.2 experiments were executed; all four were rejected based on objective preregistered criteria.
+> **Research Integrity Principle**: No experimental claims (e.g., "chunking improved retrieval by X%") will be published until experiments are executed and data is recorded. All five v1.2 experiments were executed; all five were rejected based on objective preregistered criteria.
 
 ---
 
@@ -547,11 +547,11 @@ Every candidate technique evaluated in v1.2 will progress through a disciplined 
 **Executed & Rejected:**
 - Embedding input formatting experiment (neutral; raw-text retained)
 - Cross-encoder reranking (`ms-marco-MiniLM-L-6-v2`): rejected — latency violation & safety regression
-- Hybrid BM25 + dense RRF: rejected — MRR regression (-0.1069) & vocabulary mismatch
+- Hybrid BM25 + dense RRF: rejected — MRR regression (-0.0529) & vocabulary mismatch
 - Sentence-boundary chunking (`target=400`): rejected — MRR regression & `multi_concept` safety violation
+- Context optimization (dynamic budget cap 2500ch): rejected — failed MRR target & rank 4–5 tail recall loss
 
 **Not Started / Deferred:**
-- Context optimization (dynamic trimming, compression)
 - Query expansion (HyDE / multi-query)
 - Search analytics dashboard
 - Hierarchical / parent-child chunking (identified as synthesis path forward)
