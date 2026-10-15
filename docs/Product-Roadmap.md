@@ -32,6 +32,37 @@ The roadmap is intended to evolve over time. Future milestones may be refined, e
 
 ---
 
+## Roadmap Governance and Strategic Guardrails
+
+### Product Focus
+
+KIP is an evidence-grounded knowledge intelligence platform for document-based retrieval, source-verifiable answers, and bounded knowledge workflows. The objective is to improve the usefulness, trustworthiness, and engineering quality of this system—not to maximize the number of AI features or recreate a general-purpose conversational assistant.
+
+### Engineering Principles
+
+1. **Evidence before adoption.** Experimental techniques must meet predefined acceptance criteria before entering the production path. Negative and neutral results are retained and documented.
+2. **Depth before breadth.** Prioritize a small number of complete, demonstrably useful capabilities over a broad collection of partially implemented features.
+3. **Preserve working foundations.** Avoid replacing components or adding infrastructure without a demonstrated technical need.
+4. **Zero-cost by default.** Prefer the existing free-tier architecture and open-source tooling. Paid services require explicit justification and approval.
+5. **Claims must match evidence.** Distinguish implemented functionality, automated test results, offline benchmarks, controlled experiments, live smoke tests, and realistic workload validation.
+6. **Security and workspace isolation are invariants.** Feature development must not weaken workspace scoping, source provenance, or data boundaries.
+7. **Every milestone has exit criteria.** A milestone is complete when its approved deliverables and acceptance criteria are satisfied—not when every imaginable enhancement has been added.
+8. **Future capabilities are conditional.** Memory, tools, agents, graphs, multimodal features, and infrastructure expansion must be justified by concrete use cases and demonstrated value. They are not mandatory merely because they appear in a future version table.
+
+### Implementation Workflow
+
+For each milestone, define the intended user outcome, scope, non-goals, acceptance criteria, relevant tests, and documentation updates before implementation. Group related changes into a small number of coherent work batches. Reuse the existing architecture, avoid repeated broad audits without a specific reason, and defer unrelated cleanup unless it blocks the current objective.
+
+The project maintainer reviews all changes and performs commits and pushes manually. Validation and release claims must be reported accurately, with unresolved limitations stated explicitly.
+
+### Scope and Release Policy
+
+The roadmap is reviewed at milestone boundaries. New feature proposals must explain the user problem, expected benefit, implementation and maintenance cost, and how success will be evaluated. If a proposed capability does not materially improve KIP's core product or its demonstrable engineering quality, it should be deferred or rejected.
+
+The project prioritizes a coherent, reproducible, well-documented system over perpetual feature expansion.
+
+---
+
 ## Roadmap Overview
 
 The development of the Knowledge Intelligence Platform is organized into a series of major milestones. Each milestone builds upon previous versions while introducing new capabilities in a controlled and measurable manner.
