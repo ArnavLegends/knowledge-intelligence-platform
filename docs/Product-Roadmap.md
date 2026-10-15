@@ -1,8 +1,9 @@
 # Product Roadmap
 
-**Document Version:** 2.1  
-**Project Version:** v1.2 (Research Phase — Experiments Complete)  
+**Document Version:** 3.0
+**Project Version:** v1.3.0 (v1.4 Proposed)
 **Status:** Active Forward-Looking Roadmap
+**Last Updated:** 2026-10-15
 
 ---
 
@@ -74,19 +75,22 @@ The development of the Knowledge Intelligence Platform is organized into a serie
 | **v0.3** | Knowledge Ingestion | Document ingestion (TXT), chunking, embeddings, ChromaDB, retrieval, RAG | ✅ Complete |
 | **v1.0** | Production RAG | Multi-format ingestion (MD, PDF, DOCX), Gemini multi-provider, Streamlit UI, evaluation harness | ✅ Complete |
 | **v1.1** | Multi-Tenant Cloud | Workspace bearer tokens, Qdrant Cloud, Render deployment, public testing, authenticated GET feedback | ✅ Complete & Frozen |
-| **Current** | Documentation Reconciliation | Complete project history audit, synchronizing all docs with live code | 🚧 In Progress |
-| **Active** | Public Testing & Feedback | Community testing on deployed cloud, feedback collection via Google Sheets | ⚡ Active / Available |
-| **v1.2** | Retrieval Intelligence | Research-driven retrieval: formatting experiment (neutral), cross-encoder reranking (rejected), hybrid BM25+dense (rejected), sentence-boundary chunking (rejected), context optimization (rejected) — dense retrieval retained as default | ✅ Research Complete — All Candidates Rejected |
-| **v1.3** | Performance Engineering | In-memory LRU caching, thread pool executor offloading, timeout protection, latency telemetry | ✅ Complete |
-| **v2.0** | AI Memory | Persistent memory, conversation history, personalization | 📅 Planned → Deferred |
-| **v2.1** | Tool Integration | Tool calling, external services, automation | 📅 Planned → Deferred |
-| **v2.2** | Agentic AI | Multi-step reasoning and autonomous agent workflows | 📅 Planned → Deferred |
-| **v2.3** | Knowledge Intelligence | Advanced reasoning, planning, and orchestration | 📅 Planned → Deferred |
-| **v2.4** | Knowledge Graph | Knowledge graph integration and graph-based retrieval | 📅 Planned → Deferred |
-| **v3.0** | Multimodal Intelligence | Image, audio, and multimodal document understanding | 📅 Planned → Deferred |
-| **v3.1** | Collaboration | Multi-user workspaces and collaboration features | 📅 Planned → Deferred |
-| **v3.2** | Cloud Platform | Deployment, monitoring, scalability, production operations | 📅 Planned → Deferred |
-| **v4.0** | Enterprise Platform | Enterprise-ready AI knowledge intelligence ecosystem | 📅 Planned → Deferred |
+| **v1.2** | Retrieval Intelligence | Research evaluation across 5 candidates (formatting, reranking, hybrid BM25, chunking, context opt); dense retrieval baseline retained | ✅ Research Complete — All Candidates Rejected |
+| **v1.3** | Performance Engineering | Zero-cost in-memory LRU caching (embedding & search), thread-pool executor offloading, timeout resilience, structured latency telemetry | ✅ Complete |
+| **v1.4** | Knowledge Workspace & Evidence Trust | Enhanced document listing, error feedback, evidence inspection, conditional document deletion with strict cache invalidation | 📅 Proposed / Next |
+| **v1.5** | Retrieval Generalization & Answer Quality | Secondary independent corpus assessment, citation correctness audit, cross-document query diagnosis, abstention behavior | 📅 Proposed |
+| **v1.6** | Evidence-Grounded Knowledge Workflows | Bounded workflows (multi-document comparison, structured evidence briefs), strict provenance | 📅 Proposed |
+| **v1.7** | Operational Validation & Reliability | Realistic workload testing (at 50–60% dev checkpoint), representative concurrency, cold starts, memory profiling | 📅 Proposed |
+| **v1.8** | Reproducible Release & Technical Case Study | Packaging, final architectural diagrams, reproducible benchmark guide, comprehensive case study report, formal feature freeze | 📅 Proposed |
+| **v2.0** | AI Memory | Conversational memory, session persistence, retention and privacy controls | 🔮 Conditional / Need-Justified |
+| **v2.1** | Tool Integration | Permissioned, deterministic tool calling for concrete workflows | 🔮 Conditional / Need-Justified |
+| **v2.2** | Agentic AI | Bounded agentic reasoning only where superior to deterministic orchestration | 🔮 Conditional / Need-Justified |
+| **v2.3** | Knowledge Intelligence | High-level evidence synthesis consolidating proven retrieval and tools | 🔮 Conditional / Need-Justified |
+| **v2.4** | Knowledge Graph | Graph integration subject to constrained prototype value | 🔮 Conditional / Need-Justified |
+| **v3.0** | Multimodal Intelligence | Multimodal document understanding justified by concrete use cases | 🔮 Conditional / Need-Justified |
+| **v3.1** | Collaboration | Multi-user workspaces, identity, and access controls if justified | 🔮 Conditional / Need-Justified |
+| **v3.2** | Cloud Operations | Scalability, backups, and infrastructure selected strictly from measured needs | 🔮 Conditional / Need-Justified |
+| **v4.0** | Enterprise Platform | Enterprise readiness against defined security, governance, and compliance needs | 🔮 Conditional / Need-Justified |
 
 The roadmap is intended to evolve as the project matures. Future milestones may be refined based on implementation experience, research outcomes, technological advances, and user feedback.
 
@@ -687,7 +691,321 @@ Provides production visibility into cache hit rates, embedding latency, vector s
 
 ---
 
-# Version v2.0 — AI Memory System
+# Version v1.4 — Knowledge Workspace & Evidence Trust (Proposed / Next Milestone)
+
+## Objective
+
+Improve document management, workspace-safe document operations, processing/error feedback, source presentation, evidence inspection, and source navigation. Extend existing functionality rather than rebuilding it.
+
+---
+
+## Key Deliverables
+
+- **Workspace Document Operations**: Enhanced document listing with metadata display (file format, chunk count, upload timestamp) and verified document deletion workflow. Document deletion is strictly conditional on verifying that the complete backend/API/UI workflow preserves workspace isolation, consistent vector-store behavior, and correct cache invalidation.
+- **Granular Processing & Error Feedback**: Per-document ingestion status tracking, actionable parser error messages (e.g., encrypted PDF, corrupted DOCX), and clear progress indication in the Streamlit UI.
+- **Source Presentation & Evidence Inspection**: Enhanced provenance inspector in Streamlit allowing expandable side-by-side passage review, chunk ordering within source documents, and explicit citation highlight mapping.
+- **Contextual Source Navigation**: Document navigation features allowing users to inspect surrounding chunk context and verify document attribution without leaving the application.
+
+---
+
+## Major Components
+
+### Workspace Document Management
+Extend `GET /api/v1/documents` and vector store listing with richer metadata and robust status tracking.
+
+### Conditional Document Deletion
+Rigorously verified end-to-end deletion with workspace scoping, Qdrant payload removal, and immediate search cache eviction.
+
+### UI Evidence Inspector
+Richer Streamlit components for provenance inspection and citation verification.
+
+---
+
+## Expected Outcomes
+
+At the completion of v1.4:
+- Users can clearly inspect the precise evidence backing every generated answer.
+- Document lifecycle operations provide transparent feedback without silent ingestion failures.
+- Workspace boundaries remain strictly enforced during all document operations.
+
+---
+
+## Success Criteria
+
+- Document deletion (if verified and enabled) preserves 100% workspace isolation and purges stale cache entries.
+- Ingestion failures provide actionable diagnostic messages in UI and logs.
+- Citations link cleanly to source chunks with verifiable rank and similarity score display.
+
+---
+
+## Dependencies
+
+Requires completion of v1.3.
+
+---
+
+## Risks
+
+- **Stale Cache / Dangling Vectors**: Document deletion could leave dangling vector records or stale search cache entries.
+  - *Mitigation*: Multi-stage verification with explicit cache invalidation tests and cross-tenant leakage checks before enabling deletion in the UI.
+
+---
+
+## Exit Criteria
+
+Users can manage the supported document workflow and inspect answer evidence, with existing workspace boundaries and core functionality preserved.
+
+---
+
+# Version v1.5 — Retrieval Generalization & Answer Quality (Proposed)
+
+## Objective
+
+Assess the existing retrieval baseline on a small, independently sourced second document collection. Investigate answer grounding, citation correctness, cross-document queries, missing evidence, and abstention behavior. Consider retrieval changes only when diagnosis supports a clear hypothesis.
+
+---
+
+## Key Deliverables
+
+- **Independent Second Reference Corpus**: A small, independently sourced document collection (completely separate from the frozen v1.2 50-document benchmark) representing diverse document structures and domain vocabulary.
+- **Answer Quality & Grounding Audit**: Systematic evaluation of Gemini 2.5 Flash response grounding, citation fidelity, and graceful abstention on unanswerable or ambiguous queries.
+- **Cross-Document Query Diagnosis**: Targeted evaluation of queries requiring evidence synthesis across multiple distinct documents in a single workspace.
+- **Hypothesis-Driven Retrieval Evaluation**: Diagnostic framework formulating targeted hypotheses only if specific failure modes emerge on the second collection. Strict preregistered acceptance criteria required for any candidate technique.
+
+---
+
+## Major Components
+
+### Secondary Evaluation Dataset
+Curated second collection and test queries with ground-truth chunk references, kept strictly isolated from the frozen v1.2 benchmark.
+
+### Grounding & Citation Evaluator
+Automated inspection of citation precision, hallucination detection, and abstention behavior.
+
+---
+
+## Expected Outcomes
+
+At the completion of v1.5:
+- Documented understanding of dense retrieval generalization across document genres.
+- Evidence-based diagnosis of cross-document synthesis and abstention performance.
+- Clear criteria for whether any retrieval modification is justified.
+
+---
+
+## Success Criteria
+
+- Second collection evaluated with reproducible methodology.
+- Any proposed retrieval modifications meet strict preregistered acceptance criteria (MRR and Hit Rate improvement without regression).
+- Abstention behavior verified when context is insufficient.
+
+---
+
+## Dependencies
+
+Requires completion of v1.4.
+
+---
+
+## Risks
+
+- **Benchmark Contamination**: Modifying or confusing the frozen v1.2 benchmark with new test data.
+  - *Mitigation*: Strict physical separation of the secondary dataset in `benchmarks/corpus_v1_5/`; v1.2 benchmark remains immutable.
+
+---
+
+## Exit Criteria
+
+Documented strengths and limitations across the selected collections, with justified adoption or rejection decisions.
+
+---
+
+# Version v1.6 — Evidence-Grounded Knowledge Workflows (Proposed)
+
+## Objective
+
+Develop a maximum of two focused user workflows, starting with multi-document comparison and optionally adding structured evidence briefs or document-grounded summaries. Reuse existing retrieval and provenance capabilities. Avoid a general-purpose agent framework.
+
+---
+
+## Key Deliverables
+
+- **Multi-Document Comparison Workflow**: Structured comparative retrieval and grounded synthesis highlighting agreements, differences, and unique facts across two or more workspace documents.
+- **Structured Evidence Brief / Summary**: Deterministic, source-attributed synthesis summarizing key findings with explicit citations for each bullet point or table entry.
+- **Focused UI Workflows**: Dedicated, clean Streamlit views for comparison and evidence briefing without adding conversational agent complexity or unpredictable tool loops.
+
+---
+
+## Major Components
+
+### Deterministic Workflow Orchestrator
+Lightweight, deterministic pipeline combining multi-query retrieval with structured prompt templates.
+
+### Comparative Context Builder
+Partitioned context formatting identifying distinct source document attributions.
+
+---
+
+## Expected Outcomes
+
+At the completion of v1.6:
+- Reliable multi-document synthesis for analytical tasks.
+- Strict preservation of source grounding with zero hallucination.
+- Fast execution within existing serverless timeout boundaries.
+
+---
+
+## Success Criteria
+
+- Comparison outputs cite specific evidence for each compared dimension.
+- Workflows complete within standard timeout budgets.
+- Clear handling of missing or conflicting evidence across sources.
+
+---
+
+## Dependencies
+
+Requires completion of v1.5.
+
+---
+
+## Risks
+
+- **Scope Creep into Agent Frameworks**: Pressure to introduce autonomous agent runtimes (LangGraph, CrewAI).
+  - *Mitigation*: Scope strictly capped at two deterministic workflows; no dynamic tool-use or multi-turn agent loops.
+
+---
+
+## Exit Criteria
+
+Selected workflows produce useful, source-verifiable outputs with clear handling of missing or conflicting evidence.
+
+---
+
+# Version v1.7 — Operational Validation & Reliability (Proposed)
+
+## Objective
+
+Schedule realistic workload testing only after the agreed approximately 50–60% development checkpoint is reached. Validate representative concurrent requests, document ingestion, cold starts, timeout/recovery behavior, cache invalidation, workspace isolation, and resource/operating limits.
+
+---
+
+## Key Deliverables
+
+- **Representative Concurrency Validation**: Measure backend behavior under realistic multi-tenant concurrent query load (within free-tier constraints).
+- **Ingestion & Cold-Start Characterization**: Measure memory spikes, ingestion durations, and Render free-tier cold-start recovery behavior.
+- **Edge-Case Resilience Testing**: Validate behavior under upstream API delays, Qdrant timeouts, and temporary network interruptions.
+- **Resource Utilization Profiling**: Quantify in-process cache memory footprints, CPU utilization, and worker pool saturation.
+
+---
+
+## Major Components
+
+### Workload Test Harness
+Automated scripts simulating multi-tenant queries, indexing, and eviction under varied concurrency.
+
+### Failure Mode & Limit Catalog
+Comprehensive catalog of known free-tier limits, bottleneck thresholds, and recovery behaviors.
+
+---
+
+## Expected Outcomes
+
+At the completion of v1.7:
+- Empirically measured operational boundaries for free-tier deployment.
+- Clear guidance on capacity limits and graceful degradation behavior.
+- Demonstrated stability under realistic concurrent multi-tenant usage.
+
+---
+
+## Success Criteria
+
+- Zero cross-tenant data leakage under concurrent load.
+- Timeouts cleanly mapped to HTTP 504 without thread pool exhaustion or resource starvation.
+- Memory usage stays safely within Render free-tier limits (512 MB).
+
+---
+
+## Dependencies
+
+Requires completion of v1.4–v1.6 (checkpoint reached).
+
+---
+
+## Risks
+
+- **Free-Tier Rate Limits**: Exceeding Google AI Studio or Qdrant Cloud free-tier rate limits during load testing.
+  - *Mitigation*: Controlled rate-limited testing using deterministic test mocks supplemented by low-volume live verification.
+
+---
+
+## Exit Criteria
+
+Reproducible operational validation with clearly documented limitations. Do not claim enterprise-scale readiness.
+
+---
+
+# Version v1.8 — Reproducible Release & Technical Case Study (Proposed)
+
+## Objective
+
+Package the strongest demonstrated KIP capabilities into a stable release. Complete setup/deployment guidance, architecture diagrams, reproducible evaluation instructions, a technical report describing hypotheses, decisions, trade-offs, failure cases and limitations, and a concise product demonstration. Introduce an explicit feature-freeze decision so the project can be presented and evaluated without endless feature expansion.
+
+---
+
+## Key Deliverables
+
+- **Stable v1.x Release Package**: Feature-frozen, validated codebase with clean documentation and dependency specifications.
+- **Comprehensive Technical Case Study**: In-depth engineering report documenting architectural decisions, negative research findings (v1.2), performance optimizations (v1.3), trade-offs, and empirical results.
+- **Reproducible Evaluation Guide**: Step-by-step instructions for reproducing benchmark results and running local verification.
+- **System Topology & Architecture Documentation**: Finalized, high-fidelity architectural diagrams and API references.
+- **Formal Feature-Freeze Declaration**: Explicit boundary marking the completion of the foundational KIP development arc.
+
+---
+
+## Major Components
+
+### Technical Documentation Package
+Complete architecture, evaluation, and operational documentation suite.
+
+### Evaluation & Demonstration Toolkit
+Turnkey reproduction scripts and walkthrough demonstration guides.
+
+---
+
+## Expected Outcomes
+
+At the completion of v1.8:
+- The repository serves as an exemplary open-source AI engineering case study.
+- External engineers can independently clone, verify, deploy, and evaluate the system.
+- Clear distinction between measured outcomes and future explorations.
+
+---
+
+## Success Criteria
+
+- Clean reproduction of test suite and evaluation benchmarks on fresh environments.
+- Comprehensive, honest technical reporting with failure analyses and negative results preserved.
+- Formal feature freeze established.
+
+---
+
+## Dependencies
+
+Requires completion of v1.1 through v1.7.
+
+---
+
+## Exit Criteria
+
+An engineer can understand the product, reproduce key evaluations, inspect the architecture, and distinguish measured outcomes from future plans.
+
+---
+
+# Version v2.0 — AI Memory System (Conditional / Need-Justified)
+
+> [!NOTE]
+> **Conditional Milestone**: Future capabilities in v2.x–v4.x are conditional research explorations subject to concrete user needs, proven engineering value, and cost-benefit validation. They are not guaranteed commitments or mandatory releases.
 
 ## Objective
 
@@ -751,7 +1069,7 @@ At the completion of v2.0:
 
 ## Dependencies
 
-Requires completion of v1.3.
+Requires completion of v1.8 and explicit justification of conversational memory value.
 
 ---
 
@@ -761,7 +1079,7 @@ The platform successfully supports persistent conversational memory while mainta
 
 ---
 
-# Version v2.1 — Tool Integration
+# Version v2.1 — Tool Integration (Conditional / Need-Justified)
 
 ## Objective
 
@@ -835,7 +1153,7 @@ The platform reliably integrates external tools into AI workflows.
 
 ---
 
-# Version v2.2 — Agentic AI Framework
+# Version v2.2 — Agentic AI Framework (Conditional / Need-Justified)
 
 ## Objective
 
@@ -909,7 +1227,7 @@ The platform demonstrates robust autonomous task execution through an extensible
 
 ---
 
-# Version v2.3 — Knowledge Intelligence Engine
+# Version v2.3 — Knowledge Intelligence Engine (Conditional / Need-Justified)
 
 ## Objective
 
@@ -983,7 +1301,7 @@ The platform demonstrates reliable knowledge synthesis across multiple informati
 
 ---
 
-# Version v2.4 — Knowledge Graph Integration
+# Version v2.4 — Knowledge Graph Integration (Conditional / Need-Justified)
 
 ## Objective
 
@@ -1057,7 +1375,7 @@ The platform successfully combines vector-based retrieval with graph-based knowl
 
 ---
 
-# Version v3.0 — Multimodal Intelligence Platform
+# Version v3.0 — Multimodal Intelligence Platform (Conditional / Need-Justified)
 
 ## Objective
 
@@ -1131,7 +1449,7 @@ The platform functions as a unified multimodal knowledge intelligence system.
 
 ---
 
-# Version v3.1 — Collaboration & Workspace
+# Version v3.1 — Collaboration & Workspace (Conditional / Need-Justified)
 
 ## Objective
 
@@ -1205,7 +1523,7 @@ The platform supports secure collaboration for individuals and teams.
 
 ---
 
-# Version v3.2 — Cloud Platform & Operations
+# Version v3.2 — Cloud Platform & Operations (Conditional / Need-Justified)
 
 ## Objective
 
@@ -1280,7 +1598,7 @@ The platform can be deployed, monitored, and maintained in production environmen
 
 ---
 
-# Version v4.0 — Enterprise Knowledge Intelligence Platform
+# Version v4.0 — Enterprise Knowledge Intelligence Platform (Conditional / Need-Justified)
 
 ## Objective
 
@@ -1380,10 +1698,10 @@ Future releases will continue to follow the project's engineering principles of 
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
 | Status | Active Forward-Looking Roadmap |
-| Last Reviewed | 2026-10-08 |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 

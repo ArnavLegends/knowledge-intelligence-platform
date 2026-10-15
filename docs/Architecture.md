@@ -1,8 +1,9 @@
 # System Architecture
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
+**Document Version:** 3.0
+**Project Version:** v1.3.0
 **Status:** Active System Architecture Document
+**Last Updated:** 2026-10-15
 
 ---
 
@@ -15,9 +16,10 @@ It describes the overall organization of the system, major software components, 
 The objective is to provide a stable architectural blueprint that guides implementation while allowing individual components to evolve independently over time.
 
 This document explicitly distinguishes between:
-- **CURRENT REALITY**: Subsystems and flows implemented and verified in the codebase today.
-- **PLANNED (v1.2)**: Capabilities scheduled for upcoming research milestones (e.g., hybrid search, reranking).
-- **PLANNED → DEFERRED**: Architectural patterns (agents, memory, multimodal, graph databases, relational databases) intentionally postponed to preserve system focus and simplicity.
+- **CURRENT REALITY (v1.3)**: Subsystems and flows implemented and verified in the codebase today: multi-tenant RAG, zero-cost in-memory LRU caching, async executor offloading, timeout resilience with HTTP 504 mapping, and structured latency telemetry.
+- **RESEARCH OUTCOMES (v1.2)**: Empirical evaluation across 5 candidate retrieval techniques on the 50-doc/80-case benchmark; dense whole-document baseline verified and retained as production standard.
+- **PROPOSED MILESTONES (v1.4–v1.8)**: Incremental improvements to workspace document management, evidence trust, secondary corpus validation, and bounded workflows.
+- **CONDITIONAL (v2.0+)**: Architectural patterns (conversational memory, tool calling, agents, graph databases, relational databases) strictly conditional on demonstrated need.
 
 ---
 
@@ -81,7 +83,7 @@ Ensure experiments and benchmarks can be reproduced consistently across environm
 
 The Knowledge Intelligence Platform follows a layered architecture in which each layer has a clearly defined responsibility.
 
-**Implemented layers** are shown with their active components. **Planned / Deferred layers** are marked explicitly.
+**Implemented layers** are shown with their active components. **Research outcomes and conditional layers** are marked explicitly.
 
 ```text
                     User / Browser
@@ -111,13 +113,12 @@ The Knowledge Intelligence Platform follows a layered architecture in which each
                Feedback Pipeline   ▼
 FastAPI ──(Authenticated GET)──> Apps Script ──> Google Sheet
 
-[PLANNED - v1.2] Hybrid Retrieval (BM25) & Reranking
-[PLANNED → DEFERRED] Memory System (v2.0)
-[PLANNED → DEFERRED] Tool Calling & External APIs (v2.1)
-[PLANNED → DEFERRED] Agentic Workflows (v2.2)
-[PLANNED → DEFERRED] Knowledge Graph (v2.4)
-[PLANNED → DEFERRED] Multimodal Intelligence & OCR (v3.0)
-[PLANNED → DEFERRED] Enterprise RBAC & PostgreSQL (v4.0)
+[ACTIVE v1.3] In-Memory LRU Caching (EmbeddingCache + SearchCache)
+[ACTIVE v1.3] Async Executor (ThreadPoolExecutor offloading + wall-clock timeouts)
+[RESEARCH v1.2] Dense Whole-Document Retrieval Retained (Hybrid & Reranking Rejected)
+[PROPOSED v1.4] Workspace Document Operations & Evidence Trust
+[CONDITIONAL v2.0+] Memory System (v2.0), Tool Calling (v2.1), Agentic Workflows (v2.2)
+[CONDITIONAL v2.4+] Knowledge Graph (v2.4), Multimodal (v3.0), Enterprise RBAC (v4.0)
 ```
 
 Each implemented layer performs a specific function while communicating through well-defined interfaces. This separation reduces coupling and allows components to evolve independently throughout the lifetime of the project.
@@ -157,13 +158,18 @@ Responsible for locating relevant information from indexed knowledge sources.
 
 Responsibilities include:
 
-- **Current (v1.1)**:
-  - Dense semantic vector retrieval scoped to the active workspace
-  - Workspace metadata filtering (`workspace_id` payload match)
-  - Top-$k$ context selection and ranking by cosine similarity score
-- **Planned (v1.2+)**:
-  - Hybrid search (sparse BM25 + dense vector combination)
-  - Cross-encoder reranking
+- **Current Production Reality (v1.3)**:
+  - Dense semantic vector retrieval scoped to the active workspace.
+  - Workspace metadata filtering (`workspace_id` payload match).
+  - Top-$k$ context selection and ranking by cosine similarity score.
+  - Multi-tenant search caching (`SearchCache`) with TTL and eviction hooks.
+  - Asynchronous thread-pool offloading via `run_blocking` to protect the event loop.
+- **Research Evaluation Outcomes (v1.2)**:
+  - Evaluated 5 candidate retrieval techniques across 50 documents and 80 labelled benchmark cases.
+  - Hybrid search (BM25 + dense) and cross-encoder reranking were empirically evaluated and rejected for failing to outperform the dense baseline.
+  - Dense whole-document retrieval remains the verified production baseline (MRR: 0.7623).
+- **Proposed Future Research (v1.5)**:
+  - Evaluation of dense retrieval generalization on an independent secondary corpus.
 
 ---
 
@@ -173,7 +179,7 @@ Coordinates interactions across RAG pipeline components.
 
 Responsibilities include:
 
-- **Current (v1.1)**:
+- **Current (v1.3)**:
   - RAG workflow execution (`RAGService`)
   - Grounded prompt construction (`ContextBuilder`)
   - Response generation with citation and provenance attribution (`LLMService`)
@@ -465,7 +471,78 @@ Responsibilities:
 - Ensure the final response retains explicit provenance mapping with ranked source citations.
 - Return predefined empty-context message when no relevant chunks are found.
 
-Note: Memory, agents, reranking, hybrid retrieval, and knowledge graphs are future stages.
+## In-Memory Caching Architecture
+
+> **Status: Implemented (v1.3.0).** Zero-infrastructure, bounded in-process caching foundation.
+
+To improve response latencies and eliminate redundant third-party API costs without introducing external infrastructure (such as Redis or Memcached), KIP provides a thread-safe, pure-Python caching architecture:
+
+```text
+[EmbeddingManager]
+       │
+       ▼ Single Query Text
+[EmbeddingCache] ──(Hit: <0.05ms)──> Return Cached Vector (Skip Gemini API)
+       │ (Miss)
+       ▼ Call Provider SDK
+[GeminiEmbeddingProvider]
+       │
+       ▼ Store Vector
+[EmbeddingCache.put]
+
+[RetrievalService]
+       │
+       ▼ Query Vector + Filters + Workspace ID
+[SearchCache] ──(Hit: <0.05ms)──> Return Cached Chunks (Skip Qdrant)
+       │ (Miss)
+       ▼ Call Vector Store
+[QdrantVectorStoreProvider]
+       │
+       ▼ Store Chunks
+[SearchCache.put]
+```
+
+### Components
+1. **Thread-Safe Generic LRU (`app.services.cache.lru_cache.LRUCache`)**:
+   - Implements bounded capacity using `collections.OrderedDict` protected by a reentrant lock (`threading.RLock`).
+   - Evicts least-recently-used items when the configured capacity is reached.
+2. **Embedding Cache (`app.services.cache.embedding_cache.EmbeddingCache`)**:
+   - Keys: SHA-256 hash of `(normalized_text, model, dimensions)`.
+   - Applied selectively to single query embeddings; bulk document indexing bypasses the cache to avoid cache pollution.
+3. **Multi-Tenant Search Cache (`app.services.cache.search_cache.SearchCache`)**:
+   - Keys: SHA-256 hash of `(workspace_id, collection, vector_hash, top_k, threshold, document_id, canonical_filters)`.
+   - Security Invariant: Every cache key explicitly embeds `workspace_id` to guarantee tenant isolation.
+   - Automatic Invalidation: Maintains reverse index mappings allowing immediate eviction via `invalidate_workspace(workspace_id)` and `invalidate_document(workspace_id, document_id)`. These invalidation hooks are automatically invoked when documents are indexed or deleted.
+   - TTL Safety Net: 60-second default time-to-live prevents stale entries if unhooked mutations occur.
+
+---
+
+## Concurrency & Async Execution Architecture
+
+> **Status: Implemented (v1.3.0).** Non-blocking event-loop offloading and deadline protection.
+
+FastAPI endpoints are asynchronous (`async def`), but AI providers (Gemini API SDK, Qdrant Client) make blocking synchronous network I/O calls. If executed directly inside async handlers, these calls block the single-threaded asyncio event loop, causing concurrent requests to stall.
+
+```text
+FastAPI Request (/api/v1/retrieval/search or /api/v1/rag/answer)
+      │
+      ▼ (Event Loop Thread)
+run_blocking(service.search, query, timeout=17.0s)
+      │
+      ├─ Dispatches to process-level ThreadPoolExecutor (max_workers=4)
+      │
+      ├─ Event Loop remains completely non-blocking for concurrent traffic
+      │
+      └─ asyncio.wait_for enforces strict wall-clock deadline
+            │
+            ├─ On Timeout: Returns HTTP 504 Gateway Timeout cleanly
+            └─ On Success: Returns formatted JSON response
+```
+
+### Key Principles
+- **Bounded Worker Pool (`app.core.async_executor`)**: Process-level `ThreadPoolExecutor` initialized once with configurable `RETRIEVAL_EXECUTOR_WORKERS` (default: 4).
+- **Timeout Budgets**: Endpoints enforce calculated deadlines (e.g., embedding timeout + Qdrant timeout + 2.0s buffer). Upstream stalls or hung sockets raise `TimeoutError`, translated directly to HTTP 504 Gateway Timeout.
+- **Graceful Lifecycle Shutdown**: Thread pool cleanup (`shutdown_executor`) is registered with FastAPI's `lifespan` handler to terminate worker threads cleanly on application shutdown.
+- **Guardrail**: A worker pool prevents event-loop stalls, but is not proof of unbounded queuing capacity. Scalability profiling is scheduled for milestone v1.7.
 
 ---
 
@@ -487,13 +564,16 @@ When implemented, the knowledge layer will maintain structured knowledge represe
 
 ## Evaluation Layer
 
-> **Status: Implemented Mechanical Evaluation & Baseline (v1.0/v1.1).**
+> **Status: Implemented Research Benchmark & Metric Auditor (v1.2/v1.3).**
 
-The evaluation layer currently provides:
-- **Evaluation Runner**: `evaluation/runner.py` executes test cases directly against internal services without network latency.
-- **Evaluation Models**: `evaluation/models.py` computes mechanical metrics: Document Hit Rate, Mean Reciprocal Rank (MRR), Keyword Coverage, and stage latencies.
-- **Baseline Dataset**: `benchmarks/kip_v1_baseline.json` defines a 5-case deterministic test set for KIP v1.0/v1.1.
-- **Experimental Status**: Baseline / Not Yet Evaluated with live LLM judges. Live research experiments are planned for v1.2.
+The evaluation layer provides:
+- **Evaluation Runner**: `evaluation/runner.py` executes benchmark cases against isolated vector store collections, supporting both full RAG and pure-retrieval evaluations without LLM overhead.
+- **Evaluation Models**: `evaluation/models.py` computes fine-grained retrieval metrics: Hit@1, Hit@3, Hit@5, Mean Reciprocal Rank (MRR), keyword coverage, and stage latencies.
+- **Benchmark Corpora**:
+  - `benchmarks/corpus_v1_2/`: 18 documents (14 core + 4 distractors) and 25-case pilot benchmark.
+  - `benchmarks/corpus_v1_2_expanded/`: 50 documents and 80 labelled benchmark cases across six query categories.
+- **Frozen Dense Baseline**: Verified against live Gemini `gemini-embedding-2` + Qdrant Cloud (MRR: 0.7623, Hit@1: 0.6875, Hit@5: 0.8750).
+- **Metric Auditor**: `evaluation/validate_benchmark_metrics.py` mechanically validates all committed JSON benchmark artifacts, enforcing zero recalculation discrepancies across releases.
 
 ---
 
@@ -602,16 +682,19 @@ Contains the core AI capabilities.
 
 Responsibilities include:
 
-- **Current (v1.1)**:
-  - Dense semantic retrieval
+- **Current (v1.3)**:
+  - Dense semantic retrieval (baseline retained after v1.2 candidate rejections)
+  - In-memory thread-safe LRU search and embedding caching
+  - Async thread-pool offloading and timeout enforcement (HTTP 504)
   - Grounded context assembly and prompt construction
   - Language model generation with provenance mapping
-- **Planned / Deferred (v1.2+)**:
-  - Hybrid search and cross-encoder reranking (v1.2)
-  - Conversational memory (v2.0)
-  - Tool execution (v2.1)
-  - Agent orchestration (v2.2)
-  - Knowledge graph reasoning and entity synthesis (v2.4)
+- **Planned / Conditional (v1.4+)**:
+  - Knowledge workspace & evidence trust (v1.4)
+  - Retrieval generalization & second-corpus evaluation (v1.5)
+  - Evidence-grounded knowledge workflows (v1.6)
+  - Realistic workload validation (v1.7)
+  - Reproducible release (v1.8)
+  - Conditional capabilities: Conversational memory (v2.0), Tool execution (v2.1), Bounded agentic workflows (v2.2), Knowledge graphs (v2.4)
 
 ---
 
@@ -722,7 +805,7 @@ Components:
 
 ---
 
-## Implemented Cloud Deployment (v1.1.0 Zero-Cost Production Topology)
+## Implemented Cloud Deployment (Zero-Cost Production Topology)
 
 The current live deployment implements a zero-cost cloud topology across specialized serverless and container tiers:
 
@@ -731,6 +814,8 @@ The current live deployment implements a zero-cost cloud topology across special
   - Manages client-side workspace sessions and feedback forms.
 - **Backend Tier**: Render Web Service (Free Tier) hosting FastAPI via `uvicorn backend.app.main:app`
   - Handles multi-format ingestion, chunking, embedding generation, retrieval, and RAG answering.
+  - Implements thread-safe in-memory LRU search and embedding caching with workspace invalidation.
+  - Offloads blocking provider and database calls to a bounded thread pool (`run_blocking`) with timeout enforcement (HTTP 504).
   - Automatically spins down after 15 minutes of inactivity; exhibits a 30–50 second cold-start spin-up on next request.
 - **Vector Storage Tier**: Qdrant Cloud (Free Tier)
   - Single managed cluster hosting collection `knowledge_base` with 768-dimensional vectors (COSINE distance).
@@ -782,8 +867,8 @@ Security is considered a foundational architectural concern rather than an optio
 ## Authentication
 
 - User authentication (Future)
-- Token-based workspace validation (`X-KIP-Workspace-ID` header, Current: v1.1.0)
-- Feedback webhook token authentication (`FEEDBACK_WEBHOOK_TOKEN`, Current: v1.1.0)
+- Token-based workspace validation (`X-KIP-Workspace-ID` header, Current: v1.3.0)
+- Feedback webhook token authentication (`FEEDBACK_WEBHOOK_TOKEN`, Current: v1.3.0)
 - Session management
 
 ---
@@ -792,8 +877,8 @@ Security is considered a foundational architectural concern rather than an optio
 
 - Role-Based Access Control (RBAC) (Future)
 - Permission management (Future)
-- Workspace isolation via vector payload filtering (Current: v1.1.0)
-- Workspace upload quotas and document size limits (Current: v1.1.0)
+- Workspace isolation via vector payload filtering (Current: v1.3.0)
+- Workspace upload quotas and document size limits (Current: v1.3.0)
 
 ---
 
@@ -830,10 +915,12 @@ Future versions may incorporate enterprise authentication providers, advanced co
 
 The architecture is technology-agnostic wherever practical. Individual technologies may evolve while preserving the overall system design.
 
-| Architectural Layer | Current Implementation (v1.1.0) | Historical / Testing | Future / Deferred Alternatives |
+| Architectural Layer | Current Implementation (v1.3.0) | Historical / Testing | Future / Deferred Alternatives |
 |---------------------|---------------------------------|----------------------|--------------------------------|
 | Frontend | Streamlit (`frontend/app.py`) | Streamlit (v0.1) | React, Next.js, Vue.js |
 | Backend API | FastAPI (`backend/app/main.py`) | FastAPI (v0.1) | Remains configurable |
+| In-Memory Caching | Thread-safe LRU search & embedding caches (`backend/app/core/caching.py`) | Uncached (v1.0–v1.2) | Redis, Memcached (Deferred) |
+| Concurrency & Offloading | Thread-pool offloading (`run_blocking`) & timeout bounds | Synchronous blocking (v1.0–v1.2) | Celery, Temporal, Async Workers |
 | Orchestration | Modular Custom Pipeline (`rag/pipeline.py`) | Procedural script (v0.1) | LangChain, LangGraph, AutoGen |
 | Language Models | Google Gemini (`gemini-2.5-flash`), OpenAI (`gpt-4o-mini`) | Mock / Echo (v0.1) | Anthropic Claude, Local LLMs (Ollama, vLLM) |
 | Embeddings | Google Gemini (`text-embedding-004`), OpenAI (`text-embedding-3-small`) | Deterministic Mock (v0.1) | Sentence Transformers, BGE, E5, Jina |
@@ -876,10 +963,10 @@ Architectural evolution should remain incremental and evidence-based. Significan
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
+| Status | Active / Governed |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 
@@ -888,4 +975,3 @@ The Architecture document should be reviewed whenever significant changes are ma
 Implementation details may evolve without requiring updates to this document, provided they remain consistent with the architectural principles defined herein.
 
 Major architectural revisions should be accompanied by updated diagrams, documentation, and rationale to preserve the long-term integrity of the platform.
-

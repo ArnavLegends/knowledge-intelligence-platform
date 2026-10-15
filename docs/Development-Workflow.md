@@ -1,8 +1,8 @@
 # Development Workflow
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
-**Status:** Complete / Frozen
+**Document Version:** 3.0
+**Project Version:** v1.3.0
+**Status:** Active / Governed
 
 ---
 
@@ -16,92 +16,31 @@ As the project evolves, this workflow may be refined to incorporate new engineer
 
 ---
 
-# Development Philosophy
+# Development Philosophy & Strategic Guardrails
 
-Development follows an iterative and incremental approach.
-
-Every project version should deliver measurable improvements while maintaining stability and code quality.
+Development follows an iterative, evidence-grounded approach.
 
 Core engineering principles include:
 
-- Small, incremental releases
-- Modular implementation
-- Continuous testing
-- Documentation alongside development
-- Reproducible builds
-- Version-controlled changes
-- Evidence-based improvements through benchmarking
-
-The project prioritizes maintainability over rapid feature development.
-
----
-
-# Development Lifecycle
-
-Each feature follows the same development lifecycle.
-
-1. Planning
-2. Requirements Definition
-3. Architecture Review
-4. Implementation
-5. Testing
-6. Benchmarking
-7. Documentation
-8. Release
-
-A feature should progress through each stage before being considered complete.
+- **Evidence before adoption:** Experimental techniques must meet predefined acceptance criteria before entering the production path. Negative and neutral results are documented and preserved.
+- **Depth before breadth:** Prioritize a small number of complete, demonstrably useful capabilities over a broad collection of partially implemented features.
+- **Preserve working foundations:** Avoid replacing components or adding infrastructure without a demonstrated technical need.
+- **Zero-cost by default:** Prefer the existing free-tier architecture and open-source tooling.
+- **Claims must match evidence:** Distinguish implemented functionality, automated test results, offline benchmarks, controlled experiments, live smoke tests, and realistic workload validation.
+- **Security and workspace isolation are invariants:** Feature development must not weaken workspace scoping, source provenance, or data boundaries.
+- **Small, incremental batches:** Group related changes into coherent, reviewable work batches.
+- **Continuous testing:** Validate with automated unit, integration, and performance tests (396 passing tests as of v1.3.0).
 
 ---
 
-# Versioning Strategy
+# Git & Release Workflow
 
-The project follows Semantic Versioning.
+Development and version control follow strict maintainer oversight:
 
-Version format:
-
-MAJOR.MINOR.PATCH
-
-Examples:
-
-- v0.1.0
-- v0.2.0
-- v1.0.0
-- v1.1.2
-
-Version increments:
-
-Major
-
-- Breaking architectural changes
-- Major feature releases
-
-Minor
-
-- New functionality
-- Backward-compatible improvements
-
-Patch
-
-- Bug fixes
-- Documentation improvements
-- Performance optimizations
-
----
-
-# Git Workflow
-
-Development is managed using Git.
-
-General workflow:
-
-1. Create or select the current working branch.
-2. Implement a focused set of changes.
-3. Execute tests.
-4. Update documentation when required.
-5. Commit using descriptive commit messages.
-6. Push changes to the remote repository.
-
-Commit messages should clearly describe the purpose of each change.
+1. **Pre-Implementation Definition:** For each milestone, define the intended user outcome, scope, non-goals, acceptance criteria, relevant tests, and documentation updates before implementation.
+2. **Implementation & Focused Validation:** Implement targeted changes. Run linting (`ruff check`) and formatting (`ruff format --check`). Execute focused tests proportional to changes, followed by full regression testing.
+3. **Manual Maintainer Git Operations:** AI assistants and automated tools propose changes, run verification, and prepare documentation updates. **All Git commits, tags, branches, and pushes are performed manually by the project maintainer.** Tools must not commit, push, tag, deploy, or alter Git history automatically.
+4. **Transparent Verification Reporting:** Validation and release claims must be reported accurately, with unresolved limitations stated explicitly. Claims must never equate test suite passing with demonstrated large-scale production reliability.
 
 ---
 
@@ -219,12 +158,11 @@ Process improvements should be incremental, documented, and evaluated to ensure 
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
+| Status | Active / Governed |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 
 This document should be reviewed whenever significant changes are made to the project's development process, engineering standards, testing practices, or release methodology.
-

@@ -4,18 +4,17 @@
 
 This directory is reserved for academic paper drafts and publication materials related to the Knowledge Intelligence Platform.
 
-## Current Status
+## Current Status (v1.3.0)
 
-**Not yet active.** This directory is a scaffold placeholder.
+**Research Evaluated; Case Study Planned for v1.8.** The platform has completed its initial controlled empirical research cycle (v1.2), evaluating five candidate retrieval strategies against a 50-document, 80-case frozen benchmark. All experimental reports, statistical deltas, and synthesis findings are published in [`docs/evaluation/`](../docs/evaluation/).
 
-No research results have been evaluated or published yet. All current research baselines are defined in [docs/Research-Roadmap.md](../docs/Research-Roadmap.md) and marked as **Baseline / Not Yet Evaluated**.
+Formal paper drafts and public technical case study materials are scheduled for milestone **v1.8 — Reproducible Release & Technical Case Study**, which will package reproducible evaluation scripts, architecture documentation, trade-off analyses, and failure-case studies.
 
-## Planned Role (Future)
+## Planned Role
 
 Where mature research outcomes justify it, this directory may contain:
-- Technical report drafts
-- Conference/workshop paper drafts
-- Supplementary materials and experiment logs
-- Reproducible code accompanying publications
+- Technical report and case study drafts (v1.8)
+- Conference/workshop paper submissions
+- Supplementary experimental artifacts and reproducibility notes
 
-Publication is considered an optional, long-term outcome. The primary goal of the project is engineering quality and reproducible AI systems research.
+Publication remains an optional outcome; the primary objective is disciplined engineering and reproducible AI systems evaluation.

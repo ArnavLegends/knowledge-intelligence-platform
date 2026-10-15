@@ -10,7 +10,7 @@ This directory will contain example usage scripts and demonstrations for the Kno
 
 The backend API is available and can be explored interactively via the Swagger UI at `http://localhost:8000/docs`. End-to-end example scripts will be added in a future release.
 
-## Planned Role (v1.0+)
+## Planned Role (v1.8 Release Milestone)
 
 Planned contents include:
 - End-to-end usage examples (ingest → retrieve → answer)

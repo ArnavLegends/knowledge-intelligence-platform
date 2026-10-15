@@ -21,19 +21,34 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
 | **Embeddings** | Gemini Embedding 2 (`gemini-embedding-2`) | Google AI Studio | 768 dimensions, raw-text default with optional formatter hooks |
 | **Vector Database** | Qdrant Cloud Managed | Qdrant Cloud Free Tier | Collection `knowledge_base`, Cosine distance, 768 dims |
 | **Backend API** | FastAPI + Uvicorn | Render Free Web Service | Python 3.11, auto-reload dev / single worker prod |
+| **Async Offloading** | Process ThreadPoolExecutor | In-process (`app.core.async_executor`) | Bounded 4 workers, wall-clock timeout protection & HTTP 504 mapping |
+| **In-Memory Caching** | Thread-safe LRU Cache | In-process (`app.services.cache`) | EmbeddingCache (256 cap) + SearchCache (20 cap, 60s TTL, auto-evict) |
 | **Frontend UI** | Streamlit | Streamlit Community Cloud | Multi-tenancy UI, provenance inspector, feedback box |
 | **Feedback Persistence** | Google Apps Script (`doGet()`) + Google Sheets | Google Workspace | Authenticated HTTPS GET webhook with automatic redirect handling |
 | **Document Parsers** | PyPDF, python-docx, UTF-8 text parser | In-process | PDF, DOCX, TXT, MD support |
 
 ---
 
-## 3. Implemented Capabilities (v1.1.0 & v1.2 Research Preparation)
+## 3. Implemented Capabilities (v1.3 System Reality)
 
 - **Multi-Tenant Workspaces:**
   - Dynamic workspace access token creation (`wksp_...`)
   - Workspace scoping via `X-KIP-Workspace-ID` header and Qdrant payload filtering (`workspace_id` match)
   - Strict tenant isolation across document indexing, vector retrieval, and question-answering
   - Complete UI state reset on workspace creation or switching
+
+- **In-Memory Caching Layer (Zero Infrastructure Cost):**
+  - `LRUCache`: Thread-safe generic LRU container using `collections.OrderedDict` + `threading.RLock`.
+  - `EmbeddingCache`: SHA-256 keyed cache reducing repeated query embedding latency to ~0.01 ms (100% provider call reduction).
+  - `SearchCache`: Multi-tenant, TTL-backed vector search cache with workspace and document eviction hooks triggered during document indexing and deletion.
+
+- **Async Concurrency & Timeout Resilience:**
+  - `run_blocking` (`app.core.async_executor`): Bounded `ThreadPoolExecutor` offloading blocking embedding, vector search, and LLM calls from FastAPI's async event loop.
+  - Endpoint-level wall-clock timeout budgets translating hung upstream calls directly to HTTP 504 Gateway Timeout.
+  - Process-level thread pool lifecycle shutdown wired into application `lifespan`.
+
+- **Production Latency Telemetry:**
+  - Structured wall-clock performance instrumentation (`embed_ms`, `search_ms`, `total_ms`) and cache hits/misses logged at `INFO` level without logging user queries or PII.
 
 - **Multi-Format Ingestion:**
   - File upload via API (`POST /api/v1/documents`) and Streamlit UI
@@ -55,13 +70,11 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
   - Transport to Google Apps Script via authenticated HTTPS GET (`doGet()`) using `requests.get()` with automatic HTTP 302 redirect handling
   - Automatic append to Google Sheets for evaluation and review
 
-- **Ground-Truth Evaluation Harness & Controlled Experimentation:**
-  - Datasets: `benchmarks/kip_v1_baseline.json` (v1.0 historical), `benchmarks/kip_v1_1_baseline.json` (7 cases, SHA-256 ground truth), `benchmarks/kip_v1_2_benchmark.json` (25 cases, chunk-level ground truth)
-  - Reference Corpora: `benchmarks/corpus/` (3 baseline docs) and `benchmarks/corpus_v1_2/` (18 docs, including 4 adversarial distractors)
-  - Harness: `evaluation/runner.py` and `evaluation/models.py` supporting fine-grained Hit Rate@1, Hit Rate@3, Hit Rate@5, MRR, latency profiling, and pure retrieval evaluation
-  - Formatting Hooks: Provider-neutral `doc_formatter` in `EmbeddingService` and `query_formatter` in `RetrievalService`
-  - Canonical Baseline: Live Gemini + Qdrant baseline verified (`benchmarks/kip_v1_1_baseline_result.json`, MRR 0.9048)
-  - Controlled Experiment: Asymmetric input-formatting experiment completed (`benchmarks/kip_v1_2_formatting_control_20261014_094111.json`, `benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`). Both control and treatment achieved Hit Rate@1: 0.8400, Hit Rate@3/5: 1.0000, MRR: 0.9133 on the 25-case benchmark. Raw-text embedding retained as production default.
+- **Ground-Truth Evaluation Harness & Research Datasets:**
+  - Datasets: `benchmarks/kip_v1_baseline.json` (v1.0 historical, 5 cases), `benchmarks/kip_v1_1_baseline.json` (7 cases), `benchmarks/kip_v1_2_benchmark.json` (25 cases pilot), `benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json` (50 docs, 80 cases across 6 categories).
+  - Frozen Dense Baseline: MRR: 0.7623, Hit@1: 0.6875, Hit@3: 0.8375, Hit@5: 0.8750.
+  - v1.2 Research Outcomes: 5 candidate techniques evaluated (input formatting, cross-encoder reranking, hybrid BM25+dense retrieval, sentence-boundary chunking, context optimization). All candidate techniques rejected; dense whole-document retrieval retained as production default.
+  - Metric Auditor: `evaluation/validate_benchmark_metrics.py` verifying artifact integrity and zero mathematical drift.
 
 ---
 
@@ -84,13 +97,14 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
 
 The following capabilities are positioned on the forward-looking roadmap:
 
-- **v1.2 (Retrieval Intelligence):** Research complete. Dense retrieval baseline retained.
+- **v1.2 (Retrieval Intelligence):** Research complete. Dense whole-document retrieval baseline retained as production default.
 - **v1.3 (Performance Engineering):** Complete. Zero-cost thread-safe LRU caching (embedding & search), async thread-pool offloading, timeout enforcement with HTTP 504 handling, and structured latency telemetry.
-- **v2.0 (AI Memory):** Persistent multi-turn conversation memory, session stores, user personalization.
-- **v2.1 (Tool Integration):** External tool calling, calculator, web search execution.
-- **v2.2 (Agentic AI):** Autonomous multi-step planning, LangGraph/CrewAI agents.
-- **v2.4 (Knowledge Graphs):** Neo4j graph integration, entity extraction.
-- **v3.0+ (Enterprise Platform):** RBAC authentication, Kubernetes, PostgreSQL relational storage, React/Next.js frontend.
+- **v1.4 (Knowledge Workspace & Evidence Trust):** Proposed / next milestone focusing on document management, error feedback, evidence inspection, and conditional document deletion.
+- **v1.5 (Retrieval Generalization & Answer Quality):** Proposed milestone evaluating dense retrieval on an independent secondary corpus and auditing grounding/abstention.
+- **v1.6 (Evidence-Grounded Knowledge Workflows):** Proposed milestone for bounded comparison and evidence briefing workflows.
+- **v1.7 (Operational Validation & Reliability):** Proposed milestone for realistic concurrency, memory, and cold-start profiling at the ~50–60% development checkpoint.
+- **v1.8 (Reproducible Release & Technical Case Study):** Proposed release packaging and formal feature freeze.
+- **v2.x–v4.x (Conditional Explorations):** Conversational memory (v2.0), controlled tool-use (v2.1), bounded agents (v2.2), knowledge intelligence (v2.3), knowledge graphs (v2.4), multimodal (v3.0), collaboration (v3.1), cloud scale (v3.2), enterprise platform (v4.0). These remain conditional on concrete user need and demonstrated value.
 
 ---
 
@@ -100,6 +114,7 @@ The following capabilities are positioned on the forward-looking roadmap:
 2. **Synchronous Chunk Embedding:** Document ingestion is synchronous per upload batch; very large documents (>50 pages) should be split or indexed with patience on free-tier rate limits.
 3. **Apps Script Redirects:** Google Apps Script web apps return HTTP 302 redirects to `script.googleusercontent.com`. The KIP backend dispatches requests via `requests.get()`, which follows HTTP redirects automatically by default.
 4. **Single-Node In-Memory Workspace Session:** Streamlit manages workspace credentials in browser session state; closing the browser requires reconnecting via the workspace access token.
+5. **Workload and Concurrency Validation Guardrail:** While thread-pool executor offloading (`max_workers=4`) prevents blocking FastAPI's async event loop, a configured worker ceiling is not evidence of unbounded queueing capacity or high-concurrency production throughput. Realistic multi-tenant workload testing and saturation profiling remain intentionally scheduled for the v1.7 development checkpoint (~50–60% mark). Do not extrapolate 396 passing tests to mean production-scale reliability.
 
 ---
 

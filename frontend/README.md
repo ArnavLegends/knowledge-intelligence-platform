@@ -2,7 +2,7 @@
 
 ## Status
 
-**Implemented (v1.1.0).** A clean Streamlit frontend is available at `frontend/app.py` supporting multi-tenant workspaces and persistent cloud deployment.
+**Implemented (v1.1.0+ / Active in v1.3.0).** A clean Streamlit frontend is available at `frontend/app.py` supporting multi-tenant workspaces, source provenance inspection, and persistent cloud deployment.
 
 ## Running the Frontend
 

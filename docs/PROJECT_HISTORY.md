@@ -37,9 +37,9 @@ Engineering Milestone — Cloud Cold-Start, UX Stabilization & Multi-File Indexi
   │
 Engineering Milestone — Public Testing Readiness, Feedback API & Authenticated GET Transport
   │
-Current Frozen v1.1 State
+v1.2.0 — Retrieval Intelligence Research & Benchmark Suite (Dense Baseline Retained)
   │
-Engineering Milestone — KIP v1.2 Research Preparation & Controlled Input-Formatting Experiment
+v1.3.0 — Performance Engineering & Concurrency Hardening (In-Memory LRU Caching, Async Offloading, Timeouts)
 ```
 
 ---
@@ -495,3 +495,73 @@ Establish a reproducible, scientifically disciplined research baseline for KIP v
 
 #### Validation
 - Automated test suite expanded from 245 to **267 automated tests** (267/267 passing), verifying corpus integrity, benchmark loading, formatter hooks, and fine-grained metric computations.
+
+---
+
+### Milestone 12: KIP v1.2 Expanded Retrieval Research Cycle & Benchmark Suite
+
+- **Category**: Engineering & Applied Research Milestone (`v1.2.0`)
+- **Status**: Completed
+- **Period**: 2026-10-14
+- **Related Commits**: `benchmarks/corpus_v1_2_expanded/`, `evaluation/validate_benchmark_metrics.py`, `docs/evaluation/`
+
+#### Objective
+Systematically evaluate retrieval enhancements against an expanded multi-topic benchmark, moving beyond the 25-case pilot to evaluate candidate retrieval techniques across 50 documents and 80 labelled cases spanning six categories.
+
+#### Implemented & Evaluated
+- **Expanded Evaluation Infrastructure**:
+  - Curated 50-document reference corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case ground-truth benchmark across six categories (exact token, semantic paraphrase, cross-document, multi-concept, adversarial distractor, unanswerable).
+  - Established canonical frozen dense baseline on Google Gemini `gemini-embedding-2` (768 dims) + Qdrant Cloud (`benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json`):
+    - **MRR: 0.7623 | Hit@1: 0.6875 | Hit@3: 0.8375 | Hit@5: 0.8750**
+- **Five Candidate Techniques Evaluated**:
+  1. *Asymmetric Input Formatting*: Neutral (MRR 0.9133 on 25-case pilot); raw-text embedding retained.
+  2. *Cross-Encoder Reranking*: Did not meet preregistered improvement criteria; rejected.
+  3. *Hybrid BM25 + Dense Retrieval*: Did not outperform dense baseline; rejected.
+  4. *Sentence-Boundary Chunking*: Did not satisfy adoption criteria; rejected.
+  5. *Context Optimization*: Did not satisfy adoption criteria; rejected.
+- **Metric Auditor**:
+  - Implemented `evaluation/validate_benchmark_metrics.py` and unit tests in `tests/test_benchmark_audit.py` to prevent regression and ensure exact metric recalculation matches committed artifacts.
+
+#### Empirical Decision
+All five candidate techniques were rejected under the preregistered research protocol. **Dense whole-document retrieval is retained as the production standard**. All negative findings and analysis reports (`v1.2_research_synthesis.md`, `v1.2_failure_analysis.md`) were permanently archived for scientific reproducibility.
+
+#### Validation
+- Automated test suite expanded to **275 tests**, with all 8 benchmark audit tests passing with zero discrepancies.
+
+---
+
+### Milestone 13: KIP v1.3 Performance Engineering & Concurrency Hardening
+
+- **Category**: Official Release Milestone (`v1.3.0`)
+- **Status**: Completed
+- **Period**: 2026-10-15
+- **Related Commits**: Working tree / performance engineering batch
+
+#### Objective
+Implement a zero-cost, in-memory caching layer, thread-pool offloading for blocking AI operations, endpoint timeout protection, and structured latency telemetry without introducing paid cloud infrastructure (e.g., Redis).
+
+#### Implemented
+- **In-Memory Caching Foundation**:
+  - Pure Python thread-safe generic LRU cache (`LRUCache`) using `collections.OrderedDict` + `threading.RLock`.
+  - `EmbeddingCache`: Keyed by SHA-256 of `(normalized_text, model, dimensions)`. Single query embeddings look up cache; bulk indexing bypasses it. Repeated queries drop provider calls to 0 (100% reduction) and p50 latency to 0.01 ms.
+  - `SearchCache`: Multi-tenant, TTL-backed vector search cache keyed by SHA-256 of `(workspace_id, collection, vector_hash, top_k, threshold, document_id, canonical_filters)`. Includes workspace- and document-level invalidation hooks automatically called on document indexing and deletion.
+- **Async Thread-Pool Offloading & Timeouts**:
+  - Implemented `run_blocking` in `app.core.async_executor` using a bounded process-level `ThreadPoolExecutor` (`RETRIEVAL_EXECUTOR_WORKERS=4`).
+  - Offloaded blocking Gemini and Qdrant network calls from FastAPI's async event loop, preventing event-loop freezing under concurrent requests.
+  - Enforced wall-clock timeout budgets on `/api/v1/retrieval/search` and `/api/v1/rag/answer`, mapping hung calls to HTTP 504 Gateway Timeout.
+  - Registered graceful thread-pool termination (`shutdown_executor`) in application `lifespan`.
+- **Production Observability**:
+  - Structured latency telemetry (`embed_ms`, `search_ms`, `total_ms`) and cache hit/miss statuses logged at `INFO` level for visibility under Render's production `LOG_LEVEL=INFO`.
+- **Cross-Platform Test Stabilization**:
+  - Configured `--basetemp=.pytest_temp` in `pyproject.toml` and `.gitignore` to resolve Windows symlink cleanup permission issues.
+
+#### Architectural Impact
+- Zero external infrastructure cost preserved (no Redis, no paid hosting).
+- Repeated queries execute in <0.05 ms locally.
+- Concurrency safety improved by decoupling blocking I/O from the async event loop.
+- Guardrail: Realistic scale and high-concurrency testing remain scheduled for the v1.7 development checkpoint.
+
+#### Validation
+- Automated test suite expanded to **396 automated tests** (396/396 passing, 100% pass rate).
+- Full benchmark audit re-executed: 8/8 suites passing with zero material discrepancies.
+- Clean Ruff linting and formatting across `backend` and `tests`.

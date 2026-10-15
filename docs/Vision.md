@@ -1,8 +1,8 @@
 # Vision
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
-**Status:** Complete / Frozen
+**Document Version:** 2.1
+**Project Version:** v1.3.0
+**Status:** Active
 
 ---
 
@@ -205,10 +205,10 @@ Ultimately, the success of the Knowledge Intelligence Platform will be measured 
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 2.1 |
+| Project Version | v1.3.0 |
+| Status | Active |
+| Last Reviewed | 2026-10-15 |
 
 ### Review Policy
 

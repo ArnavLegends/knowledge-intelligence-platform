@@ -6,12 +6,12 @@ This directory contains the lightweight, self-contained AI evaluation harness fo
 measuring retrieval hit rates, Mean Reciprocal Rank (MRR), keyword coverage, and
 stage latencies across the Knowledge Intelligence Platform.
 
-## Current Status (v1.2.0)
+## Current Status (v1.3.0)
 
 The evaluation harness is fully implemented, provider-backed baselines have been
-executed (v1.1 and v1.2 experiments), and a 50-document / 80-case expanded
-benchmark has been constructed to eliminate top-k saturation. All tests pass
-(276+ tests). See **Benchmark Datasets** for the full dataset inventory.
+executed (v1.1, v1.2 experiments, and expanded baseline), and all 5 candidate
+retrieval evaluations were completed and documented. All tests pass (396 tests).
+See **Benchmark Datasets** for the full dataset inventory.
 
 ### Implemented Components
 
@@ -34,7 +34,7 @@ benchmark has been constructed to eliminate top-k saturation. All tests pass
 No external evaluation packages (such as heavy LLM-as-judge frameworks) are
 required for baseline execution, keeping the evaluation pipeline deterministic
 and fast. Exact Match and LLM Faithfulness are defined as optional model fields
-reserved for external judge configurations in v1.2+.
+reserved for external judge configurations in future milestones.
 
 ## Benchmark Datasets
 
@@ -259,36 +259,33 @@ All retrieval metrics (Hit@1/3/5, MRR) are computed **only over labelled cases**
 
 The runner uses raw-text embedding (no LLM generation) with 0.5 s inter-case spacing. At ~550 ms/query this runs 80 queries in approximately 44 s of Gemini embedding calls. If the embedding quota is exceeded, the error is surfaced in `retrieval_error` on the affected case and the run continues. No results are fabricated.
 
-#### Prerequisites for live run
+#### Canonical v1.2 Expanded Baseline Results
 
-```bash
-# Start Qdrant (Docker required)
-docker run -d -p 6333:6333 qdrant/qdrant:latest
+The genuine provider-backed 80-case baseline was executed and verified on 2026-10-14 against Google Gemini and Qdrant (Run ID: `02d492c76c7343aaaeb78506fa4b0395`, artifact: `benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json`):
 
-# Or set QDRANT_URL/QDRANT_API_KEY in .env for Qdrant Cloud
-QDRANT_URL=https://<cluster>.cloud.qdrant.io:6333
-QDRANT_API_KEY=<key>
-```
+| Category | Cases | MRR | Hit@1 | Hit@3 | Hit@5 |
+|---|---:|---:|---:|---:|---:|
+| `multi_concept` | 16 | **1.0000** | 1.0000 | 1.0000 | 1.0000 |
+| `paraphrase` | 16 | **0.9375** | 0.9375 | 0.9375 | 0.9375 |
+| `exact_terminology` | 16 | **0.7938** | 0.6875 | 0.8750 | 0.9375 |
+| `cross_document` | 8 | **0.7500** | 0.6250 | 0.8750 | 0.8750 |
+| `boundary_handling` | 8 | **0.5250** | 0.3750 | 0.6250 | 0.7500 |
+| `hard_negative` | 16 | **0.4427** | 0.3125 | 0.5625 | 0.6875 |
+| **Overall** | **80** | **0.7623** | **0.6875** | **0.8375** | **0.8750** |
 
-> **Current status:** The runner is implemented and validated (285 tests pass, ruff clean). A live run attempted on 2026-10-14 was blocked because Qdrant was not running (port 6333 unreachable, Docker not available in current session). Results will be recorded here when the live run succeeds.
+P95 retrieval latency: 643.0 ms. This is the **frozen control baseline** for all v1.2 candidate evaluations.
 
 ## Remaining Limitations
 
 1. **Keyword coverage is substring match.** `kw.lower() in answer.lower()` does
    not capture paraphrase or synonyms.
 
-2. **Faithfulness not implemented.** Requires an LLM judge (planned v1.2+).
+2. **Faithfulness not implemented.** Requires an LLM judge (conditional in future milestones).
 
 3. **Single-node latency.** Latency measurements are wall-clock and include
-   embedding API network round-trips; not suitable for throughput profiling.
+   embedding API network round-trips; realistic multi-user load testing is deferred to v1.7.
 
-4. **Expanded baseline live run blocked.** The `run_v1_2_expanded_baseline.py` runner
-   is implemented and validated offline. A live run on 2026-10-14 could not complete
-   because Qdrant was not running (port 6333 unreachable, Docker unavailable in session).
-   To execute: start Qdrant (`docker run -d -p 6333:6333 qdrant/qdrant:latest`) then run
-   `python evaluation/run_v1_2_expanded_baseline.py`.
-
-## Planned Role (v1.2+)
+## Future Evaluation Enhancements
 
 Planned enhancements for future versions:
 

@@ -1,8 +1,8 @@
 # API Reference
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
-**Status:** Complete / Frozen  
+**Document Version:** 3.0
+**Project Version:** v1.3.0
+**Status:** Active / Production
 
 ---
 
@@ -14,8 +14,8 @@ The API is versioned under `/api/v1`. Interactive API documentation is also avai
 - **Swagger UI**: `http://localhost:8000/docs`
 - **ReDoc**: `http://localhost:8000/redoc`
 
-> **Multi-Tenancy Workspace Header:** All workspace-scoped endpoints (`/documents`, `/retrieval/search`, `/rag/answer`) accept an optional header:  
-> `X-KIP-Workspace-ID: <token>`  
+> **Multi-Tenancy Workspace Header:** All workspace-scoped endpoints (`/documents`, `/retrieval/search`, `/rag/answer`) accept an optional header:
+> `X-KIP-Workspace-ID: <token>`
 > When omitted, requests default to the `"default"` workspace. When provided, data ingestion, vector querying, and document inventories are strictly isolated to that workspace token.
 
 > **Provider Keys:** Endpoints backed by embedding generation or LLM generation (`/retrieval/search`, `/rag/answer`, `/llm/generate`) require a valid `LLM_API_KEY` (for Google Gemini or OpenAI) to be configured. The test suite mocks or bypasses these providers appropriately.
@@ -54,7 +54,7 @@ Returns application-level readiness to serve requests.
 
 ### `POST /api/v1/documents`
 
-Ingest an uploaded file, extract text, chunk content, generate embeddings, and index into the active workspace's vector collection.
+Ingest an uploaded file, extract text, chunk content, generate embeddings, and index into the active workspace's vector collection. Ingestion automatically invalidates the workspace search cache to ensure fresh query results.
 
 **Headers:**
 - `X-KIP-Workspace-ID` (optional, string): The workspace token to scope the document to.
@@ -124,7 +124,7 @@ Retrieve the list of all ingested documents within the requesting workspace.
 
 ### `POST /api/v1/retrieval/search`
 
-Perform a semantic similarity search against the indexed knowledge base within the requesting workspace.
+Perform a semantic similarity search against the indexed knowledge base within the requesting workspace. Utilizes in-memory search caching and thread-pool offloaded execution.
 
 **Headers:**
 - `X-KIP-Workspace-ID` (optional, string): The workspace token.
@@ -134,14 +134,17 @@ Perform a semantic similarity search against the indexed knowledge base within t
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `query` | `string` | ✅ Yes | The search query. |
-| `top_k` | `integer` | No | Max results to return. Defaults to `RETRIEVAL_DEFAULT_TOP_K` (default: 5). |
-| `threshold` | `float` | No | Maximum distance threshold to filter results. Defaults to `RETRIEVAL_DEFAULT_THRESHOLD` (default: none). |
+| `top_k` | `integer` | No | Max results to return (1–100). Defaults to `RETRIEVAL_DEFAULT_TOP_K` (default: 5). |
+| `threshold` | `float` | No | Maximum distance threshold (0.0–2.0) to filter results. Defaults to `RETRIEVAL_DEFAULT_THRESHOLD` (default: none). |
+| `document_id` | `string` | No | Optional document ID to restrict search scope to a single document. |
+| `filters` | `object` | No | Optional metadata key-value filters. |
 
 **Example Request:**
 ```json
 {
   "query": "What is retrieval-augmented generation?",
-  "top_k": 3
+  "top_k": 3,
+  "document_id": "doc-uuid-1"
 }
 ```
 
@@ -166,6 +169,7 @@ Perform a semantic similarity search against the indexed knowledge base within t
 | Status | Condition |
 |--------|-----------|
 | `422` | Missing required `query` field or validation error |
+| `504` | Retrieval timed out (`EMBEDDING_TIMEOUT_SECONDS` or `QDRANT_TIMEOUT_SECONDS` exceeded) |
 
 ---
 
@@ -220,6 +224,7 @@ If no relevant context is found in the knowledge base, the `answer` field will c
 |--------|-----------|
 | `422` | Missing required `query` field |
 | `502` | Downstream LLM provider failure |
+| `504` | Retrieval or generation timed out (`LLM_TIMEOUT_SECONDS`, `EMBEDDING_TIMEOUT_SECONDS`, or `QDRANT_TIMEOUT_SECONDS` exceeded) |
 
 ---
 
@@ -351,3 +356,13 @@ Key configuration values that affect API behavior are set via environment variab
 | `MAX_CHUNKS_PER_WORKSPACE` | `1000` | Maximum indexed chunks per workspace |
 | `FEEDBACK_WEBHOOK_URL` | — | Google Apps Script Web App URL (`/exec`) for feedback persistence |
 | `FEEDBACK_WEBHOOK_TOKEN` | — | Shared secret token for authenticating feedback webhook GET requests |
+| `SEARCH_CACHE_ENABLED` | `true` | Enable in-memory LRU search caching |
+| `SEARCH_CACHE_MAX_ENTRIES` | `256` | Maximum entries in search cache |
+| `SEARCH_CACHE_TTL_SECONDS` | `300` | Search cache time-to-live in seconds |
+| `EMBEDDING_CACHE_ENABLED` | `true` | Enable in-memory LRU embedding caching |
+| `EMBEDDING_CACHE_MAX_ENTRIES` | `512` | Maximum entries in embedding cache |
+| `EMBEDDING_CACHE_TTL_SECONDS` | `3600` | Embedding cache time-to-live in seconds |
+| `RETRIEVAL_EXECUTOR_WORKERS` | `4` | Thread pool worker count for blocking retrieval and embedding tasks |
+| `EMBEDDING_TIMEOUT_SECONDS` | `10.0` | Timeout in seconds for embedding generation |
+| `QDRANT_TIMEOUT_SECONDS` | `10.0` | Timeout in seconds for Qdrant vector operations |
+| `LLM_TIMEOUT_SECONDS` | `30.0` | Timeout in seconds for LLM generation |

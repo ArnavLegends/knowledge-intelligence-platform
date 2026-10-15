@@ -1,8 +1,8 @@
 # Benchmarking & Evaluation
 
-**Document Version:** 2.0
-**Project Version:** v1.1.0 (Feature Frozen)
-**Status:** Complete / Frozen — Mechanical Harness Implemented, Comparative Sweeps Scheduled for v1.2
+**Document Version:** 3.0
+**Project Version:** v1.3.0
+**Status:** Active — Benchmark Suite & Metric Auditor Established
 
 ---
 
@@ -10,10 +10,12 @@
 
 This document defines the benchmarking and evaluation methodology for the Knowledge Intelligence Platform.
 
-> **Evaluation Status (v1.1.0):**  
-> The full test suite contains 245 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, and evaluation).  
-> The core evaluation subsystem was implemented in v1.0.0 (`evaluation/models.py` and `evaluation/runner.py`), coupled with a mechanical ground-truth baseline dataset (`benchmarks/kip_v1_baseline.json`, containing 5 grounded test cases). This harness deterministically measures Document Hit Rate, Mean Reciprocal Rank (MRR), Keyword Coverage, and stage latencies against mock or live providers without external dependencies.
-> High-volume empirical sweeps across multiple retrieval algorithms (BM25 vs. dense vectors, chunk sizes, cross-encoder rerankers) and LLM-as-judge evaluation are scheduled for v1.2 under the 14-step research lifecycle.
+> **Evaluation & Benchmark Status (v1.3.0):**
+> The full test suite contains 396 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, in-memory caching, executor offloading, timeouts, and evaluation).
+> In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`).
+> The frozen dense whole-document baseline recorded: **MRR: 0.7623**, **Hit@1: 0.6875**, **Hit@3: 0.8375**, **Hit@5: 0.8750**, P95 Latency: 643.0 ms.
+> Five candidate techniques were systematically evaluated: asymmetric input formatting (25-case pilot, neutral MRR 0.9133), cross-encoder reranking (MRR 0.7762, latency +1,048 ms), hybrid BM25+dense RRF (MRR 0.7094), sentence-boundary chunking (MRR 0.7471), and context optimization (MRR 0.7542). All candidates failed preregistered adoption targets (MRR ≥ 0.8200) or safety invariants; dense whole-document retrieval remains the production default.
+> Metric integrity is verified mechanically by `evaluation/validate_benchmark_metrics.py`. Realistic multi-user load testing remains deferred to the ~50–60% development checkpoint (v1.7).
 
 Once fully scaled, benchmarking will provide objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
 
@@ -141,15 +143,15 @@ Metrics include:
 | Retrieval Latency | Duration of vector search query in milliseconds | Implemented (`evaluation/runner.py`) |
 | Generation Latency | Duration of LLM answer generation in milliseconds | Implemented (`evaluation/runner.py`) |
 | Total Latency | End-to-end execution latency in milliseconds | Implemented (`evaluation/runner.py`) |
-| Exact Match | Strict mechanical match against reference answer | Planned (v1.2; optional schema in `evaluation/models.py`) |
-| Provenance Accuracy | Verification that returned source citations contain ground-truth document IDs | Planned (v1.2) |
-| Faithfulness | Degree to which responses are supported by retrieved context | Planned (v1.2, requires LLM judge) |
-| Answer Relevancy | Alignment between the answer and the user's query | Planned (v1.2, requires LLM judge) |
-| Hallucination Rate | Frequency of unsupported information | Planned (v1.2, requires LLM judge) |
-| Throughput | Requests processed per second | Planned (v1.2) |
-| Memory Usage | Runtime memory consumption | Planned (v1.3) |
-| CPU Utilization | Processor usage during execution | Planned (v1.3) |
-| Storage Usage | Disk space consumed by datasets and indexes | Planned (v1.3) |
+| Exact Match | Strict mechanical match against reference answer | Implemented (`evaluation/models.py`) |
+| Provenance Accuracy | Verification that returned source citations contain ground-truth document IDs | Implemented (`evaluation/runner.py`) |
+| Faithfulness | Degree to which responses are supported by retrieved context | Conditional (requires LLM judge) |
+| Answer Relevancy | Alignment between the answer and the user's query | Conditional (requires LLM judge) |
+| Hallucination Rate | Frequency of unsupported information | Conditional (requires LLM judge) |
+| Throughput | Requests processed per second under sustained load | Planned (v1.7 workload validation) |
+| Memory Usage | Runtime memory consumption | Planned (v1.7 workload validation) |
+| CPU Utilization | Processor usage during execution | Planned (v1.7 workload validation) |
+| Storage Usage | Disk space consumed by datasets and indexes | Planned (v1.7 workload validation) |
 
 Whenever practical, benchmark results should include averages, standard deviations, confidence intervals, and sample sizes.
 
@@ -314,13 +316,19 @@ Recommended follow-up experiments.
 
 Every release should include benchmark comparisons against previous versions.
 
-| Version | Retrieval Strategy | Latency | Faithfulness / Accuracy | Status |
-|----------|-------------------|----------|-------------------------|--------|
+| Version | Retrieval Strategy | Latency | Faithfulness / Retrieval Metrics | Status |
+|----------|-------------------|----------|----------------------------------|--------|
 | v0.3 | Dense (ChromaDB + OpenAI) | — | — | Baseline Foundation |
 | v1.0 | Dense (ChromaDB + OpenAI) | Baseline | Mechanical Baseline (Hit Rate, MRR, Keyword Coverage) | ✅ Verified (`evaluation/runner.py`) |
-| v1.1 | Dense (Qdrant Cloud + Gemini) | Baseline | Multi-Tenant Isolation Verified | ✅ Verified (Cloud & Local) |
-| v1.2 | Hybrid (BM25 + Qdrant) + Reranking | Comparative | Target: Improved NDCG/MRR | 🔬 Planned Candidate |
-| v2.0 | Memory-Augmented Retrieval | TBD | TBD | 📅 Planned → Deferred |
+| v1.1 | Dense (Qdrant Cloud + Gemini) | Baseline | Multi-Tenant Isolation & Live Baseline Verified | ✅ Verified (Cloud & Local) |
+| v1.2 | Dense Whole-Doc (Baseline MRR 0.7623) vs 5 Candidates (Formatting, Reranking, Hybrid, Chunking, Context Optimization) | 643 ms P95 baseline | Candidates Failed Targets (MRR 0.7094–0.7762); Dense Retained | ✅ Completed — Candidates Rejected |
+| v1.3 | Dense Whole-Doc + In-Memory LRU Caching & Thread Offloading | ~0.03 ms cache hit / 504 timeout bounds | Retrieval Correctness & Concurrency Safety Verified | ✅ Completed (396 tests passing) |
+| v1.4 | Dense Whole-Doc + Workspace-Safe Document Operations | Monitored | Workspace Isolation & Provenance Bounds | 📅 Proposed |
+| v1.5 | Retrieval Generalization on 2nd Independent Corpus | Evaluated | Grounding, Citation Correctness, Cross-Doc | 📅 Proposed |
+| v1.6 | Evidence-Grounded Knowledge Workflows | Workflow latency | Multi-Document Comparison Verification | 📅 Proposed |
+| v1.7 | Operational Validation & Realistic Workload Testing | P95/P99 latency under concurrency | Sustained Load, Cold Starts, Resource Bounds | 📅 Proposed (~50–60% checkpoint) |
+| v1.8 | Reproducible Release & Technical Case Study | Release benchmark profile | Complete Evaluation Reproducibility | 📅 Proposed |
+| v2.0+ | Need-Justified Memory, Tools, Agents, Multimodal | Conditional | Governed by Strategic Guardrails | 🔒 Conditional |
 
 Historical benchmark data should never be deleted. Once established, newer results should be appended to preserve longitudinal comparisons.
 
@@ -328,21 +336,15 @@ Historical benchmark data should never be deleted. Once established, newer resul
 
 # Evaluation Tools
 
-### Current Implementation (v1.0.0 / v1.1.0)
+### Current Implementation (v1.3.0)
 
-- **Custom Evaluation Harness (`evaluation/runner.py`, `evaluation/models.py`):** Self-contained, lightweight evaluation engine capable of evaluating RAG retrieval hit rates, Mean Reciprocal Rank (MRR), keyword coverage, and stage latencies without requiring heavy external evaluation dependencies.
-- **Automated Pytest Suite:** 245 unit and integration tests asserting component-level correctness across ingestion, embeddings, vector stores, API routes, and multitenancy.
-
-### Planned Evaluation Tools (v1.2+)
-
-The following external tools are planned for comparative evaluation during v1.2:
-
-- RAGAS (planned for automated LLM-as-a-judge faithfulness and answer relevance)
-- DeepEval (planned for unit-test style evaluation assertions)
-- LangSmith / Weights & Biases (planned for experiment tracking and latency profiling)
-- MLflow (planned for version-to-version metric tracking)
-
-The evaluation framework should remain modular so that tools may be replaced without affecting the overall benchmarking methodology.
+- **Custom Evaluation Harness (`evaluation/runner.py`, `evaluation/models.py`):** Self-contained evaluation engine measuring RAG retrieval hit rates, Mean Reciprocal Rank (MRR), keyword coverage, and stage latencies without external cloud dependencies.
+- **Automated Metric Auditor (`evaluation/validate_benchmark_metrics.py`):** Standalone verification script ensuring mathematically correct MRR and Hit@K calculations and cross-checking raw result artifacts against synthesis reports.
+- **Benchmark Suites:**
+  - 18-doc / 25-case formatting pilot dataset (`benchmarks/kip_v1_2_benchmark.json`).
+  - 50-doc / 80-case expanded retrieval benchmark across six query categories (`benchmarks/kip_v1_2_expanded_benchmark.json`, corpus in `benchmarks/corpus_v1_2_expanded/`).
+- **Automated Pytest Suite:** 396 unit, integration, and performance tests asserting component-level correctness across ingestion, caching, concurrency, vector stores, API routes, and multitenancy.
+- **Latency Telemetry & Cache Observers:** Integrated execution timers and cache hit/miss/eviction counters in backend services.
 
 ---
 
@@ -369,12 +371,11 @@ Whenever practical, benchmark reports should include tables, charts, and reprodu
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
+| Status | Active — Benchmark Suite & Metric Auditor Established |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 
 This document should be reviewed whenever new evaluation methodologies, metrics, benchmark datasets, or experimental frameworks are introduced. Changes should preserve comparability with historical benchmark results and maintain reproducibility across project versions.
-

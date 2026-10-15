@@ -1,8 +1,8 @@
 # Software Requirements Specification (SRS)
 
-**Document Version:** 2.0  
-**Project Version:** v1.1.0 (Feature Frozen)  
-**Status:** Complete / Frozen
+**Document Version:** 3.0
+**Project Version:** v1.3.0
+**Status:** Complete / Active
 
 ---
 
@@ -96,7 +96,7 @@ The requirements defined in this document assume:
 
 # Functional Requirements
 
-The functional requirements describe the capabilities that the Knowledge Intelligence Platform shall provide. Each requirement is assigned a unique identifier for traceability throughout development, testing, benchmarking, and future releases. Requirements are explicitly distinguished between **Implemented (v1.1)** and **Planned (Future Milestone)**.
+The functional requirements describe the capabilities that the Knowledge Intelligence Platform shall provide. Each requirement is assigned a unique identifier for traceability throughout development, testing, benchmarking, and future releases. Requirements are explicitly distinguished between **Implemented (v1.3)** and **Planned / Conditional (Future Milestone)**.
 
 ---
 
@@ -203,7 +203,7 @@ The system shall retrieve relevant knowledge for user queries.
 
 ### Status
 
-Implemented (v1.1: Dense Semantic Retrieval); Planned (v1.2: Hybrid Retrieval & Reranking)
+Implemented (v1.1: Dense Semantic Retrieval; v1.3: In-Memory LRU Caching & Concurrency Offloading); Evaluated & Rejected (v1.2: Hybrid Retrieval & Reranking)
 
 ### Priority
 
@@ -215,7 +215,7 @@ Critical
 - Support workspace metadata filtering (`workspace_id` tenant isolation).
 - Rank retrieved results by cosine similarity score.
 - Return configurable numbers of documents (Top-$k$ slider range 1–20).
-- Support future hybrid retrieval (sparse BM25 + dense vectors) and cross-encoder reranking (Planned: v1.2).
+- Hybrid retrieval (sparse BM25 + dense vectors) and cross-encoder reranking evaluated in v1.2 were rejected under empirical criteria; dense semantic retrieval remains production baseline.
 
 ---
 
@@ -227,7 +227,7 @@ The platform shall construct context for language model inference.
 
 ### Status
 
-Implemented (v1.1: Retrieved Chunk Context); Planned (v2.0: Conversational Memory)
+Implemented (v1.1: Retrieved Chunk Context; v1.2: Context Optimization Evaluated & Retained Baseline); Conditional (v2.0: Conversational Memory)
 
 ### Priority
 
@@ -236,7 +236,7 @@ High
 ### Acceptance Criteria
 
 - Combine retrieved documents into a grounded context prompt (`ContextBuilder`).
-- Include conversation memory across multi-turn sessions (Planned: v2.0).
+- Include conversation memory across multi-turn sessions (Conditional: v2.0).
 - Respect token limitations and model context windows.
 - Produce structured prompts with strict grounding instructions and refusal behavior on empty context.
 
@@ -250,7 +250,7 @@ The platform shall generate responses using configurable language models.
 
 ### Status
 
-Implemented (v1.1: Request/Response Generation); Planned (v1.3: Streaming Responses)
+Implemented (v1.1: Request/Response Generation; v1.3: Timeout Enforcement & HTTP 504 Gateway Timeout Mapping); Conditional (Streaming Responses)
 
 ### Priority
 
@@ -259,8 +259,8 @@ Critical
 ### Acceptance Criteria
 
 - Invoke configured LLMs (`gemini-2.5-flash` or `gpt-4o-mini`).
-- Support streaming responses (Planned: v1.3).
-- Handle provider failures (rate limits, context limits, service unavailability) and translate them into typed exceptions.
+- Support streaming responses (Conditional).
+- Handle provider failures (rate limits, context limits, service timeouts) and translate them into typed exceptions (HTTP 502/504).
 - Return structured outputs (`LLMResponse` with token usage metadata).
 
 ---
@@ -480,10 +480,10 @@ Requirement identifiers shall remain stable across future versions to preserve i
 | Item | Value |
 |------|-------|
 | Document Owner | Project Maintainer |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
+| Status | Complete / Active |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 
@@ -685,14 +685,13 @@ External references may include:
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
-| Status | Complete / Frozen |
-| Last Reviewed | 2026-10-08 |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
+| Status | Complete / Active |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 
 The Software Requirements Specification shall be reviewed whenever new functional capabilities, architectural revisions, or significant implementation changes affect system behavior.
 
 Requirements should remain uniquely identifiable and traceable across design, implementation, testing, benchmarking, and future releases.
-

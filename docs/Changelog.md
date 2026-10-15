@@ -37,36 +37,16 @@ Each release documents significant engineering changes while maintaining histori
 
 ## [Unreleased]
 
-### KIP v1.2 Research — Controlled Gemini Embedding 2 Input-Formatting Experiment
+### Planned (v1.4 — Knowledge Workspace & Evidence Trust)
+- Granular per-document ingestion error feedback and status indicators.
+- Source evidence inspection and contextual navigation in Streamlit.
+- Conditional document deletion workflow with strict workspace scoping and cache invalidation.
 
-#### Added
-- **Asymmetric Formatting Hooks:**
-  - Added optional `doc_formatter: Callable[[str], str] | None` to `EmbeddingService.__init__` to format document text passed to embedding models while strictly preserving raw text in `EmbeddingInput.metadata["text"]` for Qdrant payloads and user provenance.
-  - Added optional `query_formatter: Callable[[str], str] | None` to `RetrievalService.__init__` to format query text passed to embedding models.
-- **Fine-Grained Retrieval Metrics:**
-  - Added `hit_at_1`, `hit_at_3`, `retrieved_chunk_ids`, and `expected_chunk_ids` to `RetrievalMetrics`.
-  - Added `hit_rate_at_1`, `hit_rate_at_3`, and `hit_rate_at_5` to `BenchmarkResult`.
-  - Added `expected_chunk_ids` to `BenchmarkCase` for chunk-level provenance evaluation.
-- **Evaluation Corpora & Datasets:**
-  - Added 18-document expanded reference corpus (`benchmarks/corpus_v1_2/`) containing 14 core architecture documents and 4 adversarial distractors with LF-only line endings.
-  - Added 25-case evaluation benchmark (`benchmarks/kip_v1_2_benchmark.json`) covering exact-token lookup, semantic paraphrase, and distractor disambiguation.
-- **Turnkey Experiment Runner:**
-  - Added `evaluation/run_v1_2_formatting_experiment.py` implementing end-to-end preflight verification, indexing of isolated collections (`kip_eval_v1_2_control` and `kip_eval_v1_2_formatted`), evaluation without LLM generation overhead, and paired delta analysis.
-- **Automated Tests:**
-  - Added unit tests in `tests/test_evaluation.py` for formatter hooks, v1.2 corpus/benchmark loading, and fine-grained hit rate metrics, bringing the test suite to 267 passing tests.
-
-#### Experimental Findings & Decision
-- **Empirical Results:** Evaluated live on Google Gemini `gemini-embedding-2` (768 dimensions) and Qdrant. Both Control (raw text) and Treatment (asymmetric formatting) yielded identical aggregate metrics: Hit Rate@1 = 0.8400, Hit Rate@3 = 1.0000, Hit Rate@5 = 1.0000, MRR = 0.9133.
-- **Paired Deltas:** 23/25 queries had identical ranks; 1 improved (`v12-017`: rank 2 -> rank 1), 1 degraded (`v12-010`: rank 1 -> rank 2). Latency delta (-20.38 ms) was within cloud network variance.
-- **Production Default:** Retained raw-text embedding as the production default to minimize token overhead. Formatter hooks preserved as extension points.
-- **Artifacts Recorded:**
-  - `benchmarks/kip_v1_2_formatting_control_20261014_094111.json`
-  - `benchmarks/kip_v1_2_formatting_treatment_20261014_094111.json`
-
+---
 
 # [v1.3.0] — Performance Engineering & Concurrency Hardening
 
-**Release Date:** 2026-10-15  
+**Release Date:** 2026-10-15
 **Theme:** Performance Engineering, Bounded Zero-Cost Caching, Async Thread Offloading, Timeout Resilience & Observability
 
 ### Added
@@ -117,9 +97,38 @@ Each release documents significant engineering changes while maintaining histori
 
 ---
 
+# [v1.2.0] — Retrieval Intelligence Research & Benchmark Suite
+
+**Release Date:** 2026-10-14
+**Theme:** Retrieval Intelligence Research, Ground-Truth Benchmarking & Hypothesis Testing
+
+### Added
+
+- **Expanded Reference Corpus & Benchmark Dataset**:
+  - Curated 50-document evaluation corpus (`benchmarks/corpus_v1_2_expanded/`) spanning architecture documents and 4 adversarial distractors.
+  - Labelled 80-case evaluation benchmark across six query categories: exact token lookup, semantic paraphrase, cross-document synthesis, multi-concept query, adversarial distractor, and unanswerable query.
+  - Established canonical frozen dense baseline on Google Gemini `gemini-embedding-2` (768 dimensions) + Qdrant Cloud (`benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json`): MRR = 0.7623, Hit@1 = 0.6875, Hit@3 = 0.8375, Hit@5 = 0.8750.
+- **Asymmetric Formatting Hooks & 25-Case Pilot**:
+  - Added optional `doc_formatter` to `EmbeddingService` and `query_formatter` to `RetrievalService`.
+  - Conducted controlled experiment on 25-case pilot benchmark (`benchmarks/kip_v1_2_benchmark.json`): Both control and treatment achieved identical aggregate MRR = 0.9133 and Hit@1 = 0.8400. Raw-text default retained.
+- **Evaluation Runner & Metric Auditor**:
+  - Fine-grained retrieval evaluation in `evaluation/runner.py` computing Hit@1, Hit@3, Hit@5, MRR, keyword coverage, and stage latencies.
+  - Automated metric auditor (`evaluation/validate_benchmark_metrics.py` and `tests/test_benchmark_audit.py`) validating mathematical integrity across historical benchmark runs.
+
+### Evaluated & Concluded (Negative Findings Retained)
+- **Candidate Techniques Evaluated**:
+  1. *Asymmetric Input Formatting*: Neutral (MRR 0.9133 on 25-case pilot); raw-text embedding retained.
+  2. *Cross-Encoder Reranking*: Did not meet preregistered acceptance criteria; rejected.
+  3. *Hybrid BM25 + Dense Retrieval*: Did not outperform dense baseline; rejected.
+  4. *Sentence-Boundary Chunking*: Did not satisfy adoption criteria; rejected.
+  5. *Context Optimization*: Did not satisfy adoption criteria; rejected.
+- **Production Standard**: Dense whole-document retrieval retained as the verified production standard. All negative and neutral experiment results, JSON artifacts, and failure analysis reports preserved for scientific reproducibility.
+
+---
+
 # [v1.1.0] — Multi-Tenant Cloud Knowledge Layer & Public Testing
 
-**Release Date:** 2026-10-07 (Feature-frozen with public testing and feedback transport on 2026-10-08)  
+**Release Date:** 2026-10-07 (Feature-frozen with public testing and feedback transport on 2026-10-08)
 **Related Commits:** `6a5d4e6`, `1a546b6`, `7c7eefc`, `58038bf`, `b3d6bf4`, `64c6562`, `cc4ee47`, `09842ef`, `ce1c42a`
 
 ## Added
@@ -158,7 +167,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # [v1.0.1] — Document Idempotency Service Wiring Patch
 
-**Release Date:** 2026-10-07  
+**Release Date:** 2026-10-07
 **Related Commits:** `fcdb6b8`
 
 ## Fixed
@@ -169,7 +178,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # [v1.0.0] — Production RAG Platform
 
-**Release Date:** 2026-10-07  
+**Release Date:** 2026-10-07
 **Related Commits:** `1b8d3f7`
 
 ## Added
@@ -202,7 +211,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # [v0.4.0] — Multi-Format Document Ingestion (Pre-v1.0 Milestone)
 
-**Date:** 2026-10-07  
+**Date:** 2026-10-07
 **Related Commits:** Part of the v1.0.0 productization development cycle leading to `1b8d3f7`
 
 ## Added
@@ -217,7 +226,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # [v0.3.0] — End-to-End RAG Workflow (Core Foundation Milestone)
 
-**Date:** 2026-10-07  
+**Date:** 2026-10-07
 **Related Commits:** Core RAG pipeline stabilization leading to `1b8d3f7`
 
 ## Added
@@ -234,7 +243,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # [v0.2.1] — Repository Professionalization & Documentation Synchronization
 
-**Date:** 2026-09-17  
+**Date:** 2026-09-17
 **Related Commits:** `1b9832f`, `a67fb7f`, `d09b855`
 
 ## Changed
@@ -256,7 +265,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # v0.2.0 — Backend Foundation
 
-**Release Date:** 2026-08-23  
+**Release Date:** 2026-08-23
 **Related Commits:** `1bfecd2`, `40f46b7`, `a454978`, `53f1faa`, `86a3576`, `40808f4`
 
 ## Added
@@ -307,7 +316,7 @@ Each release documents significant engineering changes while maintaining histori
 
 # v0.1.0 — Project Foundation
 
-**Release Date:** 2026-07-19  
+**Release Date:** 2026-07-19
 **Related Commits:** `bde42e2`, `095cf64`, `2ad1d95`
 
 ## Added
@@ -370,10 +379,10 @@ Release notes should focus on changes that are meaningful to users and contribut
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.0 |
-| Project Version | v1.1.0 (Feature Frozen) |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
 | Status | Active Changelog |
-| Last Reviewed | 2026-10-08 |
+| Last Reviewed | 2026-10-15 |
 
 ## Review Policy
 

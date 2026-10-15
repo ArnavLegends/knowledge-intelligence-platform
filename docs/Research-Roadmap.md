@@ -1,8 +1,8 @@
 # Research Roadmap
 
-**Document Version:** 2.1  
-**Project Version:** v1.2 (Research Phase — Experiments Complete)  
-**Status:** Active — v1.2 Research Concluded  
+**Document Version:** 3.0
+**Project Version:** v1.3.0
+**Status:** Active — v1.3 Completed / Future Research Governed
 
 ---
 
@@ -28,7 +28,7 @@ The platform emphasizes applied AI systems research, where experimental findings
 
 Research activities should prioritize reproducibility, objectivity, and practical impact over novelty alone.
 
-> **Research Infrastructure Status (v1.2):**  
+> **Research Infrastructure Status (v1.2):**
 > The core evaluation harness (`evaluation/models.py`, `evaluation/runner.py`) was implemented and verified in v1.0.0. In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`). Four controlled retrieval experiments were executed against this frozen benchmark under the 14-step research lifecycle. **All four candidates were rejected** — none reached the preregistered primary MRR target of ≥ 0.8200. Dense whole-document retrieval (MRR 0.7623) remains the production default pending a synthesis approach.
 
 ---
@@ -154,20 +154,20 @@ Every significant engineering improvement should be evaluated using a standardiz
 
 #### Response Quality
 
-- Faithfulness (Planned: v1.2, requires LLM judge)
-- Answer Relevance (Planned: v1.2, requires LLM judge)
+- Faithfulness (Conditional: requires LLM judge)
+- Answer Relevance (Conditional: requires LLM judge)
 - Context Relevance
 - Completeness
-- Hallucination Rate (Planned: v1.2, requires LLM judge)
+- Hallucination Rate (Conditional: requires LLM judge)
 - Keyword Coverage (Implemented in `evaluation/runner.py`)
-- Exact Match (Planned: optional schema in `evaluation/models.py`)
+- Exact Match (Optional schema in `evaluation/models.py`)
 
 #### System Performance
 
 - Latency (Retrieval, Generation, Total) (Implemented in `evaluation/runner.py`)
-- Latency Profiling (p50, p95, p99) (Planned: v1.3)
-- Throughput (requests/sec)
-- Memory Usage
+- Latency Profiling (P50, P90, P95) (Implemented in v1.3 / evaluation harness)
+- Throughput (requests/sec) (Planned: v1.7)
+- Memory Usage (Planned: v1.7)
 - Storage Requirements
 
 #### User Experience
@@ -204,68 +204,68 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 
 ### CHUNK-BASELINE-001
 
-**Status:** Baseline Established (v0.3.0 / v1.0.0)  
-**Strategy:** Fixed-size character chunking with sliding window overlap  
-**Initial Configuration:** `chunk_size = 1000`, `chunk_overlap = 200`  
-**Variables:** chunk size, overlap  
+**Status:** Baseline Established (v0.3.0 / v1.0.0)
+**Strategy:** Fixed-size character chunking with sliding window overlap
+**Initial Configuration:** `chunk_size = 1000`, `chunk_overlap = 200`
+**Variables:** chunk size, overlap
 
-**Purpose:** Establish a deterministic baseline for future chunking experiments.  
+**Purpose:** Establish a deterministic baseline for future chunking experiments.
 *(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### EMBED-BASELINE-001
 
-**Status:** Baseline Established (v0.3.0 / v1.0.0)  
-**Strategy:** OpenAI dense embedding  
-**Configuration:** `provider = openai`, `model = text-embedding-3-small`, `dimensions = 1536`  
-**Variables:** embedding model, dimensionality, batch/input size  
+**Status:** Baseline Established (v0.3.0 / v1.0.0)
+**Strategy:** OpenAI dense embedding
+**Configuration:** `provider = openai`, `model = text-embedding-3-small`, `dimensions = 1536`
+**Variables:** embedding model, dimensionality, batch/input size
 
-**Purpose:** Establish a reproducible embedding baseline for retrieval experiments.  
+**Purpose:** Establish a reproducible embedding baseline for retrieval experiments.
 *(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### EMBED-BASELINE-002
 
-**Status:** Baseline Established (v1.1.0)  
-**Strategy:** Google Gemini dense embedding with 1:1 Content/Part batching  
-**Configuration:** `provider = gemini`, `model = text-embedding-004` (aliased as `gemini-embedding-2`), `dimensions = 768`  
-**Variables:** batch size, truncation behavior, token usage  
+**Status:** Baseline Established (v1.1.0)
+**Strategy:** Google Gemini dense embedding with 1:1 Content/Part batching
+**Configuration:** `provider = gemini`, `model = text-embedding-004` (aliased as `gemini-embedding-2`), `dimensions = 768`
+**Variables:** batch size, truncation behavior, token usage
 
-**Purpose:** Establish a high-throughput, zero-cost embedding baseline for production testing.  
+**Purpose:** Establish a high-throughput, zero-cost embedding baseline for production testing.
 *(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### VECTOR-BASELINE-001
 
-**Status:** Baseline Established (v0.3.0 / v1.0.0)  
-**Strategy:** Local embedded vector storage  
-**Configuration:** `provider = chroma`, `collection = knowledge_base`, `persistence = local directory`  
+**Status:** Baseline Established (v0.3.0 / v1.0.0)
+**Strategy:** Local embedded vector storage
+**Configuration:** `provider = chroma`, `collection = knowledge_base`, `persistence = local directory`
 
-**Purpose:** Establish a reproducible storage baseline for local unit testing and development.  
+**Purpose:** Establish a reproducible storage baseline for local unit testing and development.
 *(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### VECTOR-BASELINE-002
 
-**Status:** Baseline Established (v1.1.0)  
-**Strategy:** Managed cloud serverless vector storage with deterministic workspace filtering  
-**Configuration:** `provider = qdrant`, `collection = knowledge_base`, `filter = workspace_id`, `distance = COSINE`  
+**Status:** Baseline Established (v1.1.0)
+**Strategy:** Managed cloud serverless vector storage with deterministic workspace filtering
+**Configuration:** `provider = qdrant`, `collection = knowledge_base`, `filter = workspace_id`, `distance = COSINE`
 
-**Purpose:** Establish a scalable, multi-tenant cloud storage baseline.  
+**Purpose:** Establish a scalable, multi-tenant cloud storage baseline.
 *(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### RETRIEVAL-BASELINE-001
 
-**Status:** Baseline Established (v0.3.0 / v1.0.0 / v1.1.0)  
-**Strategy:** Dense cosine semantic retrieval with Top-K cutoff  
-**Configuration:** `top_k = 5`, `threshold = None`  
+**Status:** Baseline Established (v0.3.0 / v1.0.0 / v1.1.0)
+**Strategy:** Dense cosine semantic retrieval with Top-K cutoff
+**Configuration:** `top_k = 5`, `threshold = None`
 
-**Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.  
+**Purpose:** Establish a reproducible semantic search baseline for future retrieval experiments.
 *(Comparative benchmark sweeps scheduled for v1.2).*
 
 ### RAG-BASELINE-001
 
-**Status:** Baseline Established (v1.0.0 / v1.1.0)  
-**Pipeline:** Document Indexing + Fixed Chunking + Dense Embedding + Vector Retrieval + Deterministic Context Template  
-**Configuration:** `top_k = 5`, `llm_model = gemini-2.5-flash` / `gpt-4o-mini`, `rag_prompt_version = v1`  
+**Status:** Baseline Established (v1.0.0 / v1.1.0)
+**Pipeline:** Document Indexing + Fixed Chunking + Dense Embedding + Vector Retrieval + Deterministic Context Template
+**Configuration:** `top_k = 5`, `llm_model = gemini-2.5-flash` / `gpt-4o-mini`, `rag_prompt_version = v1`
 
-**Purpose:** Establish a reproducible end-to-end RAG baseline before optimization experiments.  
+**Purpose:** Establish a reproducible end-to-end RAG baseline before optimization experiments.
 *(Canonical v1.1 live baseline achieved MRR 0.9048, Hit Rate 1.0000 on 7 cases).*
 
 ### EXP-V12-INPUT-FORMAT-001
@@ -296,10 +296,10 @@ To ensure scientific rigor and reproducible engineering, all future research exp
 
 ### EXP-V12-EXPANDED-BASELINE-001
 
-**Status:** Completed (2026-10-14)  
-**Title:** v1.2 Expanded Dense Retrieval Baseline  
-**Strategy:** Dense cosine retrieval with fixed-size chunking (`chunk_size=1000, overlap=200`) against 50-document corpus  
-**Run ID:** `02d492c76c7343aaaeb78506fa4b0395`  
+**Status:** Completed (2026-10-14)
+**Title:** v1.2 Expanded Dense Retrieval Baseline
+**Strategy:** Dense cosine retrieval with fixed-size chunking (`chunk_size=1000, overlap=200`) against 50-document corpus
+**Run ID:** `02d492c76c7343aaaeb78506fa4b0395`
 **Artifacts:** [`benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json`](../benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json), [`docs/evaluation/v1.2_failure_analysis.md`](evaluation/v1.2_failure_analysis.md)
 
 **Measured Results (80 cases, 50 documents):**
@@ -320,10 +320,10 @@ P95 query latency: 643.0 ms. This is the **frozen control baseline** for all v1.
 
 ### EXP-V12-CROSS-ENCODER-001
 
-**Status:** Completed — **REJECTED** (2026-10-14)  
-**Title:** Controlled Cross-Encoder Reranking Experiment  
-**Strategy:** Dense top-20 candidate retrieval followed by `cross-encoder/ms-marco-MiniLM-L-6-v2` ONNX reranker to produce final top-5  
-**Artifact:** [`benchmarks/kip_v1_2_reranking_treatment_20261014_115445.json`](../benchmarks/kip_v1_2_reranking_treatment_20261014_115445.json)  
+**Status:** Completed — **REJECTED** (2026-10-14)
+**Title:** Controlled Cross-Encoder Reranking Experiment
+**Strategy:** Dense top-20 candidate retrieval followed by `cross-encoder/ms-marco-MiniLM-L-6-v2` ONNX reranker to produce final top-5
+**Artifact:** [`benchmarks/kip_v1_2_reranking_treatment_20261014_115445.json`](../benchmarks/kip_v1_2_reranking_treatment_20261014_115445.json)
 **Report:** [`docs/evaluation/v1.2_cross_encoder_experiment.md`](evaluation/v1.2_cross_encoder_experiment.md)
 
 **Measured Results (80 cases):**
@@ -338,10 +338,10 @@ P95 query latency: 643.0 ms. This is the **frozen control baseline** for all v1.
 
 ### EXP-V12-HYBRID-RETRIEVAL-001
 
-**Status:** Completed — **REJECTED** (2026-10-14)  
-**Title:** Controlled Hybrid BM25 + Dense Retrieval with Reciprocal Rank Fusion  
-**Strategy:** BM25 sparse retrieval fused with Gemini dense retrieval via RRF (k=60), deduplication, top-5 final  
-**Artifact:** [`benchmarks/kip_v1_2_hybrid_treatment_20261014_121435.json`](../benchmarks/kip_v1_2_hybrid_treatment_20261014_121435.json)  
+**Status:** Completed — **REJECTED** (2026-10-14)
+**Title:** Controlled Hybrid BM25 + Dense Retrieval with Reciprocal Rank Fusion
+**Strategy:** BM25 sparse retrieval fused with Gemini dense retrieval via RRF (k=60), deduplication, top-5 final
+**Artifact:** [`benchmarks/kip_v1_2_hybrid_treatment_20261014_121435.json`](../benchmarks/kip_v1_2_hybrid_treatment_20261014_121435.json)
 **Report:** [`docs/evaluation/v1.2_hybrid_retrieval_experiment.md`](evaluation/v1.2_hybrid_retrieval_experiment.md)
 
 **Measured Results (80 cases):**
@@ -358,10 +358,10 @@ P95 query latency: 643.0 ms. This is the **frozen control baseline** for all v1.
 
 ### EXP-V12-SENTENCE-CHUNKING-001
 
-**Status:** Completed — **REJECTED** (2026-10-14)  
-**Title:** Controlled Sentence-Boundary Chunking Experiment  
-**Strategy:** `SentenceBoundaryChunker(target_chunk_size=400, min_chunk_size=150, overlap_sentences=1)` producing 173 chunks across 50 documents (3.46/doc), evaluated raw and with document-level deduplication  
-**Artifact:** [`benchmarks/kip_v1_2_chunking_treatment_20261014_124804.json`](../benchmarks/kip_v1_2_chunking_treatment_20261014_124804.json)  
+**Status:** Completed — **REJECTED** (2026-10-14)
+**Title:** Controlled Sentence-Boundary Chunking Experiment
+**Strategy:** `SentenceBoundaryChunker(target_chunk_size=400, min_chunk_size=150, overlap_sentences=1)` producing 173 chunks across 50 documents (3.46/doc), evaluated raw and with document-level deduplication
+**Artifact:** [`benchmarks/kip_v1_2_chunking_treatment_20261014_124804.json`](../benchmarks/kip_v1_2_chunking_treatment_20261014_124804.json)
 **Report:** [`docs/evaluation/v1.2_chunking_experiment.md`](evaluation/v1.2_chunking_experiment.md)
 
 **Measured Results (80 cases, document-deduplicated top-5):**
@@ -414,16 +414,21 @@ The research roadmap evolves alongside the product roadmap. Each product milesto
 | v1.0 | RAG pipeline, prompt engineering, evaluation harness (`runner.py`) | ✅ Completed |
 | v1.1 | Multi-tenant vector filtering (Qdrant), Gemini batching, user feedback persistence | ✅ Completed |
 | v1.2 | Embedding formatting (neutral); cross-encoder reranking (rejected); hybrid BM25+dense RRF (rejected); sentence-boundary chunking (rejected); context optimization (rejected) — dense whole-document retrieval retained as production default | ✅ Research Complete — All Candidates Rejected |
-| v1.3 | Performance optimization, caching, latency profiling, observability | 📅 Planned → Deferred |
-| v2.0 | Conversational memory, long-term memory architectures | 📅 Planned → Deferred |
-| v2.1 | Tool calling, API orchestration, workflow reliability | 📅 Planned → Deferred |
-| v2.2 | Planning algorithms, autonomous agents, multi-step reasoning | 📅 Planned → Deferred |
-| v2.3 | Knowledge synthesis, explainability, intelligent orchestration | 📅 Planned → Deferred |
-| v2.4 | Knowledge graphs, entity linking, graph-based retrieval | 📅 Planned → Deferred |
-| v3.0 | Multimodal retrieval, multimodal reasoning, unified knowledge representation | 📅 Planned → Deferred |
-| v3.1 | Collaboration systems, access control, collaborative AI workflows | 📅 Planned → Deferred |
-| v3.2 | Cloud deployment, distributed systems, operational AI | 📅 Planned → Deferred |
-| v4.0 | Enterprise AI systems, scalability, governance, security | 📅 Planned → Deferred |
+| v1.3 | Performance optimization, caching, latency profiling, concurrency safety | ✅ Completed |
+| v1.4 | Knowledge workspace & evidence trust, source provenance, inspection | 📅 Proposed |
+| v1.5 | Retrieval generalization on 2nd corpus, answer grounding, citation correctness | 📅 Proposed |
+| v1.6 | Evidence-grounded knowledge workflows, multi-document comparison | 📅 Proposed |
+| v1.7 | Operational validation, realistic workload testing (~50–60% dev checkpoint) | 📅 Proposed |
+| v1.8 | Reproducible release, feature freeze, technical case study | 📅 Proposed |
+| v2.0 | Conversational memory architectures, retention and privacy bounds | 🔒 Conditional / Need-Justified |
+| v2.1 | Controlled tool calling, permissioned workflow reliability | 🔒 Conditional / Need-Justified |
+| v2.2 | Bounded agentic workflows, deterministic vs agent evaluation | 🔒 Conditional / Need-Justified |
+| v2.3 | Knowledge intelligence consolidation and synthesis | 🔒 Conditional / Need-Justified |
+| v2.4 | Knowledge graphs, entity linking, graph-based retrieval | 🔒 Conditional / Need-Justified |
+| v3.0 | Multimodal retrieval, cross-modal representation | 🔒 Conditional / Need-Justified |
+| v3.1 | Collaboration systems, access control, multi-user auditability | 🔒 Conditional / Need-Justified |
+| v3.2 | Cloud operations, distributed systems, operational reliability | 🔒 Conditional / Need-Justified |
+| v4.0 | Enterprise AI systems, governance, formal compliance | 🔒 Conditional / Need-Justified |
 
 Every major product release should include at least one research question, one benchmark, and documented experimental findings.
 
@@ -487,10 +492,10 @@ Publication is considered an optional outcome rather than the primary objective.
 |------|-------|
 | Document Owner | Project Maintainer |
 | Project | Knowledge Intelligence Platform |
-| Document Version | 2.1 |
-| Project Version | v1.2 (Research Phase — Experiments Complete) |
-| Status | Active — v1.2 Research Concluded |
-| Last Reviewed | 2026-10-14 |
+| Document Version | 3.0 |
+| Project Version | v1.3.0 |
+| Status | Active — v1.3 Completed / Future Research Governed |
+| Last Reviewed | 2026-10-15 |
 
 ### Review Policy
 

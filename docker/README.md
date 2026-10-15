@@ -9,11 +9,23 @@ This directory will contain containerization and deployment configuration for th
 - Production deployment configurations
 - Container-related helper scripts
 
-## Development Milestone
+## Development & Deployment Context
 
-Docker support is planned for **v1.0** (initial deployment) and expanded in **v3.2 — Cloud Platform & Operations**. No Docker configuration exists during v0.1.
+KIP v1.3 is deployed zero-cost across managed cloud services without requiring self-hosted containers:
+- **Frontend:** Streamlit Community Cloud (native Python runtime)
+- **Backend:** Render Web Service (native Python runtime)
+- **Vector Database:** Qdrant Cloud Free Tier cluster
+
+For local development and offline evaluation, Docker can be used to run a local Qdrant instance:
+
+```bash
+docker run -d -p 6333:6333 qdrant/qdrant:latest
+```
+
+Formal containerization (Dockerfiles and docker-compose configurations for full self-hosted deployments) is planned for the v1.8 technical packaging milestone and conditional v3.2 cloud operations.
 
 ## Related Documentation
 
-- [Architecture](../docs/Architecture.md) — Deployment architecture
-- [Product Roadmap](../docs/Product-Roadmap.md) — v3.2 milestone
+- [Deployment Guide](../docs/deployment.md) — Current production free-tier topology
+- [Architecture](../docs/Architecture.md) — System architecture
+- [Product Roadmap](../docs/Product-Roadmap.md) — Planned packaging milestones

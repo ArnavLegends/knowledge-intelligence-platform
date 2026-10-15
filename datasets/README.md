@@ -2,18 +2,23 @@
 
 ## Purpose
 
-This directory will contain sample and benchmark datasets for evaluating the Knowledge Intelligence Platform.
+This directory is designated for external sample corpora and evaluation datasets for the Knowledge Intelligence Platform.
 
-## Current Status
+## Current Status (v1.3.0)
 
-**Not yet populated.** This directory is a scaffold placeholder.
+**Active Benchmark Corpora Stored in `benchmarks/`.** The primary frozen evaluation corpora and ground-truth benchmark datasets for the platform are centralized and version-controlled under [`benchmarks/`](../benchmarks/):
 
-No datasets have been added yet. Benchmark and evaluation datasets are planned for inclusion alongside the v1.0 evaluation framework.
+- **v1.1 Baseline Corpus:** `benchmarks/corpus/` (3 documents) & `benchmarks/kip_v1_1_baseline.json` (7 cases).
+- **v1.2 Pilot Corpus:** `benchmarks/corpus_v1_2/` (18 documents) & `benchmarks/kip_v1_2_benchmark.json` (25 cases).
+- **v1.2 Expanded Corpus:** `benchmarks/corpus_v1_2_expanded/` (50 documents) & `benchmarks/kip_v1_2_expanded_benchmark.json` (80 cases across 6 query categories).
 
-## Planned Role (v1.0+)
+## Future Role
 
-Planned contents include:
-- Sample document corpora for ingestion testing
-- Retrieval benchmark datasets (question-context-answer pairs)
-- Domain-specific test corpora
-- Evaluation datasets compatible with RAGAS or DeepEval
+- **v1.5 (Proposed):** Storage for a second, independently sourced document collection to evaluate retrieval generalization, answer grounding, and cross-document reasoning outside the frozen v1.2 KIP architecture corpus.
+- Domain-specific open test corpora and external ingestion fixtures.
+
+## Related Documentation
+
+- [Benchmarks README](../benchmarks/README.md)
+- [Evaluation Harness README](../evaluation/README.md)
+- [Benchmarking Methodology](../docs/Benchmarking.md)

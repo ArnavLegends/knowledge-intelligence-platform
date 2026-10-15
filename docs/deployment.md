@@ -2,7 +2,7 @@
 
 ## 1. Architecture Overview
 
-KIP v1.1.0 is architected for zero-cost ($0 / ₹0) public deployment across free-tier cloud infrastructure:
+KIP v1.3 is architected for zero-cost ($0 / ₹0) public deployment across free-tier cloud infrastructure:
 
 ```text
 ┌────────────────────────────────┐
@@ -13,7 +13,7 @@ KIP v1.1.0 is architected for zero-cost ($0 / ₹0) public deployment across fre
                 ▼
 ┌────────────────────────────────┐
 │        FastAPI on Render       │  (Stateless API Backend)
-│         Render Free Tier       │
+│    (LRU Caches & Concurrency)  │
 └───────┬───────────────┬────────┘
         │               │ HTTPS GET
         ▼               ▼
@@ -30,7 +30,7 @@ KIP v1.1.0 is architected for zero-cost ($0 / ₹0) public deployment across fre
 ```
 
 - **Frontend:** Streamlit Community Cloud (runs `frontend/app.py`). Contains NO database or LLM secrets; only knows `KIP_API_BASE_URL`.
-- **Backend:** FastAPI Web Service hosted on Render Free tier. Binds `0.0.0.0` and `$PORT`. Holds credentials securely in backend environment variables.
+- **Backend:** FastAPI Web Service hosted on Render Free tier. Binds `0.0.0.0` and `$PORT`. Holds credentials securely in backend environment variables. Includes in-memory LRU search and embedding caching and thread-offloaded execution.
 - **Vector Database:** Qdrant Cloud Free tier cluster. Uses a single collection (`knowledge_base`) with indexed payload-based multitenancy.
 - **Embeddings & LLM:** Google Gemini Free Tier (`gemini-embedding-2` / `text-embedding-004` with 768 dimensions and `gemini-2.5-flash`).
 - **Feedback Persistence:** Google Apps Script Web App receiving authenticated HTTPS GET query parameters and appending to a Google Sheet (`Sheet1`).
@@ -39,12 +39,13 @@ KIP v1.1.0 is architected for zero-cost ($0 / ₹0) public deployment across fre
 
 ## 2. Multi-Tenancy & Workspace Isolation
 
-KIP v1.1.0 enforces workspace-based multi-tenancy:
+KIP enforces workspace-based multi-tenancy:
 - **Private Workspace Token:** Each user or session generates or inputs a high-entropy workspace token (via `secrets.token_urlsafe(32)`).
 - **Mandatory Header:** Every document upload, document listing, semantic retrieval, and RAG query sends `X-KIP-Workspace-ID: <token>`.
 - **Deterministic Point IDs:** Vector IDs in Qdrant are generated deterministically using UUID5 scoped to the workspace (`uuid5(NAMESPACE_URL, "kip://<workspace_id>/<chunk_id>")`).
 - **Strict Query Filtering:** All vector searches and document listings filter strictly by `workspace_id == requested_workspace_id`. Cross-workspace contamination is blocked at both the vector engine and service layers.
 - **Idempotency:** Uploading the same document twice in the same workspace is an idempotent no-op. Uploading the same document in two different workspaces creates two independent, isolated document entries.
+- **Cache Isolation:** Search cache keys are explicitly partitioned by `workspace_id`, and document ingestion invalidates only the matching workspace's cache entries.
 
 ---
 
@@ -57,7 +58,7 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
 - **User Feedback:** Submitted feedback entries (rating category, text, workspace ID, timestamp) persist in Google Sheets via the Apps Script GET webhook.
 
 ### What Does NOT Persist Yet:
-- User accounts / passwords (authentication is token-based bearer access in v1.1.0).
+- User accounts / passwords (authentication is token-based bearer access).
 - Cross-session chat transcript history.
 
 ---
@@ -66,7 +67,7 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
 
 1. **Render Cold Starts:**
    - On the Render Free tier, the service spins down after 15 minutes of inactivity.
-   - The first request after sleep may take 30–50 seconds to respond. Subsequent requests respond instantly.
+   - The first request after sleep may take 30–50 seconds to respond. Subsequent requests respond rapidly.
 2. **Qdrant Free Cluster:**
    - Free clusters remain active as long as requests are periodically made.
    - Single collection multitenancy keeps resource utilization well below cluster limits.
@@ -123,6 +124,16 @@ KIP v1.1.0 enforces workspace-based multi-tenancy:
    - `FEEDBACK_WEBHOOK_TOKEN`: `<your-shared-secret-token>`
    - `MAX_DOCUMENTS_PER_WORKSPACE`: `50`
    - `MAX_CHUNKS_PER_WORKSPACE`: `1000`
+   - `SEARCH_CACHE_ENABLED`: `true`
+   - `SEARCH_CACHE_MAX_ENTRIES`: `256`
+   - `SEARCH_CACHE_TTL_SECONDS`: `300`
+   - `EMBEDDING_CACHE_ENABLED`: `true`
+   - `EMBEDDING_CACHE_MAX_ENTRIES`: `512`
+   - `EMBEDDING_CACHE_TTL_SECONDS`: `3600`
+   - `RETRIEVAL_EXECUTOR_WORKERS`: `4`
+   - `EMBEDDING_TIMEOUT_SECONDS`: `10.0`
+   - `QDRANT_TIMEOUT_SECONDS`: `10.0`
+   - `LLM_TIMEOUT_SECONDS`: `30.0`
 7. Deploy the service. Note your Render URL (e.g. `https://kip-api.onrender.com`). Verify `https://kip-api.onrender.com/health` returns `{"status":"healthy"}`.
 
 ### Step 4: Deploy Frontend to Streamlit Community Cloud
