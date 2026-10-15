@@ -70,9 +70,7 @@ async def search(
 
     # Total timeout: embedding + search budgets with a small scheduling margin
     total_timeout = (
-        settings.embedding_timeout_seconds
-        + settings.qdrant_timeout_seconds
-        + 2.0
+        settings.embedding_timeout_seconds + settings.qdrant_timeout_seconds + 2.0
     )
 
     try:

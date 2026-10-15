@@ -43,9 +43,7 @@ def _get_executor(max_workers: int = 4) -> ThreadPoolExecutor:
             max_workers=max_workers,
             thread_name_prefix="kip-blocking",
         )
-        logger.info(
-            "Initialized blocking I/O thread pool: max_workers=%d", max_workers
-        )
+        logger.info("Initialized blocking I/O thread pool: max_workers=%d", max_workers)
     return _executor
 
 

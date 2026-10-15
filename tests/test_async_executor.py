@@ -24,6 +24,7 @@ import pytest
 
 # --- Async executor unit tests -----------------------------------------------
 
+
 @pytest.fixture(autouse=True)
 def reset_executor():
     """Reset the module-level executor singleton between tests."""
@@ -243,9 +244,7 @@ def test_retrieval_endpoint_timeout_returns_504(kip_test_client):
     body = resp.json()
     # FastAPI HTTPException serialises to {"detail": "..."} or the body may be
     # wrapped differently when raise_server_exceptions=False — check both shapes.
-    detail_text = (
-        body.get("detail") or body.get("message") or str(body)
-    ).lower()
+    detail_text = (body.get("detail") or body.get("message") or str(body)).lower()
     assert "timed out" in detail_text, f"Unexpected body: {body}"
 
 
@@ -263,9 +262,7 @@ def test_rag_endpoint_timeout_returns_504(kip_test_client):
 
     assert resp.status_code == 504
     body = resp.json()
-    detail_text = (
-        body.get("detail") or body.get("message") or str(body)
-    ).lower()
+    detail_text = (body.get("detail") or body.get("message") or str(body)).lower()
     assert "timed out" in detail_text, f"Unexpected body: {body}"
 
 
