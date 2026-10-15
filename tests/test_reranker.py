@@ -296,7 +296,11 @@ def test_production_retrieval_defaults_unmodified():
     """Production RetrievalService and Settings must not have reranking enabled by default."""
     s = Settings()
     # RetrievalService search does not take or use reranker
-    rs = RetrievalService(settings=s)
+    rs = RetrievalService(
+        embedding_service=MagicMock(),
+        vector_store_service=MagicMock(),
+        settings=s,
+    )
     assert not hasattr(rs, "_reranker")
     assert not hasattr(s, "reranker_model")
 
