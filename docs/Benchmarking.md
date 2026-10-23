@@ -13,8 +13,10 @@ This document defines the benchmarking and evaluation methodology for the Knowle
 > **Evaluation & Benchmark Status (v1.3.0):**
 > The full test suite contains 397 automated tests (100% passing across ingestion, chunking, providers, vector stores, API endpoints, multi-tenancy, in-memory caching, executor offloading, timeouts, and evaluation).
 > In v1.2, the evaluation infrastructure was expanded to a 50-document corpus (`benchmarks/corpus_v1_2_expanded/`) and 80-case benchmark (`benchmarks/kip_v1_2_expanded_benchmark.json`) covering six query categories (`exact_terminology`, `paraphrase`, `hard_negative`, `multi_concept`, `boundary_handling`, `cross_document`).
-> The frozen dense whole-document baseline recorded: **MRR: 0.7623**, **Hit@1: 0.6875**, **Hit@3: 0.8375**, **Hit@5: 0.8750**, P95 Latency: 643.0 ms.
-> Five candidate techniques were systematically evaluated: asymmetric input formatting (25-case pilot, neutral MRR 0.9133), cross-encoder reranking (MRR 0.7762, latency +1,048 ms), hybrid BM25+dense RRF (MRR 0.7094), sentence-boundary chunking (MRR 0.7471), and context optimization (MRR 0.7542). All candidates failed preregistered adoption targets (MRR ≥ 0.8200) or safety invariants; dense whole-document retrieval remains the production default.
+> The frozen dense whole-document baseline recorded: **MRR: 0.7623**, **Hit@1: 0.6875**, **Hit@3: 0.8375**, **Hit@5: 0.8750**, P95 retrieval latency: 643.0 ms.
+> Experimental populations were kept strictly distinct:
+> - **Input-Formatting Pilot** (18 docs, 25 labelled cases): Evaluated asymmetric prompt prefixes; neutral MRR change (0.9133 vs 0.9133 control; mean retrieval latency 536.5 ms, P95 retrieval: 593.1 ms).
+> - **Expanded Benchmark Treatments** (50 docs, 80 labelled cases): Evaluated four treatments against the frozen control baseline: cross-encoder reranking (MRR 0.7762, end-to-end P95 latency 1,691.5 ms; +1,048.5 ms overhead), hybrid BM25+dense RRF (MRR 0.7094, end-to-end P95 latency 618.9 ms), sentence-boundary chunking (MRR 0.7471, retrieval P95 latency 618.6 ms), and context optimization (MRR 0.7542, optimization-stage P95 latency 0.042 ms, E2E ~643.1 ms). All four expanded treatments failed preregistered adoption targets (MRR ≥ 0.8200) or safety invariants (MRR range 0.7094–0.7762 applies strictly to these four treatments); dense whole-document retrieval remains the production default.
 > Metric integrity is verified mechanically by `evaluation/validate_benchmark_metrics.py`. Realistic multi-user load testing remains deferred to the ~50–60% development checkpoint (v1.7).
 
 Once fully scaled, benchmarking will provide objective evidence regarding the system's quality, performance, reliability, scalability, and retrieval effectiveness. Every major release should be accompanied by benchmark results to validate improvements and identify regressions.
@@ -321,7 +323,8 @@ Every release should include benchmark comparisons against previous versions.
 | v0.3 | Dense (ChromaDB + OpenAI) | — | — | Baseline Foundation |
 | v1.0 | Dense (ChromaDB + OpenAI) | Baseline | Mechanical Baseline (Hit Rate, MRR, Keyword Coverage) | ✅ Verified (`evaluation/runner.py`) |
 | v1.1 | Dense (Qdrant Cloud + Gemini) | Baseline | Multi-Tenant Isolation & Live Baseline Verified | ✅ Verified (Cloud & Local) |
-| v1.2 | Dense Whole-Doc (Baseline MRR 0.7623) vs 5 Candidates (Formatting, Reranking, Hybrid, Chunking, Context Optimization) | 643 ms P95 baseline | Candidates Failed Targets (MRR 0.7094–0.7762); Dense Retained | ✅ Completed — Candidates Rejected |
+| v1.2 (Pilot) | Asymmetric Input Formatting (18 docs, 25 cases) | 536.5 ms Mean (593.1 ms P95 retrieval) | Neutral on MRR (0.9133 vs 0.9133 control); raw text retained | ✅ Completed — Neutral |
+| v1.2 (Expanded) | Dense Baseline vs 4 Candidate Treatments (50 docs, 80 cases) | 643.0 ms P95 baseline (retrieval) | Baseline MRR 0.7623. Four treatments failed targets (MRR 0.7094–0.7762); Dense Retained | ✅ Completed — Candidates Rejected |
 | v1.3 | Dense Whole-Doc + In-Memory LRU Caching & Thread Offloading | ~0.03 ms cache hit / 504 timeout bounds | Retrieval Correctness & Concurrency Safety Verified | ✅ Completed (397 tests passing) |
 | v1.4 | Dense Whole-Doc + Workspace-Safe Document Operations | Monitored | Workspace Isolation & Provenance Bounds | 📅 Proposed |
 | v1.5 | Retrieval Generalization on 2nd Independent Corpus | Evaluated | Grounding, Citation Correctness, Cross-Doc | 📅 Proposed |

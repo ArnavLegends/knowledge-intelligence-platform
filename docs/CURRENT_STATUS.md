@@ -1,15 +1,15 @@
-# KIP Current Status (v1.3.0)
+# KIP Current Status (v1.4.0)
 
-**Document Version:** 1.3  
-**Project Version:** v1.3.0  
+**Document Version:** 1.4  
+**Project Version:** v1.4.0  
 **Status:** Canonical System State  
-**Last Updated:** 2026-10-15  
+**Last Updated:** 2026-10-23  
 
 ---
 
 ## 1. Executive Summary
 
-Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (Retrieval-Augmented Generation) platform engineered for low latency, event-loop concurrency, and bounded resource consumption. It provides document ingestion across four file formats (PDF, DOCX, TXT, MD), semantic vector search with backend-validated, workspace-scoped Qdrant filtering, grounded question-answering with strict citations and provenance, an interactive Streamlit UI, authenticated feedback collection persisted to Google Sheets, zero-cost thread-safe in-memory LRU caching (embedding and search), bounded thread-pool executor offloading (`run_blocking`), deadline timeout enforcement with HTTP 504 mapping, and structured wall-clock latency telemetry.
+Knowledge Intelligence Platform (KIP) v1.4.0 is a multi-tenant RAG (Retrieval-Augmented Generation) platform engineered with enterprise-grade security, document lifecycle management, and runtime reliability. v1.4 adds: workspace token hashing with constant-time verification and immediate revocation, a disabled-by-default LLM generation endpoint, RAG prompt-injection hardening, atomic document persistence with fsync-safe writes and traversal protection, SQLite-backed document metadata and version tracking, lifecycle-aware RAG filtering (active-doc-only evidence), on-demand document reindexing from retained source files, hardened filename validation (null-byte/control-char rejection, 255-byte ceiling), `FixedSizeChunker` whitespace-safety, chunk deduplication in context assembly, human-readable filename citations (`ContextItem.filename`), and latency telemetry in `RAGResponse` (`retrieve_ms`, `generate_ms`). Prior v1.3 capabilities — thread-pool offloading, LRU caching, deadline-enforced HTTP 504 responses, and structured latency logging — are fully preserved.
 
 ---
 
@@ -72,24 +72,29 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
 
 - **Ground-Truth Evaluation Harness & Research Datasets:**
   - Datasets: `benchmarks/kip_v1_baseline.json` (v1.0 historical, 5 cases), `benchmarks/kip_v1_1_baseline.json` (7 cases), `benchmarks/kip_v1_2_benchmark.json` (25 cases pilot), `benchmarks/kip_v1_2_expanded_baseline_20261014_112147.json` (50 docs, 80 cases across 6 categories).
-  - Frozen Dense Baseline: MRR: 0.7623, Hit@1: 0.6875, Hit@3: 0.8375, Hit@5: 0.8750.
-  - v1.2 Research Outcomes: 5 candidate techniques evaluated (input formatting, cross-encoder reranking, hybrid BM25+dense retrieval, sentence-boundary chunking, context optimization). All candidate techniques rejected; dense whole-document retrieval retained as production default.
+  - Frozen Dense Baseline (80 cases, 50 docs): MRR: 0.7623, Hit@1: 0.6875, Hit@3: 0.8375, Hit@5: 0.8750, P95 retrieval latency: 643.0 ms.
+  - v1.2 Research Outcomes (Strict Population Separation):
+    - Input-Formatting Pilot (18 docs, 25 labelled cases): Evaluated asymmetric prompt prefixes; neutral MRR change (0.9133 vs 0.9133 control, Δ = +0.0000; mean retrieval latency 536.5 ms).
+    - Expanded Benchmark Treatments (50 docs, 80 labelled cases): Evaluated cross-encoder reranking (MRR 0.7762, end-to-end P95 latency 1,691.5 ms), hybrid BM25+dense RRF (MRR 0.7094, end-to-end P95 latency 618.9 ms), sentence-boundary chunking (MRR 0.7471, retrieval P95 latency 618.6 ms), and context optimization (MRR 0.7542, optimization-stage P95 latency 0.042 ms). All four candidate treatments failed preregistered targets (MRR ≥ 0.8200) or safety invariants (MRR range 0.7094–0.7762 applies strictly to these four treatments); dense whole-document retrieval is retained as the production default.
   - Metric Auditor: `evaluation/validate_benchmark_metrics.py` verifying artifact integrity and zero mathematical drift.
 
 ---
 
 ## 4. Test Suite Metrics
 
-- **Total Test Count:** 397 automated tests
-- **Passing Rate:** 100% (397/397 passing)
+- **Total Test Count:** ~380 automated tests (excluding heavy evaluation and cache benchmarks)
+- **Passing Rate:** 100% across all non-integration tests
 - **Subsystem Breakdown:**
+  - Stage A Security (`tests/test_stage_a_security.py`): Workspace token hashing, LLM endpoint protection, prompt injection
+  - Stage B Persistence (`tests/test_stage_b_persistence.py`): Atomic storage, versioning, replacement, lifecycle filtering
+  - Stage C Reliability (`tests/test_stage_c_reliability.py`): Filename validation, parser safety, chunker robustness
   - Caching & Performance (`tests/test_cache.py`, `tests/test_cache_benchmark.py`, `tests/test_async_executor.py`): 72 tests
-  - Benchmark Auditing & Historical Verification (`tests/test_benchmark_audit.py`): 8 tests
-  - Backend API endpoints (`tests/test_api.py`, `tests/test_feedback_api.py`, `tests/test_retrieval_api.py`, `tests/test_rag_api.py`, `tests/test_documents_api.py`): 45 tests
+  - Benchmark Auditing (`tests/test_benchmark_audit.py`): 8 tests
+  - Backend API endpoints: 45+ tests
   - RAG Core (Chunking, Embeddings, Vector Store, LLM, Retrieval): 135 tests
   - Ingestion (PDF, DOCX, TXT, MD, Multi-Document, Workspaces): 62 tests
-  - Workspace & Multi-Tenancy (Scoping, Isolation, Token Management): 31 tests
-  - Evaluation & Configuration (Settings, Validation, Runners, v1.2 Formatter Hooks & Metrics): 44 tests
+  - Workspace & Multi-Tenancy: 31 tests
+  - Evaluation & Configuration: 44 tests
 
 ---
 
@@ -98,8 +103,8 @@ Knowledge Intelligence Platform (KIP) v1.3.0 is a zero-cost, multi-tenant RAG (R
 The following capabilities are positioned on the forward-looking roadmap:
 
 - **v1.2 (Retrieval Intelligence):** Research complete. Dense whole-document retrieval baseline retained as production default.
-- **v1.3 (Performance Engineering):** Complete. Zero-cost thread-safe LRU caching (embedding & search), async thread-pool offloading, timeout enforcement with HTTP 504 handling, and structured latency telemetry.
-- **v1.4 (Knowledge Workspace & Evidence Trust):** Proposed / next milestone focusing on document management, error feedback, evidence inspection, and conditional document deletion.
+- **v1.3 (Performance Engineering):** Complete. Zero-cost thread-safe LRU caching, async thread-pool offloading, timeout enforcement with HTTP 504 handling, structured latency telemetry.
+- **v1.4 (Security-First Engineering Revamp):** **Complete.** Workspace token security, document persistence & lifecycle, runtime reliability hardening, RAG citation enrichment, benchmark data integrity fixes.
 - **v1.5 (Retrieval Generalization & Answer Quality):** Proposed milestone evaluating dense retrieval on an independent secondary corpus and auditing grounding/abstention.
 - **v1.6 (Evidence-Grounded Knowledge Workflows):** Proposed milestone for bounded comparison and evidence briefing workflows.
 - **v1.7 (Operational Validation & Reliability):** Proposed milestone for realistic concurrency, memory, and cold-start profiling at the ~50–60% development checkpoint.

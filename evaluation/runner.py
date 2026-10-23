@@ -314,9 +314,18 @@ class EvaluationRunner:
             ]
             if self._sparse_retriever is not None
             else [
-                float(c.score)
+                # RerankCandidate exposes .dense_score directly;
+                # plain RetrievedChunk exposes .score.
+                float(
+                    c.dense_score
+                    if hasattr(c, "dense_score") and c.dense_score is not None
+                    else c.score
+                )
                 for c in chunks
-                if hasattr(c, "score") and c.score is not None
+                if (
+                    (hasattr(c, "dense_score") and c.dense_score is not None)
+                    or (hasattr(c, "score") and c.score is not None)
+                )
             ]
         )
         sparse_scores = [

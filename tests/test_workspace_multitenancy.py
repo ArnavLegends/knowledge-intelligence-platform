@@ -402,3 +402,66 @@ def test_workspace_listing_api_endpoint(workspace_fixture):
     assert len(docs) == 1
     assert docs[0]["document_id"] == doc.id
     assert docs[0]["filename"] == "guide.txt"
+    assert docs[0]["indexed_at"] is not None
+
+
+def test_workspace_document_deletion_is_isolated(workspace_fixture):
+    """Deleting document in tenant 1 does not affect tenant 2 with identical content."""
+    indexing = workspace_fixture["indexing"]
+    ingestion = DocumentIngestionService()
+
+    doc = ingestion.ingest("shared_policy.txt", b"Shared handbook text")
+    indexing.index_document(doc, workspace_id="tenant_alpha")
+    indexing.index_document(doc, workspace_id="tenant_beta")
+
+    assert indexing.document_exists(doc.id, workspace_id="tenant_alpha") is True
+    assert indexing.document_exists(doc.id, workspace_id="tenant_beta") is True
+
+    deleted = indexing.delete_document(doc.id, workspace_id="tenant_alpha")
+    assert deleted is True
+
+    assert indexing.document_exists(doc.id, workspace_id="tenant_alpha") is False
+    assert indexing.document_exists(doc.id, workspace_id="tenant_beta") is True
+
+    list_alpha = indexing.list_documents(workspace_id="tenant_alpha")
+    list_beta = indexing.list_documents(workspace_id="tenant_beta")
+    assert len(list_alpha) == 0
+    assert len(list_beta) == 1
+    assert list_beta[0]["document_id"] == doc.id
+
+
+def test_workspace_deletion_api_endpoint_flow(workspace_fixture):
+    """DELETE /api/v1/documents/{doc_id} deletes document with proper
+    status and isolation."""
+    indexing = workspace_fixture["indexing"]
+    ingestion = DocumentIngestionService()
+
+    doc = ingestion.ingest("deleteme.txt", b"Temporary deletion content")
+    indexing.index_document(doc, workspace_id="workspace_delete_test")
+
+    client = TestClient(app)
+
+    # Cross-workspace delete attempt (doc not in other_ws) -> 404
+    cross_res = client.delete(
+        f"/api/v1/documents/{doc.id}",
+        headers={"X-KIP-Workspace-ID": "other_workspace_999"},
+    )
+    assert cross_res.status_code == 404
+
+    # Correct workspace delete -> 200
+    del_res = client.delete(
+        f"/api/v1/documents/{doc.id}",
+        headers={"X-KIP-Workspace-ID": "workspace_delete_test"},
+    )
+    assert del_res.status_code == 200
+    del_data = del_res.json()
+    assert del_data["document_id"] == doc.id
+    assert del_data["deleted"] is True
+    assert del_data["workspace_id"] == "workspace_delete_test"
+
+    # Idempotent re-delete -> 404
+    second_del = client.delete(
+        f"/api/v1/documents/{doc.id}",
+        headers={"X-KIP-Workspace-ID": "workspace_delete_test"},
+    )
+    assert second_del.status_code == 404

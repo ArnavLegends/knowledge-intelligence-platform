@@ -21,7 +21,7 @@ class FixedSizeChunker(DocumentChunker):
 
     def chunk(self, text: str) -> list[str]:
         """Convert a source string into ordered chunk strings."""
-        if not text:
+        if not text or not text.strip():
             return []
 
         if len(text) <= self._chunk_size:
@@ -34,7 +34,8 @@ class FixedSizeChunker(DocumentChunker):
         # duplicate text excessively.
         for i in range(0, len(text), self._step):
             chunk_text = text[i : i + self._chunk_size]
-            chunks.append(chunk_text)
+            if chunk_text.strip():
+                chunks.append(chunk_text)
             # If the current chunk reaches the end of the text,
             # break to prevent redundant smaller chunks
             if i + self._chunk_size >= len(text):

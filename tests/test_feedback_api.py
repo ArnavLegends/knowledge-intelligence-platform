@@ -1,4 +1,7 @@
-"""Targeted tests for feedback submission API — GET-based Apps Script transport."""
+"""Targeted tests for feedback submission API.
+
+Tests secure POST transport and legacy GET compatibility.
+"""
 
 from unittest.mock import MagicMock, patch
 
@@ -17,12 +20,20 @@ client = TestClient(app)
 _CONFIGURED_SETTINGS = dict(
     feedback_webhook_url="https://script.google.com/macros/s/FAKE/exec",
     feedback_webhook_token="test-secret-token",
+    feedback_transport_method="POST",
+    llm_api_key="fake",
+)
+
+_LEGACY_GET_SETTINGS = dict(
+    feedback_webhook_url="https://script.google.com/macros/s/FAKE/exec",
+    feedback_webhook_token="test-secret-token",
+    feedback_transport_method="GET",
     llm_api_key="fake",
 )
 
 
-def _ok_get_mock() -> MagicMock:
-    """Return a mock requests.Response that simulates a successful Apps Script doGet."""
+def _ok_mock() -> MagicMock:
+    """Return a mock requests.Response that simulates a successful webhook response."""
     mock_resp = MagicMock()
     mock_resp.status_code = 200
     mock_resp.text = "OK"
@@ -38,17 +49,17 @@ def _override(settings_kwargs: dict):
 
 
 # ---------------------------------------------------------------------------
-# Happy path
+# Happy path — Default Secure POST Transport
 # ---------------------------------------------------------------------------
 
 
 def test_submit_feedback_success_returns_recorded():
-    """Valid feedback forwarded via GET returns 200 with 'recorded' status."""
+    """Valid feedback forwarded via POST returns 200 with 'recorded' status."""
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         with patch(
-            "app.api.v1.feedback.requests.get", return_value=_ok_get_mock()
-        ) as mock_get:
+            "app.api.v1.feedback.requests.post", return_value=_ok_mock()
+        ) as mock_post:
             payload = {
                 "category": "Bug",
                 "message": "Found an issue with docx parsing on table headers.",
@@ -62,18 +73,20 @@ def test_submit_feedback_success_returns_recorded():
         assert "Thanks" in data["message"]
         assert "timestamp" in data
 
-        mock_get.assert_called_once()
+        mock_post.assert_called_once()
     finally:
         cleanup()
 
 
-def test_submit_feedback_get_params_contain_token_and_workspace():
-    """Verify GET params include token, category, message, word_count, workspace_id."""
+def test_submit_feedback_post_payload_and_headers():
+    """Verify POST json includes token, category, message, word_count,
+    workspace_id, and Authorization header.
+    """
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         with patch(
-            "app.api.v1.feedback.requests.get", return_value=_ok_get_mock()
-        ) as mock_get:
+            "app.api.v1.feedback.requests.post", return_value=_ok_mock()
+        ) as mock_post:
             payload = {
                 "category": "UX",
                 "message": "The sidebar is hard to navigate.",
@@ -82,31 +95,68 @@ def test_submit_feedback_get_params_contain_token_and_workspace():
             resp = client.post("/api/v1/feedback", json=payload)
             assert resp.status_code == 200
 
-        _, kwargs = mock_get.call_args
-        params = kwargs["params"]
-        assert params["token"] == "test-secret-token"
-        assert params["category"] == "UX"
-        assert params["message"] == "The sidebar is hard to navigate."
-        assert params["word_count"] == 6
-        assert params["workspace_id"] == "ws-abc"
-        assert "timestamp" in params
+        _, kwargs = mock_post.call_args
+        json_body = kwargs["json"]
+        assert json_body["token"] == "test-secret-token"
+        assert json_body["category"] == "UX"
+        assert json_body["message"] == "The sidebar is hard to navigate."
+        assert json_body["word_count"] == 6
+        assert json_body["workspace_id"] == "ws-abc"
+        assert "timestamp" in json_body
+
+        headers = kwargs["headers"]
+        assert headers["Authorization"] == "Bearer test-secret-token"
+        assert headers["Content-Type"] == "application/json"
     finally:
         cleanup()
 
 
 def test_submit_feedback_no_workspace_id_sends_empty_string():
-    """workspace_id absent → GET param sent as empty string, not None/omitted."""
+    """workspace_id absent -> json param sent as empty string, not None/omitted."""
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         with patch(
-            "app.api.v1.feedback.requests.get", return_value=_ok_get_mock()
-        ) as mock_get:
+            "app.api.v1.feedback.requests.post", return_value=_ok_mock()
+        ) as mock_post:
             payload = {"category": "Other", "message": "General observation."}
             resp = client.post("/api/v1/feedback", json=payload)
             assert resp.status_code == 200
 
+        _, kwargs = mock_post.call_args
+        assert kwargs["json"]["workspace_id"] == ""
+    finally:
+        cleanup()
+
+
+# ---------------------------------------------------------------------------
+# Legacy GET Transport Compatibility
+# ---------------------------------------------------------------------------
+
+
+def test_submit_feedback_legacy_get_transport():
+    """When feedback_transport_method='GET', requests.get is invoked
+    with query params.
+    """
+    cleanup = _override(_LEGACY_GET_SETTINGS)
+    try:
+        with patch(
+            "app.api.v1.feedback.requests.get", return_value=_ok_mock()
+        ) as mock_get:
+            payload = {
+                "category": "UX",
+                "message": "Legacy GET test message.",
+                "workspace_id": "ws-legacy",
+            }
+            resp = client.post("/api/v1/feedback", json=payload)
+            assert resp.status_code == 200
+
+        mock_get.assert_called_once()
         _, kwargs = mock_get.call_args
-        assert kwargs["params"]["workspace_id"] == ""
+        params = kwargs["params"]
+        assert params["token"] == "test-secret-token"
+        assert params["category"] == "UX"
+        assert params["message"] == "Legacy GET test message."
+        assert params["workspace_id"] == "ws-legacy"
     finally:
         cleanup()
 
@@ -125,7 +175,7 @@ def test_webhook_http_200_but_body_not_ok_is_502():
         mock_resp.text = "INVALID"
         mock_resp.raise_for_status.return_value = None
 
-        with patch("app.api.v1.feedback.requests.get", return_value=mock_resp):
+        with patch("app.api.v1.feedback.requests.post", return_value=mock_resp):
             payload = {"category": "Bug", "message": "Something seems wrong."}
             resp = client.post("/api/v1/feedback", json=payload)
 
@@ -136,7 +186,7 @@ def test_webhook_http_200_but_body_not_ok_is_502():
 
 
 def test_webhook_http_200_unauthorized_body_is_502():
-    """Apps Script returning 'UNAUTHORIZED' (wrong token at runtime) → 502."""
+    """Destination returning 'UNAUTHORIZED' (wrong token at runtime) -> 502."""
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         mock_resp = MagicMock()
@@ -144,7 +194,7 @@ def test_webhook_http_200_unauthorized_body_is_502():
         mock_resp.text = "UNAUTHORIZED"
         mock_resp.raise_for_status.return_value = None
 
-        with patch("app.api.v1.feedback.requests.get", return_value=mock_resp):
+        with patch("app.api.v1.feedback.requests.post", return_value=mock_resp):
             payload = {"category": "Bug", "message": "Something seems wrong."}
             resp = client.post("/api/v1/feedback", json=payload)
 
@@ -160,7 +210,7 @@ def test_webhook_http_200_unauthorized_body_is_502():
 
 
 def test_webhook_http_404_produces_502():
-    """HTTP 404 from Apps Script → raise_for_status raises → 502 delivery_failed."""
+    """HTTP 404 from webhook destination -> raise_for_status raises -> 502."""
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         mock_resp = MagicMock()
@@ -168,7 +218,7 @@ def test_webhook_http_404_produces_502():
         mock_resp.text = ""
         mock_resp.raise_for_status.side_effect = requests_lib.HTTPError("404 Not Found")
 
-        with patch("app.api.v1.feedback.requests.get", return_value=mock_resp):
+        with patch("app.api.v1.feedback.requests.post", return_value=mock_resp):
             payload = {
                 "category": "Performance",
                 "message": "Slow response on large uploads.",
@@ -182,11 +232,11 @@ def test_webhook_http_404_produces_502():
 
 
 def test_webhook_timeout_produces_502():
-    """requests.Timeout → 502 feedback_delivery_failed without leaking internals."""
+    """requests.Timeout -> 502 feedback_delivery_failed without leaking internals."""
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         with patch(
-            "app.api.v1.feedback.requests.get",
+            "app.api.v1.feedback.requests.post",
             side_effect=requests_lib.Timeout("timed out"),
         ):
             payload = {
@@ -205,11 +255,11 @@ def test_webhook_timeout_produces_502():
 
 
 def test_webhook_connection_error_produces_502():
-    """requests.ConnectionError → 502 feedback_delivery_failed."""
+    """requests.ConnectionError -> 502 feedback_delivery_failed."""
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         with patch(
-            "app.api.v1.feedback.requests.get",
+            "app.api.v1.feedback.requests.post",
             side_effect=requests_lib.ConnectionError("refused"),
         ):
             payload = {"category": "Bug", "message": "App crashes on upload."}
@@ -227,7 +277,7 @@ def test_webhook_connection_error_produces_502():
 
 
 def test_missing_webhook_url_produces_503():
-    """Missing FEEDBACK_WEBHOOK_URL → 503 feedback_destination_unconfigured."""
+    """Missing FEEDBACK_WEBHOOK_URL -> 503 feedback_destination_unconfigured."""
     cleanup = _override(
         {
             "feedback_webhook_url": None,
@@ -250,7 +300,7 @@ def test_missing_webhook_url_produces_503():
 
 
 def test_missing_webhook_token_produces_503():
-    """Missing FEEDBACK_WEBHOOK_TOKEN → 503 feedback_destination_unconfigured."""
+    """Missing FEEDBACK_WEBHOOK_TOKEN -> 503 feedback_destination_unconfigured."""
     cleanup = _override(
         {
             "feedback_webhook_url": "https://script.google.com/macros/s/FAKE/exec",
@@ -275,7 +325,7 @@ def test_missing_webhook_token_produces_503():
 
 
 def test_invalid_category_rejected():
-    """Invalid category → 400 Bad Request."""
+    """Invalid category -> 400 Bad Request."""
     payload = {"category": "RandomCategory", "message": "Some message"}
     resp = client.post("/api/v1/feedback", json=payload)
     assert resp.status_code == 400
@@ -283,7 +333,7 @@ def test_invalid_category_rejected():
 
 
 def test_empty_message_rejected():
-    """Whitespace-only message → 400 Bad Request."""
+    """Whitespace-only message -> 400 Bad Request."""
     payload = {"category": "Bug", "message": "   "}
     resp = client.post("/api/v1/feedback", json=payload)
     assert resp.status_code == 400
@@ -291,7 +341,7 @@ def test_empty_message_rejected():
 
 
 def test_exceeds_30_words_rejected():
-    """31-word message → 400 Bad Request."""
+    """31-word message -> 400 Bad Request."""
     long_msg = "word " * 31
     payload = {"category": "UX", "message": long_msg.strip()}
     resp = client.post("/api/v1/feedback", json=payload)
@@ -309,7 +359,7 @@ def test_webhook_token_not_exposed_in_error_response():
     cleanup = _override(_CONFIGURED_SETTINGS)
     try:
         with patch(
-            "app.api.v1.feedback.requests.get",
+            "app.api.v1.feedback.requests.post",
             side_effect=requests_lib.RequestException("fail"),
         ):
             payload = {"category": "Other", "message": "Delivery will fail."}

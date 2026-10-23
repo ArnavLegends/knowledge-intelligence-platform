@@ -35,12 +35,68 @@ Each release documents significant engineering changes while maintaining histori
 
 ---
 
-## [Unreleased]
+## [v1.4.0] — Security-First Engineering Revamp
 
-### Planned (v1.4 — Knowledge Workspace & Evidence Trust)
-- Granular per-document ingestion error feedback and status indicators.
-- Source evidence inspection and contextual navigation in Streamlit.
-- Conditional document deletion workflow with strict workspace scoping and cache invalidation.
+**Release Date:** 2026-10-23
+**Theme:** Security Hardening, Document Persistence & Lifecycle, Runtime Reliability, RAG Citation Enrichment, Benchmark Data Integrity
+
+This release executes the KIP Engineering Excellence Plan across five stages. Original Document Inventory features from the prior development track are preserved and extended.
+
+### Added
+
+#### Backend
+
+- **`DELETE /api/v1/documents/{document_id}`** endpoint with strict workspace isolation:
+  - Verifies document exists in the requesting workspace before deletion.
+  - Deletes all associated embedding vectors scoped to `(document_id, workspace_id)` — does not affect documents of identical content in other workspaces.
+  - Evicts workspace search cache immediately on deletion.
+  - Returns `200` with `{document_id, deleted, workspace_id, message}` on success.
+  - Returns `404` with structured error `{"error": {"code": "not_found", ...}}` when document is absent from workspace.
+  - Rejects missing or invalid workspace tokens with `400` (consistent with other endpoints).
+- **`indexed_at` metadata field** on `WorkspaceDocumentItem`:
+  - Populated during chunk indexing as an ISO 8601 timestamp.
+  - Surfaced by `GET /api/v1/documents` for all newly indexed documents.
+  - Returns `null` for documents indexed before v1.4 (legacy records).
+- **Parser error improvements:**
+  - PDF parser: detects encrypted/password-protected PDFs and returns an actionable error (preserves `Could not read PDF file:` prefix for compatibility).
+  - DOCX parser: detects corrupted DOCX files and returns an actionable diagnostic (preserves `Could not read DOCX file:` prefix for compatibility).
+
+#### Frontend (`frontend/app.py`)
+
+- **Document inventory `indexed_at` display**: each document expander now shows `indexed_at` (formatted) or `"Unavailable (legacy record)"` for pre-v1.4 entries.
+- **Delete Document button**: each document expander includes a `🗑️ Delete` button that calls `DELETE /api/v1/documents/{doc_id}`, refreshes the document list, clears the last query/answer, and displays success/error feedback.
+- **Evidence source improvements**: sources renamed to "Evidence Sources"; source citation header maps to `[N] filename` notation; added rank, relevance score, and chunk ID to source captions; expander label changed to `▸ Inspect Evidence Passage [N]`.
+- **Upload error diagnostics**: `_api_error_message` now maps HTTP 400/415/429/502/503/504 to actionable user-facing messages distinguishing document format errors from infrastructure timeouts.
+
+#### Documentation
+
+- **`docs/evaluation/v1.5_generalization_protocol.md`**: Frozen draft research protocol for the v1.5 secondary corpus evaluation, covering RQs, 4 falsifiable hypotheses, corpus selection procedure, 60-query set across 6 categories, evaluation Tracks A/B/C/D (D gated on implementation), metrics (MRR, Hit@K, Precision@K, CF, UCR, abstention), latency scopes, configuration hashes, threats to validity, and 5 decision gates.
+- **`docs/API-Reference.md`** (Document Version 3.1): Updated `GET /api/v1/documents` schema to reflect actual response array format and `indexed_at`; added `DELETE /api/v1/documents/{document_id}` documentation.
+
+### Changed
+
+- `GET /api/v1/documents` now requires `X-KIP-Workspace-ID` (consistent with other scoped endpoints); previously it defaulted silently to `"default"` workspace.
+
+### Research Integrity (Phase 1)
+
+- `README.md`: Fixed navigation anchors; qualified grounding claim (citations indicate retrieved evidence, not absolute factual correctness).
+- `docs/Benchmarking.md`: Split combined pilot/expanded row; clarified MRR 0.7094–0.7762 as expanded-only range; labeled all latency measurement scopes explicitly.
+- `docs/evaluation/v1.2_research_synthesis.md`: Qualified whole-document truncation claim; retained empirical observation without unsupported certainty.
+- `docs/Product-Roadmap.md`: Reconciled historical milestones (Documentation Reconciliation & Community Phase marked Historical/Completed).
+- `docs/CURRENT_STATUS.md`: Qualified executive summary with free-tier constraints and grounding qualifications; separated pilot vs. expanded benchmark populations.
+
+### Tests
+
+- `tests/test_documents_api.py`: Added 4 tests:
+  - `test_list_documents_metadata_and_legacy_records` — verifies `indexed_at` field and `null` for legacy records.
+  - `test_delete_document_success` — verifies 200 response, `workspace_id` in body, correct mock call.
+  - `test_delete_document_not_found` — verifies 404 structured error when document absent.
+  - `test_delete_document_rejects_missing_or_invalid_workspace` — verifies 400 for missing/short tokens.
+- `tests/test_workspace_multitenancy.py`: Added 3 tests:
+  - `test_workspace_document_deletion_is_isolated` — verifies service-level deletion isolation across tenants.
+  - `test_workspace_deletion_api_endpoint_flow` — verifies cross-workspace 404, successful deletion, and idempotent re-delete.
+  - Extended `test_workspace_listing_api_endpoint` to assert `indexed_at is not None`.
+- `tests/test_frontend.py`: Updated expander label assertion from `"retrieved excerpt"` to `"Evidence Passage"` to match UI changes.
 
 ---
 

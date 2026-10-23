@@ -1,7 +1,7 @@
 # API Reference
 
-**Document Version:** 3.0
-**Project Version:** v1.3.0
+**Document Version:** 3.1
+**Project Version:** v1.4.0 (in development)
 **Status:** Active / Production
 
 ---
@@ -93,30 +93,71 @@ Ingest an uploaded file, extract text, chunk content, generate embeddings, and i
 
 ### `GET /api/v1/documents`
 
-Retrieve the list of all ingested documents within the requesting workspace.
+Retrieve the list of all ingested documents within the requesting workspace. Each item includes `indexed_at` (ISO 8601 timestamp, or `null` for documents indexed before v1.4) and other inventory metadata.
 
 **Headers:**
-- `X-KIP-Workspace-ID` (optional, string): The workspace token.
+- `X-KIP-Workspace-ID` (required, string): The workspace token. Must be ≥ 8 alphanumeric characters. Requests with a missing or invalid token are rejected with `400`.
+
+**Response:** `200 OK` — An array of `WorkspaceDocumentItem` objects.
+
+```json
+[
+  {
+    "document_id": "doc-uuid-1",
+    "filename": "quarterly_report.pdf",
+    "media_type": "application/pdf",
+    "chunks_indexed": 14,
+    "size_bytes": 1048576,
+    "parser": "pdf",
+    "status": "indexed",
+    "indexed_at": "2026-10-23T09:00:00+00:00"
+  },
+  {
+    "document_id": "doc-uuid-legacy",
+    "filename": "old_notes.txt",
+    "media_type": "text/plain",
+    "chunks_indexed": 3,
+    "size_bytes": 4096,
+    "parser": "txt",
+    "status": "indexed",
+    "indexed_at": null
+  }
+]
+```
+
+> **`indexed_at` note:** Documents indexed before v1.4 will return `null` for `indexed_at`. Clients should display these as "legacy records" and treat `null` as informational-only.
+
+---
+
+### `DELETE /api/v1/documents/{document_id}`
+
+Delete a document and all associated embedding vectors from the requesting workspace. The workspace search cache is evicted immediately upon deletion. Only vectors belonging to the combination of `(document_id, workspace_id)` are removed — documents of the same content indexed in a different workspace are not affected.
+
+**Path Parameter:**
+- `document_id` (string): The document ID to delete.
+
+**Headers:**
+- `X-KIP-Workspace-ID` (required, string): The workspace token. Must be ≥ 8 alphanumeric characters.
 
 **Response:** `200 OK`
 
 ```json
 {
-  "documents": [
-    {
-      "id": "doc-uuid-1",
-      "filename": "quarterly_report.pdf",
-      "media_type": "application/pdf",
-      "chunk_count": 14,
-      "size_bytes": 1048576,
-      "ingested_at": "2026-10-08T12:00:00"
-    }
-  ],
-  "total_documents": 1,
-  "total_chunks": 14,
-  "workspace_id": "ws-token"
+  "document_id": "doc-uuid-1",
+  "deleted": true,
+  "workspace_id": "my-workspace-token",
+  "message": "Document 'doc-uuid-1' deleted successfully from workspace."
 }
 ```
+
+**Error Responses:**
+
+| Status | Condition |
+|--------|----------|
+| `400` | Missing or invalid `X-KIP-Workspace-ID` header |
+| `404` | Document not found in the specified workspace (body: `{"error": {"code": "not_found", "message": "..."}}`) |
+
+> **Isolation guarantee:** Deletion is scoped to the workspace by filtering on both `document_id` and `workspace_id` in the vector store. A document indexed in workspace A cannot be deleted from workspace B.
 
 ---
 

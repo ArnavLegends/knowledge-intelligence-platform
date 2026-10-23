@@ -4,7 +4,7 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version: 1.3.0](https://img.shields.io/badge/version-1.3.0-green.svg)](https://github.com/ArnavLegends/knowledge-intelligence-platform)
+[![Version: 1.4.0](https://img.shields.io/badge/version-1.4.0-green.svg)](https://github.com/ArnavLegends/knowledge-intelligence-platform)
 [![CI](https://github.com/ArnavLegends/knowledge-intelligence-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ArnavLegends/knowledge-intelligence-platform/actions/workflows/ci.yml)
 
 ---
@@ -15,30 +15,31 @@ The **Knowledge Intelligence Platform (KIP)** is a robust, production-oriented k
 
 Designed with modern AI engineering practices, KIP implements a complete FastAPI-based Retrieval-Augmented Generation (RAG) backend engine, a Streamlit frontend, and a multi-tenant vector storage architecture supporting both local development and free-tier cloud deployments.
 
-The `/rag/answer` endpoint grounds every response in retrieved passages with explicit provenance tracking back to original source documents and chunk ranks. When questions cannot be answered from the uploaded knowledge base, KIP declines honestly rather than hallucinating answers. The separate `/api/v1/llm/generate` endpoint provides direct LLM generation and bypasses document retrieval.
+The `/api/v1/rag/answer` endpoint synthesizes answers from retrieved passages with explicit provenance tracking back to original source documents and chunk ranks. When questions cannot be answered from the uploaded knowledge base, KIP's prompt instructs the model to decline; however, while citations indicate retrieved evidence, citations do not guarantee absolute factual correctness. The separate `/api/v1/llm/generate` endpoint is **disabled by default** (returns HTTP 403) and requires an admin key to enable.
 
 ### Quick Navigation
 | Question / Goal | Location |
 |---|---|
 | **What does KIP do & what is implemented?** | [Implemented Capabilities (v1.3 Reality)](#implemented-capabilities-v13-reality) & [CURRENT_STATUS.md](docs/CURRENT_STATUS.md) |
 | **How do I run KIP locally?** | [Quick Start & Local Development](#13-quick-start--local-development) (`git clone` → `pip install` → `.env` → `run`) |
-| **What empirical evidence backs retrieval claims?** | [v1.2 Research Outcomes](#10-evaluation-harness--benchmark-integrity) & [Research Synthesis](docs/evaluation/v1.2_research_synthesis.md) |
-| **Where are the architecture & REST APIs?** | [High-Level Architecture](#4-high-level-architecture), [REST API Reference](#15-rest-api-reference), [deployment.md](docs/deployment.md) |
+| **What empirical evidence backs retrieval claims?** | [v1.2 Research Outcomes](#10-evaluation-framework) & [Research Synthesis](docs/evaluation/v1.2_research_synthesis.md) |
+| **Where are the architecture & REST APIs?** | [High-Level Architecture](#3-architecture), [REST API Quick Reference](#15-api-quick-reference), [deployment.md](docs/deployment.md) |
 | **Where are the project history & future roadmap?** | [PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md), [Product-Roadmap.md](docs/Product-Roadmap.md), [Research-Roadmap.md](docs/Research-Roadmap.md) |
 
 ---
 
-## 2. Current Project Status: v1.3.0 — Performance Engineering & Concurrency Hardening
+## 2. Current Project Status: v1.4.0 — Security-First Engineering Revamp
 
-The repository provides a complete, production-oriented RAG application currently at version **v1.3.0**:
+The repository provides a complete, production-oriented RAG application currently at version **v1.4.0**:
 
 - **Completed Milestones**:
   - **v1.1**: Multi-Tenant Cloud Knowledge Layer (bearer tokens, Qdrant Cloud, Render deployment, Google Sheets feedback)
   - **v1.2**: Retrieval Intelligence Research (5 candidate techniques evaluated across 18-doc pilot and 50-doc/80-case expanded benchmark; dense baseline retained)
   - **v1.3**: Performance Engineering (in-memory LRU caching, thread-pool offloading, timeout enforcement, structured latency telemetry)
-- **Current Milestone**: [v1.4 Knowledge Workspace & Evidence Trust](docs/Product-Roadmap.md) (Enhanced document operations, error feedback, evidence inspection)
+  - **v1.4**: Security-First Engineering Revamp (workspace token hashing, document persistence & lifecycle, runtime reliability hardening, RAG citation enrichment)
+- **Current Milestone**: [v1.5 Retrieval Generalization & Answer Quality](docs/Product-Roadmap.md)
 
-### Implemented Capabilities (v1.3 Reality)
+### Implemented Capabilities (v1.4 Reality)
 - **Multi-Tenant Workspaces**: Cryptographically secure, bearer-token workspace isolation (`X-KIP-Workspace-ID`). Every document, chunk, and retrieval operation is strictly workspace-scoped.
 - **In-Memory Caching Layer (Zero Infrastructure Cost)**:
   - Thread-safe generic LRU cache (`LRUCache`) using `collections.OrderedDict` + `threading.RLock`.

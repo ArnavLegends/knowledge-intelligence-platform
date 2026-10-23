@@ -552,7 +552,7 @@ class TestFrontendInteractionFlows:
         assert any("architecture.pdf" in m.value for m in at.markdown)
 
         # Excerpt expander is present and collapsed by default
-        excerpt_expanders = [e for e in at.expander if "retrieved excerpt" in e.label]
+        excerpt_expanders = [e for e in at.expander if "Evidence Passage" in e.label]
         assert len(excerpt_expanders) == 1
         assert excerpt_expanders[0].proto.expanded is False
 

@@ -33,8 +33,18 @@ class PdfParser(DocumentParser):
 
         try:
             pdf = PdfReader(io.BytesIO(content))
+            if getattr(pdf, "is_encrypted", False):
+                raise DocumentParseError(
+                    "Could not read PDF file: Encrypted or password-protected"
+                    " PDF files are not supported."
+                )
+        except DocumentParseError:
+            raise
         except (PdfReadError, Exception) as exc:
-            raise DocumentParseError("Could not read PDF file.") from exc
+            raise DocumentParseError(
+                "Could not read PDF file: Corrupted, unreadable, or"
+                " invalid PDF content."
+            ) from exc
 
         text_parts = []
         for page in pdf.pages:

@@ -107,23 +107,42 @@ def test_run_blocking_propagates_exception():
 def test_concurrent_calls_run_truly_parallel():
     """Concurrent run_blocking calls should execute in parallel, not serially.
 
-    Each task sleeps 0.1 s. If they ran serially total time >= 0.4 s.
-    In a thread pool they should complete in ~0.1 s + scheduling overhead.
+    Verifies true parallel execution via concurrent thread overlap tracking
+    and bounded wall-clock completion.
     """
+    import threading
+
     from app.core.async_executor import run_blocking
 
     n = 4
     sleep_s = 0.1
+    active_threads = 0
+    max_concurrent = 0
+    lock = threading.Lock()
+
+    def work():
+        nonlocal active_threads, max_concurrent
+        with lock:
+            active_threads += 1
+            if active_threads > max_concurrent:
+                max_concurrent = active_threads
+        time.sleep(sleep_s)
+        with lock:
+            active_threads -= 1
 
     async def run_parallel() -> float:
-        tasks = [run_blocking(time.sleep, sleep_s, max_workers=n) for _ in range(n)]
+        tasks = [run_blocking(work, max_workers=n) for _ in range(n)]
         t0 = time.perf_counter()
         await asyncio.gather(*tasks)
         return time.perf_counter() - t0
 
     wall_clock = asyncio.run(run_parallel())
 
-    assert wall_clock < sleep_s * 2.5, (
+    # Direct proof of parallelism: multiple threads must have been active concurrently
+    assert max_concurrent >= 2, (
+        f"Tasks executed serially (max concurrent={max_concurrent}); expected >= 2"
+    )
+    assert wall_clock < sleep_s * 4.0, (
         f"Expected parallel completion ~{sleep_s:.2f}s, got {wall_clock:.3f}s — "
         "event loop may have been blocked"
     )

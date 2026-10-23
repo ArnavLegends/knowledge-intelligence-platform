@@ -335,6 +335,7 @@ class QdrantVectorStoreProvider(VectorStoreProvider):
                     "size_bytes": p.get("size_bytes", 0),
                     "parser": p.get("parser", ""),
                     "status": "indexed",
+                    "indexed_at": p.get("indexed_at"),
                 }
             docs_map[doc_id]["chunks_indexed"] += 1
 

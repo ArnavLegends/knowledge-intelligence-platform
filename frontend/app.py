@@ -201,15 +201,43 @@ def _ask_question(query: str, top_k: int) -> dict:
     return response.json()
 
 
+def _delete_workspace_document(document_id: str, timeout: int | None = None) -> dict:
+    """Delete an indexed document from the current workspace."""
+    if timeout is None:
+        timeout = 30 if _is_local_url(API_BASE) else 60
+    url = f"{DOCUMENTS_ENDPOINT}/{document_id}"
+    response = requests.delete(
+        url,
+        headers=_get_headers(),
+        timeout=timeout,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
 def _api_error_message(exc: requests.HTTPError) -> str:
+    status_code = exc.response.status_code if exc.response is not None else 0
     try:
         body = exc.response.json()
         if "detail" in body:
-            return str(body["detail"])
-        error = body.get("error", {})
-        return f"[{error.get('code', 'error')}] {error.get('message', str(exc))}"
+            msg = str(body["detail"])
+        elif "error" in body and isinstance(body["error"], dict):
+            error = body["error"]
+            msg = f"[{error.get('code', 'error')}] {error.get('message', str(exc))}"
+        else:
+            msg = str(body)
     except Exception:
-        return str(exc)
+        msg = str(exc)
+
+    if status_code == 400:
+        return f"{msg} (Verify document format and file integrity)"
+    elif status_code == 415:
+        return f"{msg} (Supported: TXT, MD, PDF, DOCX)"
+    elif status_code == 429:
+        return f"{msg} (Workspace rate or capacity limit reached)"
+    elif status_code in (502, 503, 504):
+        return f"Service timeout ({status_code}): Upstream backend or service temporarily unavailable. This is an infrastructure issue, not an invalid document."
+    return msg
 
 
 # Synchronize documents from backend if workspace switched or on initial load
@@ -520,6 +548,10 @@ with col_left:
             seen_doc_ids.add(doc_id)
             chunks = doc.get("chunks_indexed", 0)
             filename = doc.get("filename", "document")
+            indexed_at = doc.get("indexed_at")
+            indexed_at_str = (
+                str(indexed_at) if indexed_at else "Unavailable (legacy record)"
+            )
             with st.expander(
                 f"📄 {filename} — {chunks} chunks",
                 expanded=False,
@@ -527,12 +559,38 @@ with col_left:
                 st.json(
                     {
                         "document_id": doc_id,
+                        "filename": filename,
                         "media_type": doc.get("media_type", "—"),
                         "chunks_indexed": chunks,
                         "size_bytes": f"{doc.get('size_bytes', 0):,} bytes",
+                        "indexed_at": indexed_at_str,
                         "status": doc.get("status", "indexed"),
                     }
                 )
+                if st.button(
+                    f"🗑️ Delete '{filename}'",
+                    key=f"del_doc_{doc_id}",
+                    type="secondary",
+                    use_container_width=True,
+                ):
+                    with st.spinner(f"Deleting '{filename}' from workspace…"):
+                        try:
+                            _delete_workspace_document(doc_id)
+                            st.session_state.uploaded_docs = (
+                                _fetch_workspace_documents()
+                            )
+                            st.session_state.last_answer = None
+                            st.session_state.last_sources = []
+                            st.session_state.last_query = ""
+                            st.session_state.query_key_version += 1
+                            st.success(f"Deleted '{filename}' successfully.")
+                            st.rerun()
+                        except requests.HTTPError as e:
+                            st.error(
+                                f"Deletion failed: {_api_error_message(e)}"
+                            )
+                        except Exception as e:
+                            st.error(f"Failed to delete document: {e}")
     else:
         st.info(
             "No documents indexed in this workspace yet. "
@@ -595,7 +653,11 @@ with col_right:
         sources = st.session_state.last_sources
         if sources:
             st.divider()
-            st.markdown(f"##### Sources ({len(sources)})")
+            st.markdown(f"##### Evidence Sources ({len(sources)})")
+            st.caption(
+                "Citations in the generated answer (e.g. `[1]`, `[2]`) correspond to the "
+                "evidence sources below in retrieval order. Verification is at chunk level."
+            )
             for i, src in enumerate(sources, start=1):
                 doc_id = src.get("document_id", "")
                 filename = _resolve_document_name(
@@ -607,12 +669,16 @@ with col_right:
                 chunk_id = src.get("chunk_id", "—")
                 excerpt = src.get("text", "")
 
-                st.markdown(f"**{i}. {filename}**")
-                st.caption(f"Chunk {rank} · Relevance: {score_str}")
+                st.markdown(f"**[{i}] {filename}**")
+                st.caption(
+                    f"Rank #{rank} · Relevance Score: {score_str} · Chunk ID: `{chunk_id}`"
+                )
 
-                with st.expander("▸ View retrieved excerpt", expanded=False):
+                with st.expander(
+                    f"▸ Inspect Evidence Passage [{i}]", expanded=False
+                ):
                     st.text(excerpt)
-                    st.caption(f"Chunk ID: `{chunk_id}` · Document ID: `{doc_id}`")
+                    st.caption(f"Document ID: `{doc_id}` · Chunk ID: `{chunk_id}`")
         else:
             st.divider()
             st.info(

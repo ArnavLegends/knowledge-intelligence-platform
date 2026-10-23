@@ -35,7 +35,10 @@ class DocxParser(DocumentParser):
         try:
             doc = docx.Document(io.BytesIO(content))
         except Exception as exc:
-            raise DocumentParseError("Could not read DOCX file.") from exc
+            raise DocumentParseError(
+                "Could not read DOCX file: Corrupted, unreadable, or not a"
+                " valid Word document."
+            ) from exc
 
         text_parts = [para.text for para in doc.paragraphs if para.text]
         text = "\n\n".join(text_parts).strip()

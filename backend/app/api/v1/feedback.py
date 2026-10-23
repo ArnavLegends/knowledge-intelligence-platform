@@ -92,9 +92,9 @@ def submit_feedback(
             status_code=503,
         )
 
-    # ── Build GET params (requests library URL-encodes these automatically) ──
+    # ── Build payload (sent in POST body by default, eliminating URL leakage) ──
     now = datetime.now(UTC)
-    params = {
+    payload = {
         "token": settings.feedback_webhook_token,
         "category": category,
         "message": msg,
@@ -103,9 +103,30 @@ def submit_feedback(
         "timestamp": now.isoformat(),
     }
 
-    # ── Dispatch to Apps Script doGet() ──────────────────────────────────────
+    method = (settings.feedback_transport_method or "POST").upper()
+
+    # ── Dispatch to external webhook destination ─────────────────────────────
     try:
-        resp = requests.get(settings.feedback_webhook_url, params=params, timeout=10)
+        if method == "GET":
+            logger.warning(
+                "SECURITY WARNING: Feedback webhook is using legacy GET transport. "
+                "Tokens and message content are transmitted in URL query parameters."
+            )
+            resp = requests.get(
+                settings.feedback_webhook_url, params=payload, timeout=10
+            )
+        else:
+            # Default secure POST transport: credentials and user text in JSON body
+            headers = {
+                "Authorization": f"Bearer {settings.feedback_webhook_token}",
+                "Content-Type": "application/json",
+            }
+            resp = requests.post(
+                settings.feedback_webhook_url,
+                json=payload,
+                headers=headers,
+                timeout=10,
+            )
         resp.raise_for_status()
         body = resp.text.strip()
         if body != "OK":

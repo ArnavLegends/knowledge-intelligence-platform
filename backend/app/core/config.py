@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Knowledge Intelligence Platform"
-    app_version: str = "1.3.0"
+    app_version: str = "1.4.0"
     environment: str = "development"
     debug: bool = False
     log_level: str = "INFO"
@@ -56,6 +56,17 @@ class Settings(BaseSettings):
     )
     feedback_webhook_url: str | None = None
     feedback_webhook_token: str | None = None
+    feedback_transport_method: str = "POST"
+    admin_api_key: str | None = None
+    enable_direct_llm_endpoint: bool = False
+    workspace_auth_enforce: bool = True
+    workspace_db_path: str = "./.data/kip_workspaces.db"
+    # Stage B Document Persistence Settings
+    document_storage_dir: str = "./.data/document_store"
+    # Stage E Advanced Retrieval Settings
+    enable_hybrid_retrieval: bool = False
+    enable_reranking: bool = False
+    reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
     @model_validator(mode="after")
     def validate_chunking(self) -> Self:

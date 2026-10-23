@@ -19,6 +19,7 @@ class ContextItem(BaseModel):
 
     chunk_id: str
     document_id: str | None = None
+    filename: str | None = None
     text: str
     rank: int
     score: float | None = None
@@ -30,3 +31,5 @@ class RAGResponse(BaseModel):
 
     answer: str
     sources: list[ContextItem]
+    retrieve_ms: float | None = None
+    generate_ms: float | None = None

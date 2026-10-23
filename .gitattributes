@@ -1,0 +1,8 @@
+# Auto-detect text files and perform LF normalization on checkin
+* text=auto
+
+# Benchmark corpus files require strict LF line endings for deterministic SHA-256 derivation
+benchmarks/corpus/** text eol=lf
+benchmarks/corpus_v1_2/** text eol=lf
+benchmarks/corpus_v1_2_expanded/** text eol=lf
+benchmarks/*.json text eol=lf

@@ -302,7 +302,10 @@ def test_production_retrieval_defaults_unmodified():
         settings=s,
     )
     assert not hasattr(rs, "_reranker")
-    assert not hasattr(s, "reranker_model")
+    # reranker_model exists in Settings (added Stage B) but reranking is disabled by default
+    assert hasattr(s, "reranker_model")
+    assert s.reranker_model == "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    assert s.enable_reranking is False
 
 
 def test_live_onnx_reranker_inference():

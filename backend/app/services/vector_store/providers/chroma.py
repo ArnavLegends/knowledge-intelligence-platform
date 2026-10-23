@@ -206,6 +206,7 @@ class ChromaVectorStoreProvider(VectorStoreProvider):
                     "size_bytes": m.get("size_bytes", 0),
                     "parser": m.get("parser", ""),
                     "status": "indexed",
+                    "indexed_at": m.get("indexed_at"),
                 }
             docs_map[doc_id]["chunks_indexed"] += 1
 

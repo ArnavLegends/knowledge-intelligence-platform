@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 # .chroma_data directory generation in the project root.
 os.environ["VECTOR_STORE_PERSIST_DIRECTORY"] = ""
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("WORKSPACE_AUTH_ENFORCE", "false")
 
 from app.main import app
 from app.services.chunking.chunkers.fixed_size import FixedSizeChunker
